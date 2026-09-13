@@ -440,7 +440,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }
   };
 
-  // Helper to ensure products table schema compatibility (supporting whatsapp, qris, bank_info, etc.)
+  // Helper to ensure products table schema compatibility (supporting whatsapp, qris, bank_info, payment_mode, third_party_checkout_url, etc.)
   const syncAndPrepareProductsTable = async (db: any): Promise<Set<string>> => {
     try {
       await db.prepare(`
@@ -454,6 +454,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           whatsapp_number TEXT NOT NULL,
           qris_image_url TEXT,
           bank_info TEXT,
+          payment_mode TEXT DEFAULT 'all',
+          third_party_checkout_url TEXT,
           status TEXT DEFAULT 'available',
           created_at TEXT,
           updated_at TEXT
@@ -469,10 +471,26 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           console.error('Error adding bank_info column to products table:', err);
         }
       }
+      if (!existingCols.has('payment_mode')) {
+        try {
+          await db.prepare("ALTER TABLE products ADD COLUMN payment_mode TEXT DEFAULT 'all'").run();
+          existingCols.add('payment_mode');
+        } catch (err) {
+          console.error('Error adding payment_mode column to products table:', err);
+        }
+      }
+      if (!existingCols.has('third_party_checkout_url')) {
+        try {
+          await db.prepare('ALTER TABLE products ADD COLUMN third_party_checkout_url TEXT').run();
+          existingCols.add('third_party_checkout_url');
+        } catch (err) {
+          console.error('Error adding third_party_checkout_url column to products table:', err);
+        }
+      }
       return existingCols;
     } catch (err) {
       console.error('Error preparing products table in D1:', err);
-      return new Set<string>(['id', 'title', 'slug', 'description', 'price', 'status', 'bank_info']);
+      return new Set<string>(['id', 'title', 'slug', 'description', 'price', 'status', 'bank_info', 'payment_mode', 'third_party_checkout_url']);
     }
   };
 
@@ -1628,7 +1646,7 @@ Sitemap: ${siteUrl}/sitemap.xml
       if (env.DB) {
         try {
           await syncAndPrepareProductsTable(env.DB);
-          const { results } = await env.DB.prepare('SELECT id, title, slug, description, price, image_url as imageUrl, whatsapp_number as whatsappNumber, qris_image_url as qrisImageUrl, bank_info as bankInfo, status, created_at as createdAt FROM products ORDER BY id DESC').all();
+          const { results } = await env.DB.prepare('SELECT id, title, slug, description, price, image_url as imageUrl, whatsapp_number as whatsappNumber, qris_image_url as qrisImageUrl, bank_info as bankInfo, payment_mode as paymentMode, third_party_checkout_url as thirdPartyCheckoutUrl, status, created_at as createdAt FROM products ORDER BY id DESC').all();
           if (results) {
             return jsonResponse(results);
           }
@@ -1645,7 +1663,7 @@ Sitemap: ${siteUrl}/sitemap.xml
       if (env.DB && slug) {
         try {
           await syncAndPrepareProductsTable(env.DB);
-          const product = await env.DB.prepare('SELECT id, title, slug, description, price, image_url as imageUrl, whatsapp_number as whatsappNumber, qris_image_url as qrisImageUrl, bank_info as bankInfo, status, created_at as createdAt FROM products WHERE LOWER(slug) = LOWER(?)').bind(slug).first();
+          const product = await env.DB.prepare('SELECT id, title, slug, description, price, image_url as imageUrl, whatsapp_number as whatsappNumber, qris_image_url as qrisImageUrl, bank_info as bankInfo, payment_mode as paymentMode, third_party_checkout_url as thirdPartyCheckoutUrl, status, created_at as createdAt FROM products WHERE LOWER(slug) = LOWER(?)').bind(slug).first();
           if (product) {
             return jsonResponse(product);
           }
@@ -1662,9 +1680,15 @@ Sitemap: ${siteUrl}/sitemap.xml
       if (auth.errorResponse) return auth.errorResponse;
 
       const body = await request.json() as any;
-      const { title, slug, description, price, imageUrl, whatsappNumber, qrisImageUrl, bankInfo, status } = body;
+      const { title, slug, description, price, imageUrl, whatsappNumber, qrisImageUrl, bankInfo, paymentMode, thirdPartyCheckoutUrl, status } = body;
       if (!title || !slug || !description || !price || !imageUrl || !whatsappNumber) {
         return jsonResponse({ error: 'Data produk belum lengkap' }, 400);
+      }
+
+      // XSS Sanitation for 3rd party checkout URL/link
+      let safeThirdPartyUrl = String(thirdPartyCheckoutUrl || '').trim();
+      if (safeThirdPartyUrl.toLowerCase().startsWith('javascript:')) {
+        safeThirdPartyUrl = '';
       }
 
       if (env.DB) {
@@ -1674,11 +1698,11 @@ Sitemap: ${siteUrl}/sitemap.xml
           if (existing) {
             return jsonResponse({ error: 'Slug produk sudah digunakan' }, 400);
           }
-          const insertRes = await env.DB.prepare('INSERT INTO products (title, slug, description, price, image_url, whatsapp_number, qris_image_url, bank_info, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
-            .bind(title, slug, description, Number(price), imageUrl, whatsappNumber, qrisImageUrl || '', bankInfo || '', status || 'available')
+          const insertRes = await env.DB.prepare('INSERT INTO products (title, slug, description, price, image_url, whatsapp_number, qris_image_url, bank_info, payment_mode, third_party_checkout_url, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+            .bind(title, slug, description, Number(price), imageUrl, whatsappNumber, qrisImageUrl || '', bankInfo || '', paymentMode || 'all', safeThirdPartyUrl, status || 'available')
             .run();
           const newId = insertRes.meta?.last_row_id || Date.now();
-          return jsonResponse({ success: true, product: { id: newId, title, slug, description, price, imageUrl, whatsappNumber, qrisImageUrl, bankInfo: bankInfo || '', status: status || 'available' } });
+          return jsonResponse({ success: true, product: { id: newId, title, slug, description, price, imageUrl, whatsappNumber, qrisImageUrl, bankInfo: bankInfo || '', paymentMode: paymentMode || 'all', thirdPartyCheckoutUrl: safeThirdPartyUrl, status: status || 'available' } });
         } catch (e: any) {
           console.error('Error saving product to D1:', e);
           return jsonResponse({ error: e.message || 'Gagal menyimpan produk ke database' }, 500);
@@ -1695,10 +1719,16 @@ Sitemap: ${siteUrl}/sitemap.xml
       const parts = path.split('/');
       const id = parts[parts.length - 1];
       const body = await request.json() as any;
-      const { title, slug, description, price, imageUrl, whatsappNumber, qrisImageUrl, bankInfo, status } = body;
+      const { title, slug, description, price, imageUrl, whatsappNumber, qrisImageUrl, bankInfo, paymentMode, thirdPartyCheckoutUrl, status } = body;
 
       if (!title || !slug || !description || !price || !imageUrl || !whatsappNumber) {
         return jsonResponse({ error: 'Data produk belum lengkap' }, 400);
+      }
+
+      // XSS Sanitation for 3rd party checkout URL/link
+      let safeThirdPartyUrl = String(thirdPartyCheckoutUrl || '').trim();
+      if (safeThirdPartyUrl.toLowerCase().startsWith('javascript:')) {
+        safeThirdPartyUrl = '';
       }
 
       if (env.DB && id) {
@@ -1708,10 +1738,10 @@ Sitemap: ${siteUrl}/sitemap.xml
           if (existing) {
             return jsonResponse({ error: 'Slug produk sudah digunakan oleh produk lain' }, 400);
           }
-          await env.DB.prepare('UPDATE products SET title = ?, slug = ?, description = ?, price = ?, image_url = ?, whatsapp_number = ?, qris_image_url = ?, bank_info = ?, status = ? WHERE id = ?')
-            .bind(title, slug, description, Number(price), imageUrl, whatsappNumber, qrisImageUrl || '', bankInfo || '', status, id)
+          await env.DB.prepare('UPDATE products SET title = ?, slug = ?, description = ?, price = ?, image_url = ?, whatsapp_number = ?, qris_image_url = ?, bank_info = ?, payment_mode = ?, third_party_checkout_url = ?, status = ? WHERE id = ?')
+            .bind(title, slug, description, Number(price), imageUrl, whatsappNumber, qrisImageUrl || '', bankInfo || '', paymentMode || 'all', safeThirdPartyUrl, status, id)
             .run();
-          return jsonResponse({ success: true, product: { id, title, slug, description, price, imageUrl, whatsappNumber, qrisImageUrl, bankInfo: bankInfo || '', status } });
+          return jsonResponse({ success: true, product: { id, title, slug, description, price, imageUrl, whatsappNumber, qrisImageUrl, bankInfo: bankInfo || '', paymentMode: paymentMode || 'all', thirdPartyCheckoutUrl: safeThirdPartyUrl, status } });
         } catch (e: any) {
           console.error('Error updating product in D1:', e);
           return jsonResponse({ error: e.message || 'Gagal memperbarui produk' }, 500);

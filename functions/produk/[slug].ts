@@ -64,7 +64,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       }
 
       product = await env.DB.prepare(
-        'SELECT id, title, slug, description, price, image_url as imageUrl, whatsapp_number as whatsappNumber, qris_image_url as qrisImageUrl, bank_info as bankInfo, status, created_at as createdAt FROM products WHERE LOWER(slug) = LOWER(?)'
+        'SELECT id, title, slug, description, price, image_url as imageUrl, whatsapp_number as whatsappNumber, qris_image_url as qrisImageUrl, bank_info as bankInfo, payment_mode as paymentMode, third_party_checkout_url as thirdPartyCheckoutUrl, status, created_at as createdAt FROM products WHERE LOWER(slug) = LOWER(?)'
       ).bind(slug).first();
     } catch (e) {
       console.error('Error querying D1 for product in edge handler:', e);
@@ -81,6 +81,13 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const metaTitle = `${product.title} - ${priceFormatted} | ${siteName}`;
   const metaDescription = String(product.description || '').slice(0, 160).trim();
   const bankInfoText = (product.bankInfo && product.bankInfo.trim()) ? product.bankInfo : globalSellerBankAccounts;
+  const paymentMode = product.paymentMode || 'all';
+  const thirdPartyUrl = String(product.thirdPartyCheckoutUrl || '').trim();
+
+  const showQris = (paymentMode === 'all' || paymentMode === 'qris') && Boolean(product.qrisImageUrl);
+  const showBank = (paymentMode === 'all' || paymentMode === 'bank') && Boolean(bankInfoText);
+  const showThirdParty = (paymentMode === 'all' || paymentMode === 'third_party') && Boolean(thirdPartyUrl);
+  const showWhatsapp = paymentMode === 'all' || paymentMode === 'whatsapp';
 
   // JSON-LD Schema.org Product
   const productSchema = {
@@ -158,25 +165,36 @@ export const onRequest: PagesFunction<Env> = async (context) => {
             </span>
           </div>
 
-          ${bankInfoText ? `
+          ${showBank ? `
           <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-left">
             <h3 class="text-xs font-bold text-slate-800 uppercase">Rekening Penjual &amp; Info Pengiriman</h3>
             <pre class="text-xs font-mono text-slate-800 whitespace-pre-wrap leading-relaxed">${escapeHtml(bankInfoText)}</pre>
           </div>
           ` : ''}
 
-          ${product.qrisImageUrl ? `
+          ${showQris ? `
           <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center space-y-2">
             <h3 class="text-xs font-bold text-slate-800 uppercase">Pembayaran QRIS</h3>
             <img src="${escapeHtml(product.qrisImageUrl)}" alt="QRIS Code" class="w-48 h-48 object-contain mx-auto bg-white p-2 rounded-lg border border-slate-200" />
           </div>
           ` : ''}
 
+          ${showThirdParty ? `
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center space-y-3">
+            <h3 class="text-xs font-bold text-slate-800 uppercase">Checkout Pihak Ketiga (Shopping Cart Service)</h3>
+            <a href="${escapeHtml(thirdPartyUrl)}" target="_blank" rel="noopener noreferrer" class="block w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition-all">
+              Beli / Checkout via Pihak Ketiga &rarr;
+            </a>
+          </div>
+          ` : ''}
+
+          ${showWhatsapp ? `
           <div class="pt-4 border-t border-slate-100">
             <a href="https://wa.me/${escapeHtml(product.whatsappNumber)}?text=${encodeURIComponent(`Halo, saya tertarik dengan produk ${product.title} seharga ${priceFormatted}`)}" target="_blank" rel="noreferrer" class="block w-full text-center py-3 bg-rose-600 text-white font-bold rounded-xl text-xs uppercase tracking-wider">
               Beli via WhatsApp
             </a>
           </div>
+          ` : ''}
         </div>
       </div>
     </div>

@@ -283,6 +283,14 @@ export interface SiteConfig {
   products_nav_label?: string;
   products_nav_path?: string;
   seller_bank_accounts?: string;
+  products_hero_badge?: string;
+  products_hero_title?: string;
+  products_hero_subtitle?: string;
+  products_hero_btn_text?: string;
+  products_hero_image_url?: string;
+  products_hero_image_caption?: string;
+  products_empty_title?: string;
+  products_empty_subtitle?: string;
 }
 
 export type PostStatus = 'draft' | 'pending_approval' | 'published' | 'rejected';
@@ -552,4 +560,20 @@ export interface InteractiveQAColumnData {
   buttonText: string;
   cases: QAColumnCase[];
   submissionPlaceholder?: string;
+}
+
+export interface Product {
+  id: number;
+  title: string;
+  slug: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  whatsappNumber: string;
+  qrisImageUrl?: string;
+  bankInfo?: string;
+  paymentMode?: 'all' | 'qris' | 'bank' | 'third_party' | 'whatsapp';
+  thirdPartyCheckoutUrl?: string;
+  status: 'available' | 'sold';
+  createdAt?: string;
 }

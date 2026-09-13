@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { Post, AutoLink, User, SiteConfig } from './types';
+import { Post, AutoLink, User, SiteConfig, Product } from './types';
 import { INITIAL_POSTS, INITIAL_AUTOLINKS, INITIAL_USERS } from './data/initialData';
 import { getSiteConfig, saveSiteConfig } from './lib/config';
 import { getAuthHeaders } from './lib/auth';
@@ -39,6 +39,7 @@ export default function App() {
     !(initialSsrData?.post || (initialSsrData?.posts && initialSsrData.posts.length > 0))
   );
   const [autolinks, setAutolinks] = useState<AutoLink[]>(() => initialSsrData?.autolinks || INITIAL_AUTOLINKS);
+  const [products, setProducts] = useState<Product[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [siteConfig, setSiteConfig] = useState<SiteConfig | undefined>(initialSsrData?.siteConfig);
   const [liveDraftConfig, setLiveDraftConfig] = useState<SiteConfig | undefined>(undefined);
@@ -50,9 +51,10 @@ export default function App() {
 
   // Fetch Posts, Autolinks & Config on initial mount
   useEffect(() => {
-    // 1. Critical fetch: Posts & Site Config
+    // 1. Critical fetch: Posts & Site Config & Products
     fetchPosts(!initialSsrData?.post);
     fetchConfig();
+    fetchProducts();
 
     // 2. Non-critical fetch: Autolinks (deferred to prevent critical path network chaining)
     const deferTimer = setTimeout(() => {
@@ -200,6 +202,21 @@ export default function App() {
       }
     } catch (err) {
       console.error('Error fetching autolinks:', err);
+    }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      const res = await fetch('/api/products?_t=' + Date.now());
+      const contentType = res.headers.get('content-type');
+      if (res.ok && contentType && contentType.includes('application/json')) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setProducts(data);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching products:', err);
     }
   };
 
@@ -413,17 +430,17 @@ export default function App() {
       } else if (['/privacy', '/privacy-policy', '/kebijakan-privasi'].includes(path)) {
         setCurrentView('privacy');
       } else if (
-        ['/galeri-lukisan', '/jualan', '/galeri', '/produk', '/paket', '/katalog', (siteConfig?.products_nav_path || '/produk')].includes(path) ||
-        path.startsWith('/galeri-lukisan/') ||
-        path.startsWith('/jualan/') ||
-        path.startsWith('/galeri/') ||
-        path.startsWith('/produk/') ||
-        path.startsWith('/paket/') ||
-        path.startsWith('/katalog/') ||
-        (siteConfig?.products_nav_path && (path === siteConfig.products_nav_path || path.startsWith(siteConfig.products_nav_path + '/')))
+        (() => {
+          const rawNav = siteConfig?.products_nav_path || '/produk';
+          const cleanNav = rawNav.startsWith('/') ? rawNav : `/${rawNav}`;
+          const productPrefixes = Array.from(new Set(['/produk', '/paket', '/galeri', '/galeri-lukisan', '/jualan', '/katalog', '/dijual', '/jual', '/shop', '/store', cleanNav]));
+          return productPrefixes.some(pfx => path === pfx || path.startsWith(pfx + '/'));
+        })()
       ) {
-        const prefixes = ['/galeri-lukisan', '/jualan', '/galeri', '/produk', '/paket', '/katalog', (siteConfig?.products_nav_path || '/produk')];
-        const matchedPrefix = prefixes.find(pfx => path.startsWith(pfx + '/'));
+        const rawNav = siteConfig?.products_nav_path || '/produk';
+        const cleanNav = rawNav.startsWith('/') ? rawNav : `/${rawNav}`;
+        const productPrefixes = Array.from(new Set(['/produk', '/paket', '/galeri', '/galeri-lukisan', '/jualan', '/katalog', '/dijual', '/jual', '/shop', '/store', cleanNav]));
+        const matchedPrefix = productPrefixes.find(pfx => path.startsWith(pfx + '/'));
         if (matchedPrefix) {
           const pSlug = path.slice(matchedPrefix.length + 1);
           setActiveProductSlug(pSlug || '');
@@ -499,10 +516,17 @@ export default function App() {
       const adminSuffix = String(siteConfig?.admin_url_suffix || '9999');
       setCurrentView('admin');
       window.history.pushState({}, '', `/admin-${adminSuffix}`);
-    } else if (view === 'jualan') {
+    } else if (view === 'jualan' || view === 'produk') {
       setCurrentView('jualan');
       const prodPath = siteConfig?.products_nav_path || '/produk';
-      window.history.pushState({}, '', prodPath);
+      const cleanNavPath = prodPath.startsWith('/') ? prodPath : `/${prodPath}`;
+      if (param) {
+        setActiveProductSlug(param);
+        window.history.pushState({}, '', `${cleanNavPath}/${param}`);
+      } else {
+        setActiveProductSlug('');
+        window.history.pushState({}, '', cleanNavPath);
+      }
     } else if (['privacy', 'about', 'contact', 'disclaimer', 'terms'].includes(view)) {
       setCurrentView(view as any);
       window.history.pushState({}, '', `/${view}`);
@@ -600,8 +624,10 @@ export default function App() {
         {currentView === 'home' && (
           <HomeView
             posts={publishedPosts}
+            products={products}
             autolinks={autolinks}
             onSelectPost={(slug) => handleNavigate('article', slug)}
+            onSelectProduct={(slug) => handleNavigate('jualan', slug)}
             selectedCategory={selectedCategory}
             onSelectCategory={(category) => handleNavigate('category', category)}
             siteConfig={effectiveConfig}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Product } from '../types';
 import { 
   ShoppingBag, 
   Phone, 
@@ -14,25 +15,22 @@ import {
   Maximize2
 } from 'lucide-react';
 
-interface Product {
-  id: number;
-  title: string;
-  slug: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  whatsappNumber: string;
-  qrisImageUrl?: string;
-  bankInfo?: string;
-  status: 'available' | 'sold';
-  createdAt?: string;
-}
-
 interface InteractiveProductSaleProps {
   isAdmin?: boolean;
   currentUser?: any;
   activeProductSlug?: string;
   siteConfig?: any;
+}
+
+function getSafeExternalUrl(rawUrl?: string): string {
+  if (!rawUrl) return '';
+  const trimmed = rawUrl.trim();
+  if (trimmed.toLowerCase().startsWith('javascript:')) return '';
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (trimmed.length > 0 && !trimmed.includes('<script')) {
+    return `https://${trimmed}`;
+  }
+  return '';
 }
 
 export default function InteractiveProductSale({ isAdmin = false, currentUser, activeProductSlug, siteConfig }: InteractiveProductSaleProps) {
@@ -58,6 +56,8 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser, a
   const [formWhatsappNumber, setFormWhatsappNumber] = useState<string>('');
   const [formQrisImageUrl, setFormQrisImageUrl] = useState<string>('');
   const [formBankInfo, setFormBankInfo] = useState<string>('');
+  const [formPaymentMode, setFormPaymentMode] = useState<'all' | 'qris' | 'bank' | 'third_party' | 'whatsapp'>('all');
+  const [formThirdPartyCheckoutUrl, setFormThirdPartyCheckoutUrl] = useState<string>('');
   const [formStatus, setFormStatus] = useState<'available' | 'sold'>('available');
   const [formError, setFormError] = useState<string>('');
 
@@ -105,6 +105,8 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser, a
     setFormWhatsappNumber('628123456789');
     setFormQrisImageUrl('https://images.unsplash.com/photo-1595079676339-1534801ad6cf?auto=format&fit=crop&w=400&h=400&q=80');
     setFormBankInfo('');
+    setFormPaymentMode('all');
+    setFormThirdPartyCheckoutUrl('');
     setFormStatus('available');
     setFormError('');
     setShowAdminModal(true);
@@ -121,6 +123,8 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser, a
     setFormWhatsappNumber(product.whatsappNumber);
     setFormQrisImageUrl(product.qrisImageUrl || '');
     setFormBankInfo(product.bankInfo || '');
+    setFormPaymentMode(product.paymentMode || 'all');
+    setFormThirdPartyCheckoutUrl(product.thirdPartyCheckoutUrl || '');
     setFormStatus(product.status);
     setFormError('');
     setShowAdminModal(true);
@@ -144,6 +148,8 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser, a
       whatsappNumber: formWhatsappNumber,
       qrisImageUrl: formQrisImageUrl,
       bankInfo: formBankInfo,
+      paymentMode: formPaymentMode,
+      thirdPartyCheckoutUrl: formThirdPartyCheckoutUrl,
       status: formStatus
     };
 
@@ -208,14 +214,14 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser, a
 
     // Compose custom WhatsApp message
     const formattedPrice = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(selectedProduct.price);
-    const textMessage = `Halo, saya tertarik dengan karya lukisan Anda:\n\n` +
-      `🎨 *${selectedProduct.title}*\n` +
+    const textMessage = `Halo, saya tertarik dengan ${selectedProduct.title}:\n\n` +
+      `📦 *${selectedProduct.title}*\n` +
       `💰 Harga: ${formattedPrice}\n\n` +
       `Berikut rincian pemesan saya:\n` +
       `👤 *Nama:* ${buyerName}\n` +
       `📱 *No. HP/WhatsApp:* ${buyerPhone}\n` +
       `📝 *Catatan:* ${buyerNotes || '-'}\n\n` +
-      `Saya akan melakukan pembayaran menggunakan QRIS yang tertera di halaman jualan. Tolong bantu konfirmasi ketersediaan dan pengiriman. Terima kasih!`;
+      `Saya akan melakukan pembayaran menggunakan metode yang tertera di halaman jualan. Tolong bantu konfirmasi ketersediaan dan pengiriman. Terima kasih!`;
 
     const encodedText = encodeURIComponent(textMessage);
     const waUrl = `https://api.whatsapp.com/send?phone=${selectedProduct.whatsappNumber.replace(/[^0-9]/g, '')}&text=${encodedText}`;
@@ -255,19 +261,30 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser, a
     }
   };
 
+  // Dynamic Hero Section Config values
+  const prodNavLabel = siteConfig?.products_nav_label || 'Produk Jualan';
+  const heroBadge = siteConfig?.products_hero_badge || `🛍️ Katalog ${prodNavLabel} Eksklusif`;
+  const heroTitle = siteConfig?.products_hero_title || `Miliki ${prodNavLabel} Pilihan Terbaik & Berkualitas`;
+  const heroSubtitle = siteConfig?.products_hero_subtitle || `Temukan berbagai koleksi ${prodNavLabel.toLowerCase()}, paket, dan penawaran terbaik. Didukung pembayaran instan QRIS/Bank dan koordinasi pengiriman aman via WhatsApp.`;
+  const heroBtnText = siteConfig?.products_hero_btn_text || `Tambah ${prodNavLabel} Baru`;
+  const heroImageUrl = siteConfig?.products_hero_image_url || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80';
+  const heroImageCaption = siteConfig?.products_hero_image_caption || `Katalog ${prodNavLabel}`;
+  const emptyTitle = siteConfig?.products_empty_title || `Belum Ada ${prodNavLabel}`;
+  const emptySubtitle = siteConfig?.products_empty_subtitle || `Katalog ${prodNavLabel.toLowerCase()} belum diunggah. Silakan masuk sebagai administrator untuk menambahkan item ${prodNavLabel.toLowerCase()} pertama Anda.`;
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto px-1">
       {/* HEADER HERO */}
-      <div className="bg-gradient-to-br from-slate-900 to-rose-950 text-white rounded-3xl p-8 md:p-12 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
+      <div className="bg-gradient-to-br from-slate-900 via-rose-950/80 to-slate-900 text-white rounded-3xl p-8 md:p-12 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
         <div className="space-y-4 max-w-xl z-10 text-center md:text-left">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/15 border border-rose-500/30 text-[11px] text-rose-300 font-bold uppercase tracking-wider">
-            🎨 Galeri Seni Eksklusif
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-rose-500/15 border border-rose-500/30 text-[11px] text-rose-300 font-bold uppercase tracking-wider">
+            {heroBadge}
           </div>
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
-            Miliki Karya Lukisan Orisinal &amp; Bernilai Tinggi
+            {heroTitle}
           </h1>
           <p className="text-sm text-slate-300 leading-relaxed">
-            Setiap lukisan merupakan karya seni otentik satu-satunya (one-of-a-kind) yang dibuat dengan dedikasi artistik mendalam. Didukung pembayaran instan QRIS dan koordinasi pengiriman aman via WhatsApp.
+            {heroSubtitle}
           </p>
           
           {isAdmin && (
@@ -276,19 +293,19 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser, a
               className="mt-2 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all shadow-md shadow-rose-600/20"
             >
               <Plus className="w-4 h-4" />
-              <span>Tambah Koleksi Lukisan</span>
+              <span>{heroBtnText}</span>
             </button>
           )}
         </div>
         <div className="w-full md:w-80 h-48 bg-slate-800/40 rounded-2xl border border-white/10 p-2 flex items-center justify-center relative overflow-hidden shrink-0 group">
           <img 
-            src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=400&q=80" 
-            alt="Artwork" 
+            src={heroImageUrl} 
+            alt={heroImageCaption} 
             className="w-full h-full object-cover rounded-xl opacity-90 group-hover:scale-105 transition-transform duration-700"
             referrerPolicy="no-referrer"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end p-4">
-            <span className="text-[10px] text-slate-300 font-semibold uppercase tracking-widest">Premium Art Collection</span>
+            <span className="text-[10px] text-slate-300 font-semibold uppercase tracking-widest">{heroImageCaption}</span>
           </div>
         </div>
       </div>
@@ -303,7 +320,7 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser, a
               className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-rose-600 transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
-              <span>Kembali ke Galeri Lukisan</span>
+              <span>Kembali ke Daftar {prodNavLabel}</span>
             </button>
           </div>
 
@@ -339,164 +356,237 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser, a
             </div>
           </div>
 
-          {/* RIGHT: INTERACTIVE CHECKOUT & QRIS PANEL */}
+          {/* RIGHT: INTERACTIVE CHECKOUT & PAYMENTS PANEL */}
           <div className="lg:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 space-y-6 shadow-md">
-            {checkoutStep === 'details' ? (
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">Form Kontak Pemesan</h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Sistem akan menyusun pesan WhatsApp secara otomatis dan membuka QRIS pembayaran setelah Anda menekan tombol kirim.
-                  </p>
-                </div>
+            {(() => {
+              const mode = selectedProduct.paymentMode || 'all';
+              const thirdPartyUrl = getSafeExternalUrl(selectedProduct.thirdPartyCheckoutUrl);
+              const effectiveBankInfo = (selectedProduct.bankInfo && selectedProduct.bankInfo.trim())
+                ? selectedProduct.bankInfo
+                : (siteConfig?.seller_bank_accounts || '');
 
-                <form onSubmit={handleCheckoutSubmit} className="space-y-4">
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
-                      Nama Lengkap Anda *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={buyerName}
-                      onChange={(e) => setBuyerName(e.target.value)}
-                      placeholder="Cth: Budi Santoso"
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500/30"
-                    />
+              const showThirdParty = (mode === 'all' || mode === 'third_party') && Boolean(thirdPartyUrl);
+              const showBank = (mode === 'all' || mode === 'bank') && Boolean(effectiveBankInfo);
+              const showQris = (mode === 'all' || mode === 'qris') && Boolean(selectedProduct.qrisImageUrl);
+              const showWhatsapp = mode === 'all' || mode === 'whatsapp';
+
+              if (checkoutStep === 'details') {
+                return (
+                  <div className="space-y-6">
+                    <div className="space-y-1">
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white">Pilihan Pembayaran &amp; Checkout</h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        Pilih metode transaksi atau hubungi penjual langsung di bawah ini.
+                      </p>
+                    </div>
+
+                    {/* THIRD PARTY CHECKOUT BUTTON IF AVAILABLE */}
+                    {showThirdParty && (
+                      <div className="p-4 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/60 space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-indigo-900 dark:text-indigo-200 uppercase tracking-wide flex items-center gap-1.5">
+                            <ShoppingBag className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                            <span>Checkout Pihak Ketiga (Shopping Cart)</span>
+                          </span>
+                          <span className="text-[10px] bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 px-2 py-0.5 rounded font-bold">Resmi</span>
+                        </div>
+                        <p className="text-xs text-indigo-700 dark:text-indigo-300">
+                          Lanjutkan pembelian melalui platform marketplace/shopping cart eksternal penjual.
+                        </p>
+                        <a
+                          href={thirdPartyUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md shadow-indigo-600/20"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          <span>Checkout via Pihak Ketiga &rarr;</span>
+                        </a>
+                      </div>
+                    )}
+
+                    {/* BANK ACCOUNTS (AUTO-INSERTED DEFAULT FROM ADMIN CONFIG OR CUSTOM) */}
+                    {showBank && (
+                      <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-left space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide flex items-center gap-1.5">
+                            <DollarSign className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+                            <span>Rekening Bank &amp; Info Pengiriman</span>
+                          </span>
+                          <span className="text-[10px] text-slate-500 font-mono">Multi-Bank</span>
+                        </div>
+                        <div className="text-xs font-mono text-slate-800 dark:text-slate-200 whitespace-pre-line leading-relaxed p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+                          {effectiveBankInfo}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={copyPriceToClipboard}
+                          className="w-full py-2 px-3 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 flex items-center justify-center gap-1.5 text-xs font-bold transition-all"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>{copiedPrice ? 'Nominal Price Tersalin!' : `Salin Harga (${formatRupiah(selectedProduct.price)})`}</span>
+                        </button>
+                      </div>
+                    )}
+
+                    {/* WHATSAPP CONTACT & QRIS TRIGGER */}
+                    {showWhatsapp && (
+                      <form onSubmit={handleCheckoutSubmit} className="space-y-4 pt-2 border-t border-slate-100 dark:border-slate-800">
+                        <div className="space-y-1.5">
+                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                            Nama Lengkap Anda *
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={buyerName}
+                            onChange={(e) => setBuyerName(e.target.value)}
+                            placeholder="Cth: Budi Santoso"
+                            className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500/30"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                            Nomor HP/WhatsApp Anda *
+                          </label>
+                          <input
+                            type="tel"
+                            required
+                            value={buyerPhone}
+                            onChange={(e) => setBuyerPhone(e.target.value)}
+                            placeholder="Cth: 081234567890"
+                            className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500/30"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                            Catatan Pengiriman / Pesan Khusus
+                          </label>
+                          <textarea
+                            value={buyerNotes}
+                            onChange={(e) => setBuyerNotes(e.target.value)}
+                            placeholder="Masukkan alamat pengiriman, request khusus packing kayu, atau penawaran."
+                            rows={3}
+                            className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500/30"
+                          />
+                        </div>
+
+                        {selectedProduct.status === 'available' ? (
+                          <button
+                            type="submit"
+                            className="w-full py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all shadow-md shadow-rose-600/20"
+                          >
+                            <Phone className="w-4 h-4" />
+                            <span>Beli via WhatsApp &amp; {showQris ? 'Tampilkan QRIS' : 'Proses Order'}</span>
+                          </button>
+                        ) : (
+                          <div className="p-4 text-center bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 rounded-xl font-bold text-sm">
+                            Barang ini telah Terjual (Sold Out)
+                          </div>
+                        )}
+                      </form>
+                    )}
+                  </div>
+                );
+              }
+
+              return (
+                <div className="space-y-6 text-center">
+                  <div className="space-y-2">
+                    <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-950/60 rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400 mx-auto">
+                      <CheckCircle className="w-6 h-6" />
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">Order Diinisiasi via WhatsApp</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Silakan selesaikan pesan di tab WhatsApp. Berikut detail info transaksi dan QRIS pembayaran:
+                    </p>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
-                      Nomor HP/WhatsApp Anda *
-                    </label>
-                    <input
-                      type="tel"
-                      required
-                      value={buyerPhone}
-                      onChange={(e) => setBuyerPhone(e.target.value)}
-                      placeholder="Cth: 081234567890"
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500/30"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
-                      Catatan Pengiriman / Pesan Khusus
-                    </label>
-                    <textarea
-                      value={buyerNotes}
-                      onChange={(e) => setBuyerNotes(e.target.value)}
-                      placeholder="Masukkan alamat pengiriman, request khusus packing kayu, atau penawaran."
-                      rows={3}
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500/30"
-                    />
-                  </div>
-
-                  {selectedProduct.status === 'available' ? (
-                    <button
-                      type="submit"
-                      className="w-full py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all shadow-md shadow-rose-600/20"
-                    >
-                      <Phone className="w-4 h-4" />
-                      <span>Hubungi &amp; Tampilkan QRIS</span>
-                    </button>
-                  ) : (
-                    <div className="p-4 text-center bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 rounded-xl font-bold text-sm">
-                      Lukisan ini telah Terjual (Sold Out)
+                  {/* QRIS FRAME IF ENABLED */}
+                  {showQris && (
+                    <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 max-w-xs mx-auto space-y-3 shadow-2xs">
+                      <div className="bg-white p-2 rounded-xl flex items-center justify-center aspect-square border border-slate-200">
+                        <img 
+                          src={selectedProduct.qrisImageUrl} 
+                          alt="QRIS QR Code" 
+                          className="max-w-full max-h-full object-contain"
+                          referrerPolicy="no-referrer"
+                        />
+                      </div>
+                      <div className="text-[10px] text-slate-500 font-extrabold uppercase tracking-widest">
+                        QRIS MANDIRI / GOPAY / DANA / ALL BANK
+                      </div>
                     </div>
                   )}
-                </form>
-              </div>
-            ) : (
-              <div className="space-y-6 text-center">
-                <div className="space-y-2">
-                  <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-950/60 rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400 mx-auto">
-                    <CheckCircle className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">Tautan WhatsApp Terbuka</h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Silakan selesaikan pesan di tab WhatsApp yang baru terbuka. Selanjutnya, lakukan pembayaran scan QRIS di bawah ini:
-                  </p>
-                </div>
 
-                {/* QRIS FRAME */}
-                {selectedProduct.qrisImageUrl ? (
-                  <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 max-w-xs mx-auto space-y-3 shadow-2xs">
-                    <div className="bg-white p-2 rounded-xl flex items-center justify-center aspect-square border border-slate-200">
-                      <img 
-                        src={selectedProduct.qrisImageUrl} 
-                        alt="QRIS QR Code" 
-                        className="max-w-full max-h-full object-contain"
-                        referrerPolicy="no-referrer"
-                      />
+                  {/* BANK INFO IF ENABLED */}
+                  {showBank && (
+                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-left space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide flex items-center gap-1.5">
+                          <DollarSign className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+                          <span>Rekening Bank &amp; Info Pengiriman</span>
+                        </span>
+                      </div>
+                      <div className="text-xs font-mono text-slate-800 dark:text-slate-200 whitespace-pre-line leading-relaxed p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+                        {effectiveBankInfo}
+                      </div>
                     </div>
-                    <div className="text-[10px] text-slate-500 font-extrabold uppercase tracking-widest">
-                      QRIS MANDIRI / GOPAY / DANA
+                  )}
+
+                  {/* THIRD PARTY CHECKOUT IF AVAILABLE */}
+                  {showThirdParty && (
+                    <div className="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 text-center space-y-2">
+                      <span className="text-xs font-bold text-indigo-900 dark:text-indigo-200 uppercase tracking-wide block">
+                        Link Checkout Pihak Ketiga
+                      </span>
+                      <a
+                        href={thirdPartyUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        <span>Buka Halaman Checkout Pihak Ketiga &rarr;</span>
+                      </a>
                     </div>
-                  </div>
-                ) : (
-                  <div className="p-8 bg-slate-100 dark:bg-slate-950 rounded-2xl text-slate-400 text-xs">
-                    Kode QRIS belum diunggah oleh admin.
-                  </div>
-                )}
+                  )}
 
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 text-left space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase">Jumlah Transfer</span>
-                    <span className="text-sm font-extrabold text-slate-900 dark:text-white">
-                      {formatRupiah(selectedProduct.price)}
-                    </span>
-                  </div>
-                  <button
-                    onClick={copyPriceToClipboard}
-                    className="w-full py-2 px-3 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-500/50 hover:bg-rose-500/[0.02] flex items-center justify-center gap-1.5 text-xs font-bold transition-all"
-                  >
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>{copiedPrice ? 'Tersalin!' : 'Salin Angka Nominal'}</span>
-                  </button>
-                </div>
-
-                {((selectedProduct.bankInfo && selectedProduct.bankInfo.trim()) || (siteConfig?.seller_bank_accounts && siteConfig.seller_bank_accounts.trim())) && (
-                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-left space-y-2">
+                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 text-left space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide flex items-center gap-1.5">
-                        <DollarSign className="w-4 h-4 text-rose-600 dark:text-rose-400" />
-                        <span>Rekening Bank &amp; Info Pengiriman</span>
+                      <span className="text-[11px] font-bold text-slate-500 uppercase">Jumlah Nominal Transfer</span>
+                      <span className="text-sm font-extrabold text-slate-900 dark:text-white">
+                        {formatRupiah(selectedProduct.price)}
                       </span>
                     </div>
-                    <div className="text-xs font-mono text-slate-800 dark:text-slate-200 whitespace-pre-line leading-relaxed p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
-                      {(selectedProduct.bankInfo && selectedProduct.bankInfo.trim())
-                        ? selectedProduct.bankInfo
-                        : siteConfig?.seller_bank_accounts}
-                    </div>
+                    <button
+                      onClick={copyPriceToClipboard}
+                      className="w-full py-2 px-3 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-500/50 hover:bg-rose-500/[0.02] flex items-center justify-center gap-1.5 text-xs font-bold transition-all"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>{copiedPrice ? 'Tersalin!' : 'Salin Angka Nominal'}</span>
+                    </button>
                   </div>
-                )}
 
-                <div className="space-y-2 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed text-left border-t border-slate-100 dark:border-slate-800 pt-4">
-                  <p className="font-bold text-slate-700 dark:text-slate-300">Petunjuk Pembayaran:</p>
-                  <ol className="list-decimal pl-4 space-y-1">
-                    <li>Pindai QR Code di atas menggunakan dompet digital atau mobile banking Anda.</li>
-                    <li>Masukkan nominal transfer persis senilai angka yang tersalin di atas.</li>
-                    <li>Kirimkan tangkapan layar (screenshot) bukti transaksi ke kontak WhatsApp yang telah terbuka.</li>
-                  </ol>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setCheckoutStep('details')}
+                      className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                    >
+                      Kembali ke Form
+                    </button>
+                    <button
+                      onClick={() => handleSelectProduct(null)}
+                      className="flex-1 py-2.5 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-950 dark:hover:bg-slate-750 text-white font-bold text-xs transition-colors"
+                    >
+                      Selesai &amp; Tutup
+                    </button>
+                  </div>
                 </div>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setCheckoutStep('details')}
-                    className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                  >
-                    Kembali ke Form
-                  </button>
-                  <button
-                    onClick={() => handleSelectProduct(null)}
-                    className="flex-1 py-2.5 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-950 dark:hover:bg-slate-750 text-white font-bold text-xs transition-colors"
-                  >
-                    Selesai &amp; Tutup
-                  </button>
-                </div>
-              </div>
-            )}
+              );
+            })()}
           </div>
         </div>
       ) : (
@@ -505,14 +595,14 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser, a
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-3">
               <div className="w-8 h-8 rounded-full border-4 border-rose-500 border-t-transparent animate-spin" />
-              <p className="text-xs text-slate-500">Memuat koleksi lukisan terbaik...</p>
+              <p className="text-xs text-slate-500">Memuat koleksi {prodNavLabel.toLowerCase()}...</p>
             </div>
           ) : products.length === 0 ? (
             <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 space-y-2">
               <ShoppingBag className="w-10 h-10 text-slate-400 mx-auto" />
-              <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200">Belum Ada Koleksi Lukisan</h3>
+              <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-200">{emptyTitle}</h3>
               <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                Koleksi jualan lukisan orisinal belum diunggah. Silakan masuk sebagai administrator untuk menambahkan karya seni lukis pertama Anda.
+                {emptySubtitle}
               </p>
             </div>
           ) : (
@@ -724,10 +814,60 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser, a
                 />
               </div>
 
+              <div className="space-y-1.5 p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                    Opsi Metode Pembayaran di Halaman Produk *
+                  </label>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-2">
+                    Tentukan metode pembayaran yang akan diaktifkan untuk produk ini.
+                  </p>
+                  <select
+                    value={formPaymentMode}
+                    onChange={(e) => setFormPaymentMode(e.target.value as any)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-900 dark:text-white font-bold focus:outline-none focus:ring-2 focus:ring-rose-500/30"
+                  >
+                    <option value="all">Semua Metode (QRIS, Bank, Link Pihak Ketiga &amp; WhatsApp)</option>
+                    <option value="qris">Hanya Pembayaran QRIS</option>
+                    <option value="bank">Hanya Transfer Rekening Bank</option>
+                    <option value="third_party">Hanya Link / Tombol Checkout Pihak Ketiga (Shopping Cart)</option>
+                    <option value="whatsapp">Hanya WhatsApp Checkout Direct</option>
+                  </select>
+                </div>
+
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-1.5">
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide flex items-center justify-between">
+                    <span>URL / Link Checkout Pihak Ketiga (Shopping Cart Services)</span>
+                    <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-semibold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800">Aman &amp; Anti-XSS</span>
+                  </label>
+                  <input
+                    type="url"
+                    value={formThirdPartyCheckoutUrl}
+                    onChange={(e) => setFormThirdPartyCheckoutUrl(e.target.value)}
+                    placeholder="Contoh: https://shopee.co.id/product/123 atau https://mayar.link/checkout/xyz"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500/30"
+                  />
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                    Sediakan URL / link checkout belanja pihak ketiga (Shopee, Tokopedia, Mayar, TripPay, Midtrans, Lynk.id, Gumroad, Stripe, dll).
+                  </p>
+                </div>
+              </div>
+
               <div className="space-y-1.5">
-                <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase">
-                  Nomor Rekening Bank Penjual &amp; Syarat Delivery/Shipping Fee
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase">
+                    Nomor Rekening Bank Penjual &amp; Syarat Delivery/Shipping Fee
+                  </label>
+                  {siteConfig?.seller_bank_accounts && (
+                    <button
+                      type="button"
+                      onClick={() => setFormBankInfo(siteConfig.seller_bank_accounts)}
+                      className="text-[10px] font-bold text-rose-600 dark:text-rose-400 hover:underline"
+                    >
+                      + Isi dari Config Admin
+                    </button>
+                  )}
+                </div>
                 <textarea
                   rows={4}
                   value={formBankInfo}
@@ -736,7 +876,7 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser, a
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500/30 font-mono leading-relaxed"
                 />
                 <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                  Text box bebas multi-baris untuk nomor rekening berbagai bank &amp; info pengiriman produk ini.
+                  Text box bebas multi-baris untuk nomor rekening berbagai bank &amp; info pengiriman. Jika dikosongkan, sistem otomatis menggunakan default rekening dari Admin Config.
                 </p>
               </div>
 
