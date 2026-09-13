@@ -614,7 +614,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   }
 
   const preRenderedHtml = `
-    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100">
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100 h-16 min-h-[64px]" style="height: 64px; min-height: 64px;">
       <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         <div class="flex items-center gap-2">
           <span class="text-lg font-black text-rose-600">${escapeHtml(siteName)}</span>

@@ -1055,7 +1055,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const preRenderedBody = `
     <div class="min-h-screen bg-slate-50 text-slate-900 font-sans">
       <!-- HEADER NAVBAR -->
-      <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
+      <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs h-16 min-h-[64px]" style="height: 64px; min-height: 64px;">
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <a href="/" class="flex items-center gap-2 text-rose-600 font-black text-xl tracking-tight">
             <span class="bg-rose-600 text-white p-2 rounded-2xl shadow-sm">👶</span>

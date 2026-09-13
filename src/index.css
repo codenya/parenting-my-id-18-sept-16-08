@@ -15,8 +15,8 @@
   --color-rose-900: color-mix(in srgb, var(--color-primary, #e11d48) 55%, black);
   --color-rose-950: color-mix(in srgb, var(--color-primary, #e11d48) 40%, black);
   
-  --font-sans: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
-  --font-heading: var(--font-heading, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+  --font-sans: "Inter", var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+  --font-heading: "Playfair Display", var(--font-heading, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
 }
 
 /* Zero CLS & Font Rendering Stabilization */
