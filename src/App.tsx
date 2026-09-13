@@ -19,6 +19,7 @@ import InteractiveProductSale from './components/InteractiveProductSale';
 export default function App() {
   const [currentView, setCurrentView] = useState<'home' | 'article' | 'admin' | 'privacy' | 'about' | 'contact' | 'disclaimer' | 'terms' | 'jualan'>('home');
   const [activeSlug, setActiveSlug] = useState<string>('');
+  const [activeProductSlug, setActiveProductSlug] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Semua');
 
   // Check if server injected SSR initial data
@@ -411,7 +412,23 @@ export default function App() {
         setCurrentView('admin');
       } else if (['/privacy', '/privacy-policy', '/kebijakan-privasi'].includes(path)) {
         setCurrentView('privacy');
-      } else if (['/galeri-lukisan', '/jualan', '/galeri', '/produk', '/paket', (siteConfig?.products_nav_path || '/produk')].includes(path)) {
+      } else if (
+        ['/galeri-lukisan', '/jualan', '/galeri', '/produk', '/paket', (siteConfig?.products_nav_path || '/produk')].includes(path) ||
+        path.startsWith('/galeri-lukisan/') ||
+        path.startsWith('/jualan/') ||
+        path.startsWith('/galeri/') ||
+        path.startsWith('/produk/') ||
+        path.startsWith('/paket/') ||
+        (siteConfig?.products_nav_path && path.startsWith(siteConfig.products_nav_path + '/'))
+      ) {
+        const prefixes = ['/galeri-lukisan', '/jualan', '/galeri', '/produk', '/paket', (siteConfig?.products_nav_path || '/produk')];
+        const matchedPrefix = prefixes.find(pfx => path.startsWith(pfx + '/'));
+        if (matchedPrefix) {
+          const pSlug = path.slice(matchedPrefix.length + 1);
+          setActiveProductSlug(pSlug || '');
+        } else {
+          setActiveProductSlug('');
+        }
         setCurrentView('jualan');
       } else if (['/about', '/about-us', '/tentang-kami'].includes(path)) {
         setCurrentView('about');

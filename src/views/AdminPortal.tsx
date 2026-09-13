@@ -309,6 +309,7 @@ export default function AdminPortal({
   const [cfgMobileShowLoggedUsername, setCfgMobileShowLoggedUsername] = useState(siteConfig?.mobile_show_logged_username || false);
   const [cfgProductsNavLabel, setCfgProductsNavLabel] = useState(siteConfig?.products_nav_label || 'Produk');
   const [cfgProductsNavPath, setCfgProductsNavPath] = useState(siteConfig?.products_nav_path || '/produk');
+  const [cfgSellerBankAccounts, setCfgSellerBankAccounts] = useState(siteConfig?.seller_bank_accounts || '');
 
   const [cfgSiteDomain, setCfgSiteDomain] = useState(siteConfig?.site_domain || 'domain.com');
   const [cfgDefaultThemeMode, setCfgDefaultThemeMode] = useState<'light'|'dark'|'auto'>(siteConfig?.default_theme_mode || 'auto');
@@ -705,6 +706,7 @@ export default function AdminPortal({
       setCfgMobileShowLoggedUsername(siteConfig.mobile_show_logged_username ?? false);
       setCfgProductsNavLabel(siteConfig.products_nav_label || 'Produk');
       setCfgProductsNavPath(siteConfig.products_nav_path || '/produk');
+      setCfgSellerBankAccounts(siteConfig.seller_bank_accounts || '');
       setCfgHeroBadgeText(siteConfig.hero_badge_text || 'Portal Nomor 1');
       setCfgAutolinkTickerLabel(siteConfig.autolink_ticker_label || 'Topik Trending:');
       setCfgFooterAutolinkLabel(siteConfig.footer_autolink_label || 'Tautan Populer');
@@ -805,6 +807,7 @@ export default function AdminPortal({
         mobile_show_logged_username: cfgMobileShowLoggedUsername,
         products_nav_label: cfgProductsNavLabel,
         products_nav_path: cfgProductsNavPath,
+        seller_bank_accounts: cfgSellerBankAccounts,
         site_domain: cfgSiteDomain,
         default_theme_mode: cfgDefaultThemeMode,
         font_size_scale: cfgFontSizeScale,
@@ -1083,6 +1086,7 @@ export default function AdminPortal({
         mobile_show_logged_username: cfgMobileShowLoggedUsername,
         products_nav_label: cfgProductsNavLabel,
         products_nav_path: cfgProductsNavPath,
+        seller_bank_accounts: cfgSellerBankAccounts,
 
         site_domain: cfgSiteDomain,
         default_theme_mode: cfgDefaultThemeMode,
@@ -3509,6 +3513,22 @@ export default function AdminPortal({
                   />
                   <p className="text-[10px] text-slate-500 mt-1 leading-normal">
                     Path router dinamis tempat halaman jualan dirender. Harus diawali slash. Contoh: <strong>/produk</strong> atau <strong>/paket</strong>.
+                  </p>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Informasi Rekening Bank &amp; Ongkos Kirim (seller_bank_accounts)
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={cfgSellerBankAccounts}
+                    onChange={(e) => setCfgSellerBankAccounts(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-medium focus:ring-2 focus:ring-rose-500 leading-relaxed font-mono"
+                    placeholder="Contoh:&#10;Bank BCA: 1234567890 a/n Nama&#10;Bank Mandiri: 0987654321 a/n Nama&#10;&#10;Keterangan Pengiriman:&#10;- Jabodetabek: Free Ongkir&#10;- Luar Jawa: Rp 50.000"
+                  />
+                  <p className="text-[10px] text-slate-500 mt-1 leading-normal">
+                    Masukkan keterangan rekening pembayaran dan informasi ongkir/delivery fee. Kolom ini berupa textbox multi-baris sehingga memudahkan pembeli membaca rincian transfer.
                   </p>
                 </div>
               </div>
