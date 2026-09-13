@@ -440,7 +440,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }
   };
 
-  // Helper to ensure products table schema compatibility (supporting whatsapp, qris, etc.)
+  // Helper to ensure products table schema compatibility (supporting whatsapp, qris, bank_info, etc.)
   const syncAndPrepareProductsTable = async (db: any): Promise<Set<string>> => {
     try {
       await db.prepare(`
@@ -453,16 +453,26 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           image_url TEXT NOT NULL,
           whatsapp_number TEXT NOT NULL,
           qris_image_url TEXT,
+          bank_info TEXT,
           status TEXT DEFAULT 'available',
           created_at TEXT,
           updated_at TEXT
         )
       `).run();
       const colInfo = await db.prepare('PRAGMA table_info(products)').all();
-      return new Set<string>((colInfo?.results || []).map((c: any) => c.name));
+      const existingCols = new Set<string>((colInfo?.results || []).map((c: any) => c.name));
+      if (!existingCols.has('bank_info')) {
+        try {
+          await db.prepare('ALTER TABLE products ADD COLUMN bank_info TEXT').run();
+          existingCols.add('bank_info');
+        } catch (err) {
+          console.error('Error adding bank_info column to products table:', err);
+        }
+      }
+      return existingCols;
     } catch (err) {
       console.error('Error preparing products table in D1:', err);
-      return new Set<string>(['id', 'title', 'slug', 'description', 'price', 'status']);
+      return new Set<string>(['id', 'title', 'slug', 'description', 'price', 'status', 'bank_info']);
     }
   };
 
@@ -1618,7 +1628,7 @@ Sitemap: ${siteUrl}/sitemap.xml
       if (env.DB) {
         try {
           await syncAndPrepareProductsTable(env.DB);
-          const { results } = await env.DB.prepare('SELECT id, title, slug, description, price, image_url as imageUrl, whatsapp_number as whatsappNumber, qris_image_url as qrisImageUrl, status, created_at as createdAt FROM products ORDER BY id DESC').all();
+          const { results } = await env.DB.prepare('SELECT id, title, slug, description, price, image_url as imageUrl, whatsapp_number as whatsappNumber, qris_image_url as qrisImageUrl, bank_info as bankInfo, status, created_at as createdAt FROM products ORDER BY id DESC').all();
           if (results) {
             return jsonResponse(results);
           }
@@ -1629,13 +1639,30 @@ Sitemap: ${siteUrl}/sitemap.xml
       return jsonResponse([]);
     }
 
+    // GET /api/products/slug/:slug
+    if (path.startsWith('/api/products/slug/') && method === 'GET') {
+      const slug = path.replace('/api/products/slug/', '');
+      if (env.DB && slug) {
+        try {
+          await syncAndPrepareProductsTable(env.DB);
+          const product = await env.DB.prepare('SELECT id, title, slug, description, price, image_url as imageUrl, whatsapp_number as whatsappNumber, qris_image_url as qrisImageUrl, bank_info as bankInfo, status, created_at as createdAt FROM products WHERE LOWER(slug) = LOWER(?)').bind(slug).first();
+          if (product) {
+            return jsonResponse(product);
+          }
+        } catch (e) {
+          console.error('Error fetching product by slug from D1:', e);
+        }
+      }
+      return jsonResponse({ error: 'Produk tidak ditemukan' }, 404);
+    }
+
     // POST /api/products
     if (path === '/api/products' && method === 'POST') {
       const auth = await authenticateRequest(['admin', 'editor']);
       if (auth.errorResponse) return auth.errorResponse;
 
       const body = await request.json() as any;
-      const { title, slug, description, price, imageUrl, whatsappNumber, qrisImageUrl, status } = body;
+      const { title, slug, description, price, imageUrl, whatsappNumber, qrisImageUrl, bankInfo, status } = body;
       if (!title || !slug || !description || !price || !imageUrl || !whatsappNumber) {
         return jsonResponse({ error: 'Data produk belum lengkap' }, 400);
       }
@@ -1647,11 +1674,11 @@ Sitemap: ${siteUrl}/sitemap.xml
           if (existing) {
             return jsonResponse({ error: 'Slug produk sudah digunakan' }, 400);
           }
-          const insertRes = await env.DB.prepare('INSERT INTO products (title, slug, description, price, image_url, whatsapp_number, qris_image_url, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
-            .bind(title, slug, description, Number(price), imageUrl, whatsappNumber, qrisImageUrl || '', status || 'available')
+          const insertRes = await env.DB.prepare('INSERT INTO products (title, slug, description, price, image_url, whatsapp_number, qris_image_url, bank_info, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
+            .bind(title, slug, description, Number(price), imageUrl, whatsappNumber, qrisImageUrl || '', bankInfo || '', status || 'available')
             .run();
           const newId = insertRes.meta?.last_row_id || Date.now();
-          return jsonResponse({ success: true, product: { id: newId, title, slug, description, price, imageUrl, whatsappNumber, qrisImageUrl, status: status || 'available' } });
+          return jsonResponse({ success: true, product: { id: newId, title, slug, description, price, imageUrl, whatsappNumber, qrisImageUrl, bankInfo: bankInfo || '', status: status || 'available' } });
         } catch (e: any) {
           console.error('Error saving product to D1:', e);
           return jsonResponse({ error: e.message || 'Gagal menyimpan produk ke database' }, 500);
@@ -1668,7 +1695,7 @@ Sitemap: ${siteUrl}/sitemap.xml
       const parts = path.split('/');
       const id = parts[parts.length - 1];
       const body = await request.json() as any;
-      const { title, slug, description, price, imageUrl, whatsappNumber, qrisImageUrl, status } = body;
+      const { title, slug, description, price, imageUrl, whatsappNumber, qrisImageUrl, bankInfo, status } = body;
 
       if (!title || !slug || !description || !price || !imageUrl || !whatsappNumber) {
         return jsonResponse({ error: 'Data produk belum lengkap' }, 400);
@@ -1681,10 +1708,10 @@ Sitemap: ${siteUrl}/sitemap.xml
           if (existing) {
             return jsonResponse({ error: 'Slug produk sudah digunakan oleh produk lain' }, 400);
           }
-          await env.DB.prepare('UPDATE products SET title = ?, slug = ?, description = ?, price = ?, image_url = ?, whatsapp_number = ?, qris_image_url = ?, status = ? WHERE id = ?')
-            .bind(title, slug, description, Number(price), imageUrl, whatsappNumber, qrisImageUrl || '', status, id)
+          await env.DB.prepare('UPDATE products SET title = ?, slug = ?, description = ?, price = ?, image_url = ?, whatsapp_number = ?, qris_image_url = ?, bank_info = ?, status = ? WHERE id = ?')
+            .bind(title, slug, description, Number(price), imageUrl, whatsappNumber, qrisImageUrl || '', bankInfo || '', status, id)
             .run();
-          return jsonResponse({ success: true, product: { id, title, slug, description, price, imageUrl, whatsappNumber, qrisImageUrl, status } });
+          return jsonResponse({ success: true, product: { id, title, slug, description, price, imageUrl, whatsappNumber, qrisImageUrl, bankInfo: bankInfo || '', status } });
         } catch (e: any) {
           console.error('Error updating product in D1:', e);
           return jsonResponse({ error: e.message || 'Gagal memperbarui produk' }, 500);

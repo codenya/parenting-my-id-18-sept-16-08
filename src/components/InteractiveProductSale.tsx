@@ -23,6 +23,7 @@ interface Product {
   imageUrl: string;
   whatsappNumber: string;
   qrisImageUrl?: string;
+  bankInfo?: string;
   status: 'available' | 'sold';
   createdAt?: string;
 }
@@ -30,9 +31,11 @@ interface Product {
 interface InteractiveProductSaleProps {
   isAdmin?: boolean;
   currentUser?: any;
+  activeProductSlug?: string;
+  siteConfig?: any;
 }
 
-export default function InteractiveProductSale({ isAdmin = false, currentUser }: InteractiveProductSaleProps) {
+export default function InteractiveProductSale({ isAdmin = false, currentUser, activeProductSlug, siteConfig }: InteractiveProductSaleProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -54,6 +57,7 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser }:
   const [formImageUrl, setFormImageUrl] = useState<string>('');
   const [formWhatsappNumber, setFormWhatsappNumber] = useState<string>('');
   const [formQrisImageUrl, setFormQrisImageUrl] = useState<string>('');
+  const [formBankInfo, setFormBankInfo] = useState<string>('');
   const [formStatus, setFormStatus] = useState<'available' | 'sold'>('available');
   const [formError, setFormError] = useState<string>('');
 
@@ -62,6 +66,16 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser }:
     fetchProducts();
   }, []);
 
+  // Sync active product slug from URL
+  useEffect(() => {
+    if (activeProductSlug && products.length > 0) {
+      const match = products.find(p => p.slug.toLowerCase() === activeProductSlug.toLowerCase());
+      if (match) {
+        setSelectedProduct(match);
+      }
+    }
+  }, [activeProductSlug, products]);
+
   const fetchProducts = async () => {
     setLoading(true);
     try {
@@ -69,6 +83,10 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser }:
       if (res.ok) {
         const data = await res.json();
         setProducts(data);
+        if (activeProductSlug) {
+          const match = data.find((p: Product) => p.slug.toLowerCase() === activeProductSlug.toLowerCase());
+          if (match) setSelectedProduct(match);
+        }
       }
     } catch (err) {
       console.error('Failed to fetch products:', err);
@@ -86,6 +104,7 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser }:
     setFormImageUrl('https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80');
     setFormWhatsappNumber('628123456789');
     setFormQrisImageUrl('https://images.unsplash.com/photo-1595079676339-1534801ad6cf?auto=format&fit=crop&w=400&h=400&q=80');
+    setFormBankInfo('');
     setFormStatus('available');
     setFormError('');
     setShowAdminModal(true);
@@ -101,6 +120,7 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser }:
     setFormImageUrl(product.imageUrl);
     setFormWhatsappNumber(product.whatsappNumber);
     setFormQrisImageUrl(product.qrisImageUrl || '');
+    setFormBankInfo(product.bankInfo || '');
     setFormStatus(product.status);
     setFormError('');
     setShowAdminModal(true);
@@ -123,6 +143,7 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser }:
       imageUrl: formImageUrl,
       whatsappNumber: formWhatsappNumber,
       qrisImageUrl: formQrisImageUrl,
+      bankInfo: formBankInfo,
       status: formStatus
     };
 
@@ -221,6 +242,19 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser }:
     }).format(num);
   };
 
+  const handleSelectProduct = (product: Product | null) => {
+    setSelectedProduct(product);
+    setCheckoutStep('details');
+    const baseNavPath = siteConfig?.products_nav_path || '/produk';
+    const cleanNavPath = baseNavPath.startsWith('/') ? baseNavPath : `/${baseNavPath}`;
+    
+    if (product) {
+      window.history.pushState({}, '', `${cleanNavPath}/${product.slug}`);
+    } else {
+      window.history.pushState({}, '', cleanNavPath);
+    }
+  };
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto px-1">
       {/* HEADER HERO */}
@@ -265,10 +299,7 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser }:
           {/* BACK TO GALLERY ROW */}
           <div className="lg:col-span-12">
             <button
-              onClick={() => {
-                setSelectedProduct(null);
-                setCheckoutStep('details');
-              }}
+              onClick={() => handleSelectProduct(null)}
               className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-rose-600 transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -425,6 +456,22 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser }:
                   </button>
                 </div>
 
+                {((selectedProduct.bankInfo && selectedProduct.bankInfo.trim()) || (siteConfig?.seller_bank_accounts && siteConfig.seller_bank_accounts.trim())) && (
+                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-left space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide flex items-center gap-1.5">
+                        <DollarSign className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+                        <span>Rekening Bank &amp; Info Pengiriman</span>
+                      </span>
+                    </div>
+                    <div className="text-xs font-mono text-slate-800 dark:text-slate-200 whitespace-pre-line leading-relaxed p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+                      {(selectedProduct.bankInfo && selectedProduct.bankInfo.trim())
+                        ? selectedProduct.bankInfo
+                        : siteConfig?.seller_bank_accounts}
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-2 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed text-left border-t border-slate-100 dark:border-slate-800 pt-4">
                   <p className="font-bold text-slate-700 dark:text-slate-300">Petunjuk Pembayaran:</p>
                   <ol className="list-decimal pl-4 space-y-1">
@@ -442,10 +489,7 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser }:
                     Kembali ke Form
                   </button>
                   <button
-                    onClick={() => {
-                      setSelectedProduct(null);
-                      setCheckoutStep('details');
-                    }}
+                    onClick={() => handleSelectProduct(null)}
                     className="flex-1 py-2.5 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-950 dark:hover:bg-slate-750 text-white font-bold text-xs transition-colors"
                   >
                     Selesai &amp; Tutup
@@ -476,7 +520,7 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser }:
               {products.map((product) => (
                 <div
                   key={product.id}
-                  onClick={() => setSelectedProduct(product)}
+                  onClick={() => handleSelectProduct(product)}
                   className="group cursor-pointer bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-lg hover:border-rose-500/50 transition-all flex flex-col justify-between"
                 >
                   <div className="relative aspect-4/3 bg-slate-950 border-b border-slate-100 dark:border-slate-800 overflow-hidden">
@@ -668,7 +712,7 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser }:
 
               <div className="space-y-1.5">
                 <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase">
-                  URL Gambar Lukisan *
+                  URL Gambar Lukisan / Barang *
                 </label>
                 <input
                   type="text"
@@ -678,6 +722,22 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser }:
                   placeholder="URL gambar lukisan resolusi tinggi"
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500/30"
                 />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase">
+                  Nomor Rekening Bank Penjual &amp; Syarat Delivery/Shipping Fee
+                </label>
+                <textarea
+                  rows={4}
+                  value={formBankInfo}
+                  onChange={(e) => setFormBankInfo(e.target.value)}
+                  placeholder={"Bisa diisi keterangan nomor rekening berbagai bank dengan pemisah ganti baris (multi-baris), serta keterangan delivery/shipping fee.\n\nContoh:\nBank BCA: 1234567890 a/n John Doe\nBank Mandiri: 0987654321 a/n John Doe\n\nSyarat Delivery / Shipping Fee:\n- Gratis Ongkir area Jakarta\n- Luar pulau +Rp 50.000 (Packing Kayu)"}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500/30 font-mono leading-relaxed"
+                />
+                <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                  Text box bebas multi-baris untuk nomor rekening berbagai bank &amp; info pengiriman produk ini.
+                </p>
               </div>
 
               <div className="flex gap-3 justify-end pt-4 border-t border-slate-100 dark:border-slate-800">
