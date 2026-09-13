@@ -14,9 +14,10 @@ import CustomScriptsInjector from './components/CustomScriptsInjector';
 const ArticleDetailView = lazy(() => import('./views/ArticleDetailView'));
 const AdminPortal = lazy(() => import('./views/AdminPortal'));
 const StaticPageView = lazy(() => import('./views/StaticPageView'));
+import InteractiveProductSale from './components/InteractiveProductSale';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'article' | 'admin' | 'privacy' | 'about' | 'contact' | 'disclaimer' | 'terms'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'article' | 'admin' | 'privacy' | 'about' | 'contact' | 'disclaimer' | 'terms' | 'jualan'>('home');
   const [activeSlug, setActiveSlug] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Semua');
 
@@ -410,6 +411,8 @@ export default function App() {
         setCurrentView('admin');
       } else if (['/privacy', '/privacy-policy', '/kebijakan-privasi'].includes(path)) {
         setCurrentView('privacy');
+      } else if (['/galeri-lukisan', '/jualan', '/galeri', '/produk', '/paket', (siteConfig?.products_nav_path || '/produk')].includes(path)) {
+        setCurrentView('jualan');
       } else if (['/about', '/about-us', '/tentang-kami'].includes(path)) {
         setCurrentView('about');
       } else if (['/contact', '/contact-us', '/kontak', '/hubungi-kami'].includes(path)) {
@@ -455,7 +458,7 @@ export default function App() {
     syncRouteFromUrl();
     window.addEventListener('popstate', syncRouteFromUrl);
     return () => window.removeEventListener('popstate', syncRouteFromUrl);
-  }, [posts]);
+  }, [posts, siteConfig]);
 
   // Navigation Helper
   const handleNavigate = (view: string, param?: string) => {
@@ -478,6 +481,10 @@ export default function App() {
       const adminSuffix = String(siteConfig?.admin_url_suffix || '9999');
       setCurrentView('admin');
       window.history.pushState({}, '', `/admin-${adminSuffix}`);
+    } else if (view === 'jualan') {
+      setCurrentView('jualan');
+      const prodPath = siteConfig?.products_nav_path || '/produk';
+      window.history.pushState({}, '', prodPath);
     } else if (['privacy', 'about', 'contact', 'disclaimer', 'terms'].includes(view)) {
       setCurrentView(view as any);
       window.history.pushState({}, '', `/${view}`);
@@ -639,6 +646,12 @@ export default function App() {
               onNavigate={(v, p) => handleNavigate(v, p)}
             />
           </Suspense>
+        )}
+
+        {currentView === 'jualan' && (
+          <div className="py-4 md:py-6">
+            <InteractiveProductSale isAdmin={currentUser?.role === 'admin'} currentUser={currentUser} />
+          </div>
         )}
 
         {currentView === 'admin' && (

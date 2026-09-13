@@ -7,7 +7,7 @@ import {
   Upload, Eye, Sparkles, CheckCircle2, RefreshCw, Bold, Italic, Heading2, 
   Heading3, List, ListOrdered, Quote, Image as ImageIcon, Code, UserCheck, 
   ExternalLink, Search, Zap, AlertCircle, Settings, Key, Copy, Check, 
-  LogOut, Globe, Palette, Layout, MessageSquare, Droplet, Users, Award, History, RotateCcw, X, Menu, LayoutGrid, Database
+  LogOut, Globe, Palette, Layout, MessageSquare, Droplet, Users, Award, History, RotateCcw, X, Menu, LayoutGrid, Database, ShoppingBag
 } from 'lucide-react';
 import { generateSlug } from '../lib/autolink';
 import RichPostEditor from '../components/RichPostEditor';
@@ -16,6 +16,7 @@ import { sanitizeAndOptimizeImageUrl, getOptimizedAvatarUrl } from '../lib/image
 import { getAuthHeaders } from '../lib/auth';
 import TurnstileWidget from '../components/TurnstileWidget';
 import DatabaseBackupManager from '../components/DatabaseBackupManager';
+import InteractiveProductSale from '../components/InteractiveProductSale';
 
 interface AdminPortalProps {
   currentUser: User | null;
@@ -73,8 +74,8 @@ export default function AdminPortal({
     }
   }, []);
 
-  // Admin tabs: 'posts' | 'editor' | 'writers' | 'autolinks' | 'sitemap' | 'config' | 'security' | 'comments' | 'database'
-  const [activeTab, setActiveTab] = useState<'posts' | 'editor' | 'writers' | 'autolinks' | 'sitemap' | 'config' | 'security' | 'comments' | 'database'>('posts');
+  // Admin tabs: 'posts' | 'editor' | 'writers' | 'autolinks' | 'sitemap' | 'config' | 'security' | 'comments' | 'database' | 'products'
+  const [activeTab, setActiveTab] = useState<'posts' | 'editor' | 'writers' | 'autolinks' | 'sitemap' | 'config' | 'security' | 'comments' | 'database' | 'products'>('posts');
 
   // Comments & Cusdis Webhook State
   const [comments, setComments] = useState<any[]>([]);
@@ -306,6 +307,8 @@ export default function AdminPortal({
   const [cfgSiteName, setCfgSiteName] = useState(siteConfig?.site_name || 'Website Utama');
   const [cfgMobileAdminBtnLabel, setCfgMobileAdminBtnLabel] = useState(siteConfig?.mobile_admin_btn_label || 'Portal Admin & Editor');
   const [cfgMobileShowLoggedUsername, setCfgMobileShowLoggedUsername] = useState(siteConfig?.mobile_show_logged_username || false);
+  const [cfgProductsNavLabel, setCfgProductsNavLabel] = useState(siteConfig?.products_nav_label || 'Produk');
+  const [cfgProductsNavPath, setCfgProductsNavPath] = useState(siteConfig?.products_nav_path || '/produk');
 
   const [cfgSiteDomain, setCfgSiteDomain] = useState(siteConfig?.site_domain || 'domain.com');
   const [cfgDefaultThemeMode, setCfgDefaultThemeMode] = useState<'light'|'dark'|'auto'>(siteConfig?.default_theme_mode || 'auto');
@@ -700,6 +703,8 @@ export default function AdminPortal({
       setCfgShowHeaderBadge(siteConfig.show_header_badge ?? siteConfig.show_edge_badge ?? true);
       setCfgMobileAdminBtnLabel(siteConfig.mobile_admin_btn_label || 'Portal Admin & Editor');
       setCfgMobileShowLoggedUsername(siteConfig.mobile_show_logged_username ?? false);
+      setCfgProductsNavLabel(siteConfig.products_nav_label || 'Produk');
+      setCfgProductsNavPath(siteConfig.products_nav_path || '/produk');
       setCfgHeroBadgeText(siteConfig.hero_badge_text || 'Portal Nomor 1');
       setCfgAutolinkTickerLabel(siteConfig.autolink_ticker_label || 'Topik Trending:');
       setCfgFooterAutolinkLabel(siteConfig.footer_autolink_label || 'Tautan Populer');
@@ -798,6 +803,8 @@ export default function AdminPortal({
         site_name: cfgSiteName,
         mobile_admin_btn_label: cfgMobileAdminBtnLabel,
         mobile_show_logged_username: cfgMobileShowLoggedUsername,
+        products_nav_label: cfgProductsNavLabel,
+        products_nav_path: cfgProductsNavPath,
         site_domain: cfgSiteDomain,
         default_theme_mode: cfgDefaultThemeMode,
         font_size_scale: cfgFontSizeScale,
@@ -1016,7 +1023,8 @@ export default function AdminPortal({
     cfgCorporateBadgeText, cfgCorporateTitle, cfgCorporateSubtitle, cfgCorporateCtaProposal, cfgCorporateCtaConsult, cfgCorporateWhatsapp, cfgCorporateStat1Val, cfgCorporateStat1Lbl, cfgCorporateStat2Val, cfgCorporateStat2Lbl, cfgCorporateStat3Val, cfgCorporateStat3Lbl,
     cfgProductBadgeText, cfgProductTitle, cfgProductSubtitle, cfgProductPrice, cfgProductOriginalPrice, cfgProductDiscountTag, cfgProductCtaText, cfgProductWhatsapp,
     cfgClassifiedMastheadTitle, cfgClassifiedMastheadSubtitle, cfgClassifiedEdition, cfgClassifiedPriceTag, cfgClassifiedPhone,
-    cfgKbBadgeText, cfgKbTitle, cfgKbSubtitle, cfgKbSearchPlaceholder
+    cfgKbBadgeText, cfgKbTitle, cfgKbSubtitle, cfgKbSearchPlaceholder,
+    cfgProductsNavLabel, cfgProductsNavPath
   ]);
 
   // Autofill Demo High-CTR AdSense Snippets
@@ -1073,6 +1081,8 @@ export default function AdminPortal({
         site_name: cfgSiteName,
         mobile_admin_btn_label: cfgMobileAdminBtnLabel,
         mobile_show_logged_username: cfgMobileShowLoggedUsername,
+        products_nav_label: cfgProductsNavLabel,
+        products_nav_path: cfgProductsNavPath,
 
         site_domain: cfgSiteDomain,
         default_theme_mode: cfgDefaultThemeMode,
@@ -2023,6 +2033,18 @@ export default function AdminPortal({
             >
               <Database className="w-4 h-4 text-indigo-400" />
               <span>🗄️ Database & Schema D1</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('products')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
+                activeTab === 'products'
+                  ? 'bg-rose-600 text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+              }`}
+            >
+              <ShoppingBag className="w-4 h-4 text-emerald-400" />
+              <span>🎨 Kelola Produk Jualan</span>
             </button>
           </>
         )}
@@ -3456,6 +3478,38 @@ export default function AdminPortal({
                       Tampilkan Nama User Saat Login di Tombol Admin Mobile (mobile_show_logged_username)
                     </span>
                   </label>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Label Navigasi Menu Jualan / Katalog (products_nav_label)
+                  </label>
+                  <input
+                    type="text"
+                    value={cfgProductsNavLabel}
+                    onChange={(e) => setCfgProductsNavLabel(e.target.value)}
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-semibold focus:ring-2 focus:ring-rose-500"
+                    placeholder="Produk"
+                  />
+                  <p className="text-[10px] text-slate-500 mt-1 leading-normal">
+                    Nama tombol yang tampil di navbar atas (Header) dan menu mobile. Contoh: <strong>Produk</strong>, <strong>Paket</strong>, atau <strong>Galeri</strong>.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Path URL Halaman Jualan (products_nav_path)
+                  </label>
+                  <input
+                    type="text"
+                    value={cfgProductsNavPath}
+                    onChange={(e) => setCfgProductsNavPath(e.target.value)}
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-semibold focus:ring-2 focus:ring-rose-500"
+                    placeholder="/produk"
+                  />
+                  <p className="text-[10px] text-slate-500 mt-1 leading-normal">
+                    Path router dinamis tempat halaman jualan dirender. Harus diawali slash. Contoh: <strong>/produk</strong> atau <strong>/paket</strong>.
+                  </p>
                 </div>
               </div>
 
@@ -6613,6 +6667,22 @@ export default function AdminPortal({
       {/* ------------------------------------------------------------- */}
       {activeTab === 'database' && currentUser?.role === 'admin' && (
         <DatabaseBackupManager siteConfig={siteConfig} />
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* TAB 10: MANAGE PRODUCTS (ROLE ADMIN ONLY) */}
+      {/* ------------------------------------------------------------- */}
+      {activeTab === 'products' && currentUser?.role === 'admin' && (
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 space-y-6 shadow-sm">
+          <div className="space-y-1">
+            <h2 className="text-xl font-black text-slate-900 dark:text-white">Panel Manajemen Produk Jualan</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Kelola daftar lukisan orisinal yang Anda pasarkan. Anda dapat menambah, mengedit, memperbarui status (Tersedia/Terjual), serta menetapkan kode QRIS pembayaran dan no WhatsApp untuk masing-masing karya.
+            </p>
+          </div>
+          <div className="h-px bg-slate-100 dark:bg-slate-800" />
+          <InteractiveProductSale isAdmin={true} currentUser={currentUser} />
+        </div>
       )}
 
     </div>

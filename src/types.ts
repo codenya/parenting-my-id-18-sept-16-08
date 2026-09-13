@@ -278,6 +278,10 @@ export interface SiteConfig {
   kb_subtitle?: string;
   kb_search_placeholder?: string;
   kb_helpdesk_whatsapp?: string;
+
+  // Dynamic Sales Catalog Navigation Wording & Path
+  products_nav_label?: string;
+  products_nav_path?: string;
 }
 
 export type PostStatus = 'draft' | 'pending_approval' | 'published' | 'rejected';

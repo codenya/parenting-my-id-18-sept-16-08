@@ -288,7 +288,11 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
   kb_title: 'Ensiklopedia & Pusat Pengetahuan Pengasuhan Anak',
   kb_subtitle: 'Temukan jawaban medis dan psikologis terpercaya untuk setiap tahap tumbuh kembang buah hati.',
   kb_search_placeholder: 'Cari panduan (contoh: MPASI 6 bulan, demam anak, tantrum)...',
-  kb_helpdesk_whatsapp: '6281234567890'
+  kb_helpdesk_whatsapp: '6281234567890',
+
+  // Dynamic Sales Catalog Navigation Wording & Path
+  products_nav_label: 'Produk',
+  products_nav_path: '/produk'
 };
 
 export async function loadSiteConfig(): Promise<SiteConfig> {
