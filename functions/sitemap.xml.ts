@@ -25,6 +25,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const siteUrl = (env.SITE_URL || requestUrl.origin).replace(/\/$/, '');
 
   let posts: { slug: string; updatedAt: string }[] = INITIAL_SLUGS;
+  let products: { slug: string; updatedAt: string }[] = [];
+  let productsNavPath = '/produk';
 
   if (env.DB) {
     try {
@@ -37,8 +39,23 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           updatedAt: r.updatedAt ? r.updatedAt.split('T')[0] : new Date().toISOString().split('T')[0],
         }));
       }
+
+      const prodRes = await env.DB.prepare(
+        "SELECT slug, updated_at as updatedAt FROM products WHERE status = 'available' ORDER BY id DESC"
+      ).all();
+      if (prodRes?.results && prodRes.results.length > 0) {
+        products = prodRes.results.map((r: any) => ({
+          slug: r.slug,
+          updatedAt: r.updatedAt ? r.updatedAt.split('T')[0] : new Date().toISOString().split('T')[0],
+        }));
+      }
+
+      const pathRow = await env.DB.prepare("SELECT value FROM configs WHERE key = 'products_nav_path'").first<string>('value');
+      if (pathRow) {
+        productsNavPath = pathRow.startsWith('/') ? pathRow : `/${pathRow}`;
+      }
     } catch (e) {
-      console.error('Error fetching posts for sitemap:', e);
+      console.error('Error fetching posts or products for sitemap:', e);
     }
   }
 
@@ -50,6 +67,18 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     <lastmod>${escapeXml(p.updatedAt)}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>`
+    )
+    .join('');
+
+  const productUrls = products
+    .map(
+      (p) => `
+  <url>
+    <loc>${escapeXml(`${siteUrl}${productsNavPath}/${encodeURIComponent(p.slug)}`)}</loc>
+    <lastmod>${escapeXml(p.updatedAt)}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
   </url>`
     )
     .join('');
@@ -79,7 +108,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     <loc>${escapeXml(siteUrl)}/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
-  </url>${staticUrls}${urls}
+  </url>${staticUrls}${urls}${productUrls}
 </urlset>`;
 
   return new Response(xml, {

@@ -37,7 +37,7 @@ export default function Header({ currentView, onNavigate, currentUser, onLogout,
       if (e) e.preventDefault();
       onNavigate('home');
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else if (['/galeri-lukisan', '/jualan', '/galeri', '/produk', '/paket', (siteConfig?.products_nav_path || '/produk')].includes(url)) {
+    } else if (['/galeri-lukisan', '/jualan', '/galeri', '/produk', '/paket', '/katalog', (siteConfig?.products_nav_path || '/produk')].includes(url) || (siteConfig?.products_nav_path && url.startsWith(siteConfig.products_nav_path))) {
       if (e) e.preventDefault();
       onNavigate('jualan');
     } else if (url.startsWith('/kategori/')) {
@@ -129,7 +129,7 @@ export default function Header({ currentView, onNavigate, currentUser, onLogout,
             {rawHeaderLinks.map((link, idx) => {
               const isExternalOrXml = link.url.startsWith('http') || link.url.endsWith('.xml');
               const isHome = link.url === '/' || link.url === '/home' || link.label === 'Beranda';
-              const isActive = (isHome && currentView === 'home') || (currentView === 'jualan' && (link.url === (siteConfig?.products_nav_path || '/produk') || ['/galeri-lukisan', '/jualan', '/galeri', '/produk', '/paket'].includes(link.url)));
+              const isActive = (isHome && currentView === 'home') || (currentView === 'jualan' && (link.url === (siteConfig?.products_nav_path || '/produk') || ['/galeri-lukisan', '/jualan', '/galeri', '/produk', '/paket', '/katalog'].includes(link.url)));
 
               if (isExternalOrXml) {
                 return (
