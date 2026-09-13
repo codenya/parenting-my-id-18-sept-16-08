@@ -292,7 +292,8 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
 
   // Dynamic Sales Catalog Navigation Wording & Path
   products_nav_label: 'Produk',
-  products_nav_path: '/produk'
+  products_nav_path: '/produk',
+  seller_bank_accounts: 'Bank BCA: 1234567890 a/n Nama Pemilik\nBank Mandiri: 0987654321 a/n Nama Pemilik\n\nKeterangan Ongkir:\n- Jabodetabek & Jawa Barat: Gratis Ongkir\n- Luar Jawa: Tambahan biaya Rp 50.000'
 };
 
 export async function loadSiteConfig(): Promise<SiteConfig> {

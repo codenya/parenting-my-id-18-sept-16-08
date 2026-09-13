@@ -282,6 +282,7 @@ export interface SiteConfig {
   // Dynamic Sales Catalog Navigation Wording & Path
   products_nav_label?: string;
   products_nav_path?: string;
+  seller_bank_accounts?: string;
 }
 
 export type PostStatus = 'draft' | 'pending_approval' | 'published' | 'rejected';

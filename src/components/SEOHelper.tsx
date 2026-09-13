@@ -135,6 +135,46 @@ export default function SEOHelper({
       script.textContent = JSON.stringify(jsonObj, null, 2);
     };
 
+    if (type === 'product' || articleData?.type === 'product') {
+      // Remove stale article, website and list schemas
+      const articleScript = document.getElementById('jsonld-article-schema');
+      if (articleScript) articleScript.remove();
+      const breadcrumbScript = document.getElementById('jsonld-breadcrumb-schema');
+      if (breadcrumbScript) breadcrumbScript.remove();
+      const faqScript = document.getElementById('jsonld-faq-schema');
+      if (faqScript) faqScript.remove();
+      const personScript = document.getElementById('jsonld-person-schema');
+      if (personScript) personScript.remove();
+      const websiteScript = document.getElementById('jsonld-website-schema');
+      if (websiteScript) websiteScript.remove();
+      const organizationScript = document.getElementById('jsonld-organization-schema');
+      if (organizationScript) organizationScript.remove();
+      const itemlistScript = document.getElementById('jsonld-itemlist-schema');
+      if (itemlistScript) itemlistScript.remove();
+
+      const productSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        '@id': `${effectiveCanonicalUrl}#product`,
+        'name': title,
+        'description': description,
+        'image': finalImage ? [finalImage] : undefined,
+        'offers': {
+          '@type': 'Offer',
+          'url': effectiveCanonicalUrl,
+          'priceCurrency': 'IDR',
+          'price': articleData?.price || 0,
+          'priceValidUntil': '2030-12-31',
+          'itemCondition': 'https://schema.org/NewCondition',
+          'availability': articleData?.status === 'available'
+            ? 'https://schema.org/InStock'
+            : 'https://schema.org/OutOfStock'
+        }
+      };
+      injectJsonLd('jsonld-product-schema', productSchema);
+      return;
+    }
+
     if (type === 'website' || articleData?.type === 'website') {
       // Remove stale article schemas
       const articleScript = document.getElementById('jsonld-article-schema');
