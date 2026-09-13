@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Post, AutoLink, SiteConfig } from '../types';
+import { Post, AutoLink, SiteConfig, Product } from '../types';
 import SEOHelper from '../components/SEOHelper';
 
 // Import all Layout Modes
@@ -16,8 +16,10 @@ import KnowledgeBaseHomeLayout from '../components/home_layouts/KnowledgeBaseHom
 
 interface HomeViewProps {
   posts: Post[];
+  products?: Product[];
   autolinks: AutoLink[];
   onSelectPost: (slug: string) => void;
+  onSelectProduct?: (slug: string) => void;
   selectedCategory?: string;
   onSelectCategory: (category: string) => void;
   siteConfig?: SiteConfig;
@@ -25,8 +27,10 @@ interface HomeViewProps {
 
 export default function HomeView({
   posts,
+  products = [],
   autolinks,
   onSelectPost,
+  onSelectProduct,
   selectedCategory: propSelectedCategory,
   onSelectCategory,
   siteConfig,
@@ -56,6 +60,20 @@ export default function HomeView({
     return posts.filter((p) => p.status === 'published');
   }, [posts]);
 
+  const matchingProducts = useMemo(() => {
+    if (!searchQuery || !searchQuery.trim() || !products || products.length === 0) {
+      return [];
+    }
+    const s = searchQuery.toLowerCase().trim();
+    return products.filter((prod) => {
+      const titleMatch = (prod.title || '').toLowerCase().includes(s);
+      const descMatch = (prod.description || '').toLowerCase().includes(s);
+      const slugMatch = (prod.slug || '').toLowerCase().includes(s);
+      const bankMatch = (prod.bankInfo || '').toLowerCase().includes(s);
+      return titleMatch || descMatch || slugMatch || bankMatch;
+    });
+  }, [products, searchQuery]);
+
   const categories = ['Semua', 'Pola Asuh', 'Tumbuh Kembang', 'Kesehatan & Gizi', 'Balita'];
 
   const { filteredPosts, isKeywordMatchFallback, isLatestFallback, fallbackPosts } = useMemo(() => {
@@ -79,13 +97,14 @@ export default function HomeView({
 
     // 2. Apply Search Query if present
     if (searchLower) {
-      const searchFiltered = directMatches.filter((post) => {
-        return (
-          post.title.toLowerCase().includes(searchLower) ||
-          post.excerpt.toLowerCase().includes(searchLower) ||
-          post.tags.toLowerCase().includes(searchLower) ||
-          post.content.toLowerCase().includes(searchLower)
-        );
+      const pool = targetCatLower === 'semua' ? publishedPosts : directMatches;
+      const searchFiltered = pool.filter((post) => {
+        const titleMatch = (post.title || '').toLowerCase().includes(searchLower);
+        const excerptMatch = (post.excerpt || '').toLowerCase().includes(searchLower);
+        const tagsMatch = (post.tags || '').toLowerCase().includes(searchLower);
+        const catMatch = (post.category || '').toLowerCase().includes(searchLower);
+        const contentMatch = (post.contentMarkdown || (post as any).content || '').toLowerCase().includes(searchLower);
+        return titleMatch || excerptMatch || tagsMatch || catMatch || contentMatch;
       });
       return {
         filteredPosts: searchFiltered,
@@ -221,12 +240,14 @@ export default function HomeView({
             posts={posts}
             autolinks={autolinks}
             onSelectPost={onSelectPost}
+            onSelectProduct={onSelectProduct}
             selectedCategory={activeCategory}
             onSelectCategory={handleCategoryChange}
             siteConfig={siteConfig}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
             filteredPosts={filteredPosts}
+            matchingProducts={matchingProducts}
             categories={categories}
             isKeywordMatchFallback={isKeywordMatchFallback}
             isLatestFallback={isLatestFallback}

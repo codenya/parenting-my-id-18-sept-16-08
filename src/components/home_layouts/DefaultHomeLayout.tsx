@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Post, AutoLink, SiteConfig } from '../../types';
-import { Search, Clock, Eye, Sparkles, ArrowRight, BookOpen, Zap } from 'lucide-react';
+import { Post, AutoLink, SiteConfig, Product } from '../../types';
+import { Search, Clock, Eye, Sparkles, ArrowRight, BookOpen, Zap, ShoppingBag, Tag } from 'lucide-react';
 import AdSlot from '../AdSlot';
 import HeroPerformanceBox from '../HeroPerformanceBox';
 import { getOptimizedImageUrl, getResponsiveSrcSet, getOptimizedAvatarUrl } from '../../lib/imageUtils';
@@ -9,12 +9,14 @@ interface LayoutProps {
   posts: Post[];
   autolinks: AutoLink[];
   onSelectPost: (slug: string) => void;
+  onSelectProduct?: (slug: string) => void;
   selectedCategory: string;
   onSelectCategory: (category: string) => void;
   siteConfig?: SiteConfig;
   searchQuery: string;
   setSearchQuery: (q: string) => void;
   filteredPosts: Post[];
+  matchingProducts?: Product[];
   categories: string[];
   isKeywordMatchFallback?: boolean;
   isLatestFallback?: boolean;
@@ -25,12 +27,14 @@ export default function DefaultHomeLayout({
   posts,
   autolinks,
   onSelectPost,
+  onSelectProduct,
   selectedCategory,
   onSelectCategory,
   siteConfig,
   searchQuery,
   setSearchQuery,
   filteredPosts,
+  matchingProducts = [],
   categories,
   isKeywordMatchFallback = false,
   isLatestFallback = false,
@@ -147,6 +151,39 @@ export default function DefaultHomeLayout({
         </div>
       </div>
 
+      {/* SEARCH BAR & CATEGORIES */}
+      <div className="flex flex-col gap-4 pt-1 min-h-[60px]">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+          <div className="relative flex-1 max-w-md">
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={`Cari artikel atau kata kunci di ${siteConfig?.site_name || 'website'}...`}
+              className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-colors shadow-2xs"
+            />
+          </div>
+
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none min-h-[44px] h-[44px] shrink-0">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => onSelectCategory(cat)}
+                style={{ contentVisibility: 'auto' }}
+                className={`h-[36px] px-3.5 py-2 rounded-xl text-xs font-black shrink-0 whitespace-nowrap transition-colors inline-flex items-center justify-center leading-none ${
+                  selectedCategory === cat
+                    ? 'bg-rose-700 text-white shadow-sm shadow-rose-500/20'
+                    : 'bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 hover:border-rose-500'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* FEATURED POST */}
       {featuredPost && !searchQuery && selectedCategory === 'Semua' && (
         <section
@@ -237,38 +274,89 @@ export default function DefaultHomeLayout({
         />
       )}
 
-      {/* SEARCH BAR & CATEGORIES */}
-      <div className="flex flex-col gap-4 pt-2 min-h-[120px]">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={`Cari artikel atau kata kunci di ${siteConfig?.site_name || 'website'}...`}
-              className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-colors shadow-2xs"
-            />
+      {/* PRODUCTS & CATALOG SEARCH RESULTS */}
+      {searchQuery && matchingProducts && matchingProducts.length > 0 && (
+        <section className="space-y-6 pt-2 pb-6 border-b border-slate-200 dark:border-slate-800">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <ShoppingBag className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              <span>Hasil Produk, Paket &amp; Katalog ("{searchQuery}")</span>
+            </h2>
+            <span className="text-xs text-indigo-700 dark:text-indigo-300 font-bold bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 px-3 py-1 rounded-full">
+              {matchingProducts.length} Produk Ditemukan
+            </span>
           </div>
 
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none min-h-[44px] h-[44px] shrink-0">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => onSelectCategory(cat)}
-                style={{ contentVisibility: 'auto' }}
-                className={`h-[36px] px-3.5 py-2 rounded-xl text-xs font-black shrink-0 whitespace-nowrap transition-colors inline-flex items-center justify-center leading-none ${
-                  selectedCategory === cat
-                    ? 'bg-rose-700 text-white shadow-sm shadow-rose-500/20'
-                    : 'bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 hover:border-rose-500'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {matchingProducts.map((prod) => {
+              const baseNavPath = siteConfig?.products_nav_path || '/produk';
+              const cleanNavPath = baseNavPath.startsWith('/') ? baseNavPath : `/${baseNavPath}`;
+              const prodUrl = `${cleanNavPath}/${prod.slug}`;
+              const prodNavLabel = siteConfig?.products_nav_label || 'Produk Jualan';
+
+              return (
+                <div
+                  key={prod.id}
+                  onClick={() => onSelectProduct && onSelectProduct(prod.slug)}
+                  className="group cursor-pointer rounded-2xl overflow-hidden border border-indigo-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-xl hover:border-indigo-300 dark:hover:border-indigo-700 transition-all duration-300 flex flex-col justify-between"
+                >
+                  <div className="space-y-3">
+                    <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+                      {prod.imageUrl ? (
+                        <img
+                          src={prod.imageUrl}
+                          alt={prod.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-indigo-50 dark:bg-slate-800 text-indigo-400">
+                          <ShoppingBag className="w-12 h-12" />
+                        </div>
+                      )}
+                      <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-indigo-700/90 text-white text-[10px] font-bold backdrop-blur-xs uppercase tracking-wider">
+                        {prodNavLabel}
+                      </span>
+                      <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-emerald-600/95 text-white text-[11px] font-extrabold shadow-sm">
+                        {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(prod.price)}
+                      </span>
+                    </div>
+
+                    <div className="p-5 space-y-2">
+                      <div className="flex items-center gap-1.5 text-[11px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider">
+                        <Tag className="w-3 h-3 shrink-0" />
+                        <span className="truncate">{prodUrl}</span>
+                      </div>
+
+                      <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
+                        {prod.title}
+                      </h3>
+
+                      <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                        {prod.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-5 pt-0 mt-2">
+                    <a
+                      href={prodUrl}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (onSelectProduct) onSelectProduct(prod.slug);
+                      }}
+                      className="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md shadow-indigo-600/20"
+                    >
+                      <span>Lihat Detail &amp; Pesan</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        </div>
-      </div>
+        </section>
+      )}
 
       {/* ARTICLES GRID */}
       <section className="space-y-6" id="artikel-terbaru">

@@ -310,6 +310,14 @@ export default function AdminPortal({
   const [cfgProductsNavLabel, setCfgProductsNavLabel] = useState(siteConfig?.products_nav_label || 'Produk');
   const [cfgProductsNavPath, setCfgProductsNavPath] = useState(siteConfig?.products_nav_path || '/produk');
   const [cfgSellerBankAccounts, setCfgSellerBankAccounts] = useState(siteConfig?.seller_bank_accounts || '');
+  const [cfgProductsHeroBadge, setCfgProductsHeroBadge] = useState(siteConfig?.products_hero_badge || '🛍️ Katalog Produk & Paket Eksklusif');
+  const [cfgProductsHeroTitle, setCfgProductsHeroTitle] = useState(siteConfig?.products_hero_title || 'Miliki Produk & Paket Pilihan Berkualitas');
+  const [cfgProductsHeroSubtitle, setCfgProductsHeroSubtitle] = useState(siteConfig?.products_hero_subtitle || 'Temukan berbagai koleksi produk, paket, dan penawaran terbaik. Didukung pembayaran instan QRIS/Bank dan koordinasi pengiriman aman via WhatsApp.');
+  const [cfgProductsHeroBtnText, setCfgProductsHeroBtnText] = useState(siteConfig?.products_hero_btn_text || 'Tambah Produk Baru');
+  const [cfgProductsHeroImageUrl, setCfgProductsHeroImageUrl] = useState(siteConfig?.products_hero_image_url || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80');
+  const [cfgProductsHeroImageCaption, setCfgProductsHeroImageCaption] = useState(siteConfig?.products_hero_image_caption || 'Katalog Pilihan Utama');
+  const [cfgProductsEmptyTitle, setCfgProductsEmptyTitle] = useState(siteConfig?.products_empty_title || 'Belum Ada Produk Jualan');
+  const [cfgProductsEmptySubtitle, setCfgProductsEmptySubtitle] = useState(siteConfig?.products_empty_subtitle || 'Katalog produk belum diunggah. Silakan masuk sebagai administrator untuk menambahkan item pertama Anda.');
 
   const [cfgSiteDomain, setCfgSiteDomain] = useState(siteConfig?.site_domain || 'domain.com');
   const [cfgDefaultThemeMode, setCfgDefaultThemeMode] = useState<'light'|'dark'|'auto'>(siteConfig?.default_theme_mode || 'auto');
@@ -707,6 +715,14 @@ export default function AdminPortal({
       setCfgProductsNavLabel(siteConfig.products_nav_label || 'Produk');
       setCfgProductsNavPath(siteConfig.products_nav_path || '/produk');
       setCfgSellerBankAccounts(siteConfig.seller_bank_accounts || '');
+      setCfgProductsHeroBadge(siteConfig.products_hero_badge || '🛍️ Katalog Produk & Paket Eksklusif');
+      setCfgProductsHeroTitle(siteConfig.products_hero_title || 'Miliki Produk & Paket Pilihan Berkualitas');
+      setCfgProductsHeroSubtitle(siteConfig.products_hero_subtitle || 'Temukan berbagai koleksi produk, paket, dan penawaran terbaik. Didukung pembayaran instan QRIS/Bank dan koordinasi pengiriman aman via WhatsApp.');
+      setCfgProductsHeroBtnText(siteConfig.products_hero_btn_text || 'Tambah Produk Baru');
+      setCfgProductsHeroImageUrl(siteConfig.products_hero_image_url || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80');
+      setCfgProductsHeroImageCaption(siteConfig.products_hero_image_caption || 'Katalog Pilihan Utama');
+      setCfgProductsEmptyTitle(siteConfig.products_empty_title || 'Belum Ada Produk Jualan');
+      setCfgProductsEmptySubtitle(siteConfig.products_empty_subtitle || 'Katalog produk belum diunggah. Silakan masuk sebagai administrator untuk menambahkan item pertama Anda.');
       setCfgHeroBadgeText(siteConfig.hero_badge_text || 'Portal Nomor 1');
       setCfgAutolinkTickerLabel(siteConfig.autolink_ticker_label || 'Topik Trending:');
       setCfgFooterAutolinkLabel(siteConfig.footer_autolink_label || 'Tautan Populer');
@@ -808,6 +824,14 @@ export default function AdminPortal({
         products_nav_label: cfgProductsNavLabel,
         products_nav_path: cfgProductsNavPath,
         seller_bank_accounts: cfgSellerBankAccounts,
+        products_hero_badge: cfgProductsHeroBadge,
+        products_hero_title: cfgProductsHeroTitle,
+        products_hero_subtitle: cfgProductsHeroSubtitle,
+        products_hero_btn_text: cfgProductsHeroBtnText,
+        products_hero_image_url: cfgProductsHeroImageUrl,
+        products_hero_image_caption: cfgProductsHeroImageCaption,
+        products_empty_title: cfgProductsEmptyTitle,
+        products_empty_subtitle: cfgProductsEmptySubtitle,
         site_domain: cfgSiteDomain,
         default_theme_mode: cfgDefaultThemeMode,
         font_size_scale: cfgFontSizeScale,
@@ -1087,6 +1111,14 @@ export default function AdminPortal({
         products_nav_label: cfgProductsNavLabel,
         products_nav_path: cfgProductsNavPath,
         seller_bank_accounts: cfgSellerBankAccounts,
+        products_hero_badge: cfgProductsHeroBadge,
+        products_hero_title: cfgProductsHeroTitle,
+        products_hero_subtitle: cfgProductsHeroSubtitle,
+        products_hero_btn_text: cfgProductsHeroBtnText,
+        products_hero_image_url: cfgProductsHeroImageUrl,
+        products_hero_image_caption: cfgProductsHeroImageCaption,
+        products_empty_title: cfgProductsEmptyTitle,
+        products_empty_subtitle: cfgProductsEmptySubtitle,
 
         site_domain: cfgSiteDomain,
         default_theme_mode: cfgDefaultThemeMode,
@@ -3530,6 +3562,126 @@ export default function AdminPortal({
                   <p className="text-[10px] text-slate-500 mt-1 leading-normal">
                     Masukkan keterangan rekening pembayaran dan informasi ongkir/delivery fee. Kolom ini berupa textbox multi-baris sehingga memudahkan pembeli membaca rincian transfer.
                   </p>
+                </div>
+
+                <div className="md:col-span-2 pt-3 border-t border-slate-200 dark:border-slate-800 space-y-3">
+                  <h4 className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>🎨 Custom Wording Header Hero Box (Halaman Produk)</span>
+                  </h4>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                        Sub-Header Badge Text (products_hero_badge)
+                      </label>
+                      <input
+                        type="text"
+                        value={cfgProductsHeroBadge}
+                        onChange={(e) => setCfgProductsHeroBadge(e.target.value)}
+                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-semibold focus:ring-2 focus:ring-rose-500"
+                        placeholder="Contoh: 🎨 Galeri Seni Eksklusif"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                        Label Tombol Tambah Item (products_hero_btn_text)
+                      </label>
+                      <input
+                        type="text"
+                        value={cfgProductsHeroBtnText}
+                        onChange={(e) => setCfgProductsHeroBtnText(e.target.value)}
+                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-semibold focus:ring-2 focus:ring-rose-500"
+                        placeholder="Contoh: Tambah Koleksi Lukisan"
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                        Judul Utama Hero Box (products_hero_title)
+                      </label>
+                      <input
+                        type="text"
+                        value={cfgProductsHeroTitle}
+                        onChange={(e) => setCfgProductsHeroTitle(e.target.value)}
+                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-bold focus:ring-2 focus:ring-rose-500"
+                        placeholder="Contoh: Miliki Karya Lukisan Orisinal & Bernilai Tinggi"
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                        Deskripsi / Subtitle Hero Box (products_hero_subtitle)
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={cfgProductsHeroSubtitle}
+                        onChange={(e) => setCfgProductsHeroSubtitle(e.target.value)}
+                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-medium focus:ring-2 focus:ring-rose-500 leading-relaxed"
+                        placeholder="Masukkan deskripsi narasi header hero halaman jualan..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                        URL Gambar Hero Sisi Kanan (products_hero_image_url)
+                      </label>
+                      <input
+                        type="text"
+                        value={cfgProductsHeroImageUrl}
+                        onChange={(e) => setCfgProductsHeroImageUrl(e.target.value)}
+                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-medium focus:ring-2 focus:ring-rose-500"
+                        placeholder="https://images.unsplash.com/..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                        Caption Gambar Sisi Kanan (products_hero_image_caption)
+                      </label>
+                      <input
+                        type="text"
+                        value={cfgProductsHeroImageCaption}
+                        onChange={(e) => setCfgProductsHeroImageCaption(e.target.value)}
+                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-semibold focus:ring-2 focus:ring-rose-500"
+                        placeholder="Contoh: Premium Art Collection"
+                      />
+                    </div>
+
+                    <div className="md:col-span-2 pt-3 border-t border-slate-200 dark:border-slate-800 space-y-3">
+                      <h4 className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <span>📦 Custom Wording Pesan "Belum Ada Produk" (Empty State)</span>
+                      </h4>
+
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                            Judul Pesan Saat Produk Kosong (products_empty_title)
+                          </label>
+                          <input
+                            type="text"
+                            value={cfgProductsEmptyTitle}
+                            onChange={(e) => setCfgProductsEmptyTitle(e.target.value)}
+                            className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-bold focus:ring-2 focus:ring-rose-500"
+                            placeholder="Contoh: Belum Ada Koleksi Lukisan / Belum Ada Produk"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                            Deskripsi/Keterangan Pesan Saat Produk Kosong (products_empty_subtitle)
+                          </label>
+                          <textarea
+                            rows={3}
+                            value={cfgProductsEmptySubtitle}
+                            onChange={(e) => setCfgProductsEmptySubtitle(e.target.value)}
+                            className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-medium focus:ring-2 focus:ring-rose-500 leading-relaxed"
+                            placeholder="Contoh: Katalog jualan lukisan orisinal belum diunggah. Silakan masuk sebagai administrator untuk menambahkan karya seni lukis pertama Anda."
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 

@@ -293,7 +293,15 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
   // Dynamic Sales Catalog Navigation Wording & Path
   products_nav_label: 'Produk',
   products_nav_path: '/produk',
-  seller_bank_accounts: 'Bank BCA: 1234567890 a/n Nama Pemilik\nBank Mandiri: 0987654321 a/n Nama Pemilik\n\nKeterangan Ongkir:\n- Jabodetabek & Jawa Barat: Gratis Ongkir\n- Luar Jawa: Tambahan biaya Rp 50.000'
+  seller_bank_accounts: 'Bank BCA: 1234567890 a/n Nama Pemilik\nBank Mandiri: 0987654321 a/n Nama Pemilik\n\nKeterangan Ongkir:\n- Jabodetabek & Jawa Barat: Gratis Ongkir\n- Luar Jawa: Tambahan biaya Rp 50.000',
+  products_hero_badge: '🛍️ Katalog Produk & Paket Eksklusif',
+  products_hero_title: 'Miliki Produk & Paket Pilihan Berkualitas',
+  products_hero_subtitle: 'Temukan berbagai koleksi produk, paket, dan penawaran terbaik. Didukung pembayaran instan QRIS/Bank dan koordinasi pengiriman aman via WhatsApp.',
+  products_hero_btn_text: 'Tambah Produk Baru',
+  products_hero_image_url: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80',
+  products_hero_image_caption: 'Katalog Pilihan Utama',
+  products_empty_title: 'Belum Ada Produk Jualan',
+  products_empty_subtitle: 'Katalog produk belum diunggah. Silakan masuk sebagai administrator untuk menambahkan item pertama Anda.'
 };
 
 export async function loadSiteConfig(): Promise<SiteConfig> {
