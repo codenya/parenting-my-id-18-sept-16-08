@@ -440,6 +440,32 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }
   };
 
+  // Helper to ensure products table schema compatibility (supporting whatsapp, qris, etc.)
+  const syncAndPrepareProductsTable = async (db: any): Promise<Set<string>> => {
+    try {
+      await db.prepare(`
+        CREATE TABLE IF NOT EXISTS products (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          slug TEXT UNIQUE NOT NULL,
+          description TEXT NOT NULL,
+          price REAL NOT NULL,
+          image_url TEXT NOT NULL,
+          whatsapp_number TEXT NOT NULL,
+          qris_image_url TEXT,
+          status TEXT DEFAULT 'available',
+          created_at TEXT,
+          updated_at TEXT
+        )
+      `).run();
+      const colInfo = await db.prepare('PRAGMA table_info(products)').all();
+      return new Set<string>((colInfo?.results || []).map((c: any) => c.name));
+    } catch (err) {
+      console.error('Error preparing products table in D1:', err);
+      return new Set<string>(['id', 'title', 'slug', 'description', 'price', 'status']);
+    }
+  };
+
   // Security: Authenticate Bearer or session token (Stateless HMAC-SHA256 JWT, zero D1 query load)
   const authenticateRequest = async (allowedRoles?: string[]): Promise<{ user?: any; errorResponse?: Response }> => {
     const authHeader = request.headers.get('Authorization') || request.headers.get('x-session-token') || '';
@@ -1581,6 +1607,109 @@ Sitemap: ${siteUrl}/sitemap.xml
         }
       }
       return jsonResponse({ success: true, message: 'Autolink berhasil dihapus' });
+    }
+
+    // =========================================================================
+    // PRODUCTS SALES API ENDPOINTS
+    // =========================================================================
+    
+    // GET /api/products
+    if (path === '/api/products' && method === 'GET') {
+      if (env.DB) {
+        try {
+          await syncAndPrepareProductsTable(env.DB);
+          const { results } = await env.DB.prepare('SELECT id, title, slug, description, price, image_url as imageUrl, whatsapp_number as whatsappNumber, qris_image_url as qrisImageUrl, status, created_at as createdAt FROM products ORDER BY id DESC').all();
+          if (results) {
+            return jsonResponse(results);
+          }
+        } catch (e) {
+          console.error('Error fetching products from D1:', e);
+        }
+      }
+      return jsonResponse([]);
+    }
+
+    // POST /api/products
+    if (path === '/api/products' && method === 'POST') {
+      const auth = await authenticateRequest(['admin', 'editor']);
+      if (auth.errorResponse) return auth.errorResponse;
+
+      const body = await request.json() as any;
+      const { title, slug, description, price, imageUrl, whatsappNumber, qrisImageUrl, status } = body;
+      if (!title || !slug || !description || !price || !imageUrl || !whatsappNumber) {
+        return jsonResponse({ error: 'Data produk belum lengkap' }, 400);
+      }
+
+      if (env.DB) {
+        try {
+          await syncAndPrepareProductsTable(env.DB);
+          const existing = await env.DB.prepare('SELECT id FROM products WHERE LOWER(slug) = LOWER(?)').bind(slug).first();
+          if (existing) {
+            return jsonResponse({ error: 'Slug produk sudah digunakan' }, 400);
+          }
+          const insertRes = await env.DB.prepare('INSERT INTO products (title, slug, description, price, image_url, whatsapp_number, qris_image_url, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+            .bind(title, slug, description, Number(price), imageUrl, whatsappNumber, qrisImageUrl || '', status || 'available')
+            .run();
+          const newId = insertRes.meta?.last_row_id || Date.now();
+          return jsonResponse({ success: true, product: { id: newId, title, slug, description, price, imageUrl, whatsappNumber, qrisImageUrl, status: status || 'available' } });
+        } catch (e: any) {
+          console.error('Error saving product to D1:', e);
+          return jsonResponse({ error: e.message || 'Gagal menyimpan produk ke database' }, 500);
+        }
+      }
+      return jsonResponse({ error: 'Database tidak terhubung' }, 500);
+    }
+
+    // PUT /api/products/:id
+    if (path.startsWith('/api/products/') && method === 'PUT') {
+      const auth = await authenticateRequest(['admin', 'editor']);
+      if (auth.errorResponse) return auth.errorResponse;
+
+      const parts = path.split('/');
+      const id = parts[parts.length - 1];
+      const body = await request.json() as any;
+      const { title, slug, description, price, imageUrl, whatsappNumber, qrisImageUrl, status } = body;
+
+      if (!title || !slug || !description || !price || !imageUrl || !whatsappNumber) {
+        return jsonResponse({ error: 'Data produk belum lengkap' }, 400);
+      }
+
+      if (env.DB && id) {
+        try {
+          await syncAndPrepareProductsTable(env.DB);
+          const existing = await env.DB.prepare('SELECT id FROM products WHERE LOWER(slug) = LOWER(?) AND id != ?').bind(slug, id).first();
+          if (existing) {
+            return jsonResponse({ error: 'Slug produk sudah digunakan oleh produk lain' }, 400);
+          }
+          await env.DB.prepare('UPDATE products SET title = ?, slug = ?, description = ?, price = ?, image_url = ?, whatsapp_number = ?, qris_image_url = ?, status = ? WHERE id = ?')
+            .bind(title, slug, description, Number(price), imageUrl, whatsappNumber, qrisImageUrl || '', status, id)
+            .run();
+          return jsonResponse({ success: true, product: { id, title, slug, description, price, imageUrl, whatsappNumber, qrisImageUrl, status } });
+        } catch (e: any) {
+          console.error('Error updating product in D1:', e);
+          return jsonResponse({ error: e.message || 'Gagal memperbarui produk' }, 500);
+        }
+      }
+      return jsonResponse({ error: 'Database tidak terhubung atau ID tidak valid' }, 500);
+    }
+
+    // DELETE /api/products/:id
+    if (path.startsWith('/api/products/') && method === 'DELETE') {
+      const auth = await authenticateRequest(['admin', 'editor']);
+      if (auth.errorResponse) return auth.errorResponse;
+
+      const parts = path.split('/');
+      const id = parts[parts.length - 1];
+      if (env.DB && id) {
+        try {
+          await env.DB.prepare('DELETE FROM products WHERE id = ?').bind(id).run();
+          return jsonResponse({ success: true, message: 'Produk jualan berhasil dihapus' });
+        } catch (e: any) {
+          console.error('Error deleting product from D1:', e);
+          return jsonResponse({ error: e.message || 'Gagal menghapus produk' }, 500);
+        }
+      }
+      return jsonResponse({ error: 'Database tidak terhubung' }, 500);
     }
 
     // 7. GET /api/config (Public site settings ONLY - Accelerated & Edge Cached)
@@ -3017,6 +3146,20 @@ CREATE TABLE IF NOT EXISTS login_attempts (
   ip TEXT PRIMARY KEY,
   attempts INTEGER DEFAULT 0,
   last_attempt INTEGER DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS products (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  description TEXT NOT NULL,
+  price REAL NOT NULL,
+  image_url TEXT NOT NULL,
+  whatsapp_number TEXT NOT NULL,
+  qris_image_url TEXT,
+  status TEXT DEFAULT 'available',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );`;
       }
 

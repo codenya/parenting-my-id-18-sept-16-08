@@ -22,7 +22,7 @@ export default function Header({ currentView, onNavigate, currentUser, onLogout,
         { label: 'Pola Asuh', url: '/kategori/pola-asuh' },
         { label: 'Tumbuh Kembang', url: '/kategori/tumbuh-kembang' },
         { label: 'Kesehatan & Gizi', url: '/kategori/kesehatan-gizi' },
-        { label: 'Balita', url: '/balita' },
+        { label: siteConfig?.products_nav_label || 'Produk', url: siteConfig?.products_nav_path || '/produk' },
         { label: 'Sitemap', url: '/sitemap.xml' },
         { label: 'RSS Feed', url: '/feed.xml' }
       ];
@@ -37,6 +37,9 @@ export default function Header({ currentView, onNavigate, currentUser, onLogout,
       if (e) e.preventDefault();
       onNavigate('home');
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (['/galeri-lukisan', '/jualan', '/galeri', '/produk', '/paket', (siteConfig?.products_nav_path || '/produk')].includes(url)) {
+      if (e) e.preventDefault();
+      onNavigate('jualan');
     } else if (url.startsWith('/kategori/')) {
       if (e) e.preventDefault();
       const slug = url.replace('/kategori/', '');
@@ -126,7 +129,7 @@ export default function Header({ currentView, onNavigate, currentUser, onLogout,
             {rawHeaderLinks.map((link, idx) => {
               const isExternalOrXml = link.url.startsWith('http') || link.url.endsWith('.xml');
               const isHome = link.url === '/' || link.url === '/home' || link.label === 'Beranda';
-              const isActive = isHome && currentView === 'home';
+              const isActive = (isHome && currentView === 'home') || (currentView === 'jualan' && (link.url === (siteConfig?.products_nav_path || '/produk') || ['/galeri-lukisan', '/jualan', '/galeri', '/produk', '/paket'].includes(link.url)));
 
               if (isExternalOrXml) {
                 return (
