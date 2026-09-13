@@ -2255,7 +2255,7 @@ export default function RichPostEditor({
                 </div>
 
                 {/* QUESTIONS DEFINITION */}
-                <div className="space-y-4 pt-2">
+                <div className="flex flex-col gap-4 pt-2">
                   <div className="flex items-center justify-between pb-2 border-b border-dashed border-slate-100 dark:border-slate-800">
                     <h5 className="font-extrabold text-[11px] text-slate-700 dark:text-slate-300 uppercase tracking-wider">Daftar Soal Pilihan Ganda ({ (interactiveQuiz.questions || []).length } Soal)</h5>
                     <button
@@ -2405,7 +2405,7 @@ export default function RichPostEditor({
                 </div>
 
                 {/* PHASES LIST DEFINITION */}
-                <div className="space-y-4 pt-2">
+                <div className="flex flex-col gap-4 pt-2">
                   <div className="flex items-center justify-between pb-2 border-b border-dashed border-slate-100 dark:border-slate-800">
                     <h5 className="font-extrabold text-[11px] text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                       Daftar Fase Skenario ({ (interactiveTimelineSlider.phases || []).length } Fase)

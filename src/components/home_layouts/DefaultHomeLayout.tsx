@@ -238,7 +238,7 @@ export default function DefaultHomeLayout({
       )}
 
       {/* SEARCH BAR & CATEGORIES */}
-      <div className="space-y-4 pt-2">
+      <div className="flex flex-col gap-4 pt-2 min-h-[120px]">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
           <div className="relative flex-1 max-w-md">
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
