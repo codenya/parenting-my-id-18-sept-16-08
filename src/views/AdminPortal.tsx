@@ -2553,12 +2553,12 @@ export default function AdminPortal({
                               {post.status === 'pending_approval' && (
                                 <span className="px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-300 dark:border-amber-800 inline-flex items-center gap-1">
                                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
-                                  ⏳ Menunggu Ditinjau
+                                  ⏳ Tunggu Ditinjau
                                 </span>
                               )}
                               {(!post.status || post.status === 'published') && (
                                 <span className="px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
-                                  ✅ Diterbitkan
+                                  ✅ Terbit
                                 </span>
                               )}
                               {post.status === 'draft' && (
