@@ -15,6 +15,7 @@ const ArticleDetailView = lazy(() => import('./views/ArticleDetailView'));
 const AdminPortal = lazy(() => import('./views/AdminPortal'));
 const StaticPageView = lazy(() => import('./views/StaticPageView'));
 import InteractiveProductSale from './components/InteractiveProductSale';
+import { WhatsAppWidget } from './components/WhatsAppWidget';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<'home' | 'article' | 'admin' | 'privacy' | 'about' | 'contact' | 'disclaimer' | 'terms' | 'jualan'>('home');
@@ -694,7 +695,12 @@ export default function App() {
 
         {currentView === 'jualan' && (
           <div className="py-4 md:py-6">
-            <InteractiveProductSale isAdmin={currentUser?.role === 'admin'} currentUser={currentUser} />
+            <InteractiveProductSale 
+              isAdmin={currentUser?.role === 'admin'} 
+              currentUser={currentUser} 
+              activeProductSlug={activeProductSlug}
+              siteConfig={effectiveConfig}
+            />
           </div>
         )}
 
@@ -748,6 +754,18 @@ export default function App() {
             />
           </div>
         </div>
+      )}
+
+      {effectiveConfig && effectiveConfig.wa_widget_enabled && (
+        <WhatsAppWidget
+          enabled={effectiveConfig.wa_widget_enabled}
+          position={effectiveConfig.wa_position || 'bottom-right'}
+          headerTitle={effectiveConfig.wa_header_title || 'Hubungi Kami'}
+          subtitle={effectiveConfig.wa_subtitle || 'Ada yang bisa kami bantu?'}
+          accentColor={effectiveConfig.wa_color_accent || '#25D366'}
+          operators={effectiveConfig.wa_operators || []}
+          formFields={effectiveConfig.wa_form_fields || ['name', 'phone', 'message']}
+        />
       )}
     </div>
   );

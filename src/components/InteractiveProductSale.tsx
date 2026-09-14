@@ -104,7 +104,7 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser, a
     setFormImageUrl('https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80');
     setFormWhatsappNumber('628123456789');
     setFormQrisImageUrl('https://images.unsplash.com/photo-1595079676339-1534801ad6cf?auto=format&fit=crop&w=400&h=400&q=80');
-    setFormBankInfo('');
+    setFormBankInfo(siteConfig?.seller_bank_accounts || '');
     setFormPaymentMode('all');
     setFormThirdPartyCheckoutUrl('');
     setFormStatus('available');
@@ -203,7 +203,7 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser, a
     }
   };
 
-  const handleCheckoutSubmit = (e: React.FormEvent) => {
+  const handleCheckoutSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!buyerName || !buyerPhone) {
       alert('Nama Lengkap dan Nomor WhatsApp Anda wajib diisi.');
@@ -211,6 +211,25 @@ export default function InteractiveProductSale({ isAdmin = false, currentUser, a
     }
 
     if (!selectedProduct) return;
+
+    // Send data to D1 first
+    try {
+      await fetch('/api/products/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          buyer_name: buyerName,
+          buyer_phone: buyerPhone,
+          buyer_notes: buyerNotes || '',
+          product_id: selectedProduct.id,
+          product_title: selectedProduct.title,
+          product_slug: selectedProduct.slug,
+          product_price: selectedProduct.price
+        })
+      });
+    } catch (err) {
+      console.error('Failed to log product purchase lead:', err);
+    }
 
     // Compose custom WhatsApp message
     const formattedPrice = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(selectedProduct.price);

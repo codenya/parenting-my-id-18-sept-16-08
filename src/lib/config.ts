@@ -275,6 +275,8 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
   product_discount_tag: 'HEMAT 37%',
   product_whatsapp: '6281234567890',
   product_cta_text: 'Pesan Paket Sekarang via WhatsApp',
+  product_mgmt_heading: 'Panel Manajemen Produk Jualan',
+  product_mgmt_desc: 'Kelola daftar penawaran, produk digital, jasa, atau paket yang Anda pasarkan. Anda dapat menambah, mengedit, memperbarui status (Tersedia/Terjual), serta menetapkan nomor WhatsApp dan metode pembayaran untuk masing-masing item.',
 
   // Model 9: Iklan Baris Koran Dulu
   newspaper_name: 'WARTA PARENTING NUSANTARA',

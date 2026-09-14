@@ -247,6 +247,8 @@ let mockComments = [
   }
 ];
 
+let mockChatLeads: any[] = [];
+
 let mockPosts: any[] = [
   {
     id: 1,
@@ -410,6 +412,7 @@ function loadServerData() {
     const usersFile = path.join(DATA_DIR, 'users.json');
     const autolinksFile = path.join(DATA_DIR, 'autolinks.json');
     const commentsFile = path.join(DATA_DIR, 'comments.json');
+    const chatLeadsFile = path.join(DATA_DIR, 'chat_leads.json');
 
     // 1. Fallback to unified store.json if individual files don't exist
     if (fs.existsSync(storeFile) && (!fs.existsSync(postsFile) || !fs.existsSync(usersFile))) {
@@ -419,6 +422,7 @@ function loadServerData() {
         if (storeData.users && Array.isArray(storeData.users)) mockUsers = storeData.users;
         if (storeData.autolinks && Array.isArray(storeData.autolinks)) mockAutolinks = storeData.autolinks;
         if (storeData.comments && Array.isArray(storeData.comments)) mockComments = storeData.comments;
+        if (storeData.chatLeads && Array.isArray(storeData.chatLeads)) mockChatLeads = storeData.chatLeads;
         console.log('[Persistence] Successfully loaded unified state from fallback store.json');
       } catch (e) {
         console.error('[Persistence] Error loading unified fallback store.json, trying individual files...', e);
@@ -454,6 +458,13 @@ function loadServerData() {
       fs.writeFileSync(commentsFile, JSON.stringify(mockComments, null, 2), 'utf-8');
     }
 
+    if (fs.existsSync(chatLeadsFile)) {
+      const data = JSON.parse(fs.readFileSync(chatLeadsFile, 'utf-8'));
+      if (Array.isArray(data)) mockChatLeads = data;
+    } else {
+      fs.writeFileSync(chatLeadsFile, JSON.stringify(mockChatLeads, null, 2), 'utf-8');
+    }
+
     // 3. Ensure unified store.json is updated/created
     if (!fs.existsSync(storeFile)) {
       const storeObj = { posts: mockPosts, users: mockUsers, autolinks: mockAutolinks, comments: mockComments };
@@ -472,9 +483,10 @@ function saveServerData() {
     fs.writeFileSync(path.join(DATA_DIR, 'users.json'), JSON.stringify(mockUsers, null, 2), 'utf-8');
     fs.writeFileSync(path.join(DATA_DIR, 'autolinks.json'), JSON.stringify(mockAutolinks, null, 2), 'utf-8');
     fs.writeFileSync(path.join(DATA_DIR, 'comments.json'), JSON.stringify(mockComments, null, 2), 'utf-8');
+    fs.writeFileSync(path.join(DATA_DIR, 'chat_leads.json'), JSON.stringify(mockChatLeads, null, 2), 'utf-8');
 
     // Save fallback unified state to store.json
-    const storeObj = { posts: mockPosts, users: mockUsers, autolinks: mockAutolinks, comments: mockComments };
+    const storeObj = { posts: mockPosts, users: mockUsers, autolinks: mockAutolinks, comments: mockComments, chatLeads: mockChatLeads };
     fs.writeFileSync(path.join(DATA_DIR, 'store.json'), JSON.stringify(storeObj, null, 2), 'utf-8');
   } catch (err) {
     console.error('[Persistence] Error saving data to disk:', err);
@@ -896,6 +908,33 @@ app.delete('/api/comments/:id', requireAuth(['admin', 'editor']), (req, res) => 
   mockComments = mockComments.filter((c) => c.id !== commentId);
   saveServerData();
   res.json({ success: true, message: 'Komentar berhasil dihapus' });
+});
+
+// WhatsApp Lead Logger
+app.post('/api/whatsapp/lead', (req, res) => {
+  try {
+    const { customer_name, customer_phone, department, assigned_operator_phone, initial_message, page_url } = req.body;
+    const newLead = {
+      id: Date.now(),
+      customer_name,
+      customer_phone,
+      department,
+      assigned_operator_phone,
+      initial_message,
+      page_url,
+      created_at: new Date().toISOString(),
+    };
+    mockChatLeads.unshift(newLead);
+    saveServerData();
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Gagal mencatat lead' });
+  }
+});
+
+// GET WhatsApp Leads (Admin Protected)
+app.get('/api/whatsapp/leads', requireAuth(['admin']), (req, res) => {
+  res.json(mockChatLeads);
 });
 
 // GET Cusdis Webhook Endpoint (Health Check)

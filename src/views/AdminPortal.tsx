@@ -7,7 +7,7 @@ import {
   Upload, Eye, Sparkles, CheckCircle2, RefreshCw, Bold, Italic, Heading2, 
   Heading3, List, ListOrdered, Quote, Image as ImageIcon, Code, UserCheck, 
   ExternalLink, Search, Zap, AlertCircle, Settings, Key, Copy, Check, 
-  LogOut, Globe, Palette, Layout, MessageSquare, Droplet, Users, Award, History, RotateCcw, X, Menu, LayoutGrid, Database, ShoppingBag
+  LogOut, Globe, Palette, Layout, MessageSquare, Droplet, Users, Award, History, RotateCcw, X, Menu, LayoutGrid, Database, ShoppingBag, BarChart2
 } from 'lucide-react';
 import { generateSlug } from '../lib/autolink';
 import RichPostEditor from '../components/RichPostEditor';
@@ -74,8 +74,8 @@ export default function AdminPortal({
     }
   }, []);
 
-  // Admin tabs: 'posts' | 'editor' | 'writers' | 'autolinks' | 'sitemap' | 'config' | 'security' | 'comments' | 'database' | 'products'
-  const [activeTab, setActiveTab] = useState<'posts' | 'editor' | 'writers' | 'autolinks' | 'sitemap' | 'config' | 'security' | 'comments' | 'database' | 'products'>('posts');
+  // Admin tabs: 'posts' | 'editor' | 'writers' | 'autolinks' | 'sitemap' | 'config' | 'security' | 'comments' | 'database' | 'products' | 'wa_leads'
+  const [activeTab, setActiveTab] = useState<'posts' | 'editor' | 'writers' | 'autolinks' | 'sitemap' | 'config' | 'security' | 'comments' | 'database' | 'products' | 'wa_leads'>('posts');
 
   // Comments & Cusdis Webhook State
   const [comments, setComments] = useState<any[]>([]);
@@ -104,6 +104,49 @@ export default function AdminPortal({
       console.error('Failed to fetch DNS-AID:', err);
     } finally {
       setIsCheckingDnsAid(false);
+    }
+  };
+
+  const fetchWaLeads = async () => {
+    setIsLoadingWaLeads(true);
+    setWaLeadsError('');
+    try {
+      const res = await fetch('/api/whatsapp/leads', {
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setWaLeads(data);
+      } else {
+        setWaLeadsError('Gagal mengambil data log WhatsApp Chat leads.');
+      }
+    } catch (err: any) {
+      console.error('Failed to fetch WA leads:', err);
+      setWaLeadsError(err.message || 'Error mengambil data leads.');
+    } finally {
+      setIsLoadingWaLeads(false);
+    }
+  };
+
+  const fetchProductOrders = async () => {
+    setIsLoadingProductOrders(true);
+    setProductOrdersError('');
+    try {
+      const res = await fetch('/api/products/orders', {
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setProductOrders(data);
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        setProductOrdersError(errData.error || 'Gagal mengambil data log pembelian produk.');
+      }
+    } catch (err: any) {
+      console.error('Failed to fetch product orders:', err);
+      setProductOrdersError(err.message || 'Error mengambil data pemesanan produk.');
+    } finally {
+      setIsLoadingProductOrders(false);
     }
   };
 
@@ -201,7 +244,7 @@ export default function AdminPortal({
   // Guard effect: Non-admin users (non role admin) cannot access restricted features
   useEffect(() => {
     if (currentUser && currentUser.role !== 'admin') {
-      const adminOnlyTabs = ['writers', 'autolinks', 'sitemap', 'comments', 'config'];
+      const adminOnlyTabs = ['writers', 'autolinks', 'sitemap', 'comments', 'config', 'wa_leads'];
       if (currentUser.role === 'writer') {
         adminOnlyTabs.push('security');
       }
@@ -318,6 +361,16 @@ export default function AdminPortal({
   const [cfgProductsHeroImageCaption, setCfgProductsHeroImageCaption] = useState(siteConfig?.products_hero_image_caption || 'Katalog Pilihan Utama');
   const [cfgProductsEmptyTitle, setCfgProductsEmptyTitle] = useState(siteConfig?.products_empty_title || 'Belum Ada Produk Jualan');
   const [cfgProductsEmptySubtitle, setCfgProductsEmptySubtitle] = useState(siteConfig?.products_empty_subtitle || 'Katalog produk belum diunggah. Silakan masuk sebagai administrator untuk menambahkan item pertama Anda.');
+
+  // WA Widget
+  const [cfgWaEnabled, setCfgWaEnabled] = useState(siteConfig?.wa_widget_enabled || false);
+  const [cfgWaPosition, setCfgWaPosition] = useState(siteConfig?.wa_position || 'bottom-right');
+  const [cfgWaHeaderTitle, setCfgWaHeaderTitle] = useState(siteConfig?.wa_header_title || 'Hubungi Kami');
+  const [cfgWaSubtitle, setCfgWaSubtitle] = useState(siteConfig?.wa_subtitle || 'Halo! Ada yang bisa kami bantu?');
+  const [cfgWaColorAccent, setCfgWaColorAccent] = useState(siteConfig?.wa_color_accent || '#25D366');
+  const [cfgWaOperators, setCfgWaOperators] = useState(siteConfig?.wa_operators || []);
+  const [cfgWaFormFields, setCfgWaFormFields] = useState(siteConfig?.wa_form_fields || ['name', 'phone', 'message']);
+  const [cfgWaEnableRotation, setCfgWaEnableRotation] = useState(siteConfig?.wa_enable_rotation || false);
 
   const [cfgSiteDomain, setCfgSiteDomain] = useState(siteConfig?.site_domain || 'domain.com');
   const [cfgDefaultThemeMode, setCfgDefaultThemeMode] = useState<'light'|'dark'|'auto'>(siteConfig?.default_theme_mode || 'auto');
@@ -469,6 +522,15 @@ export default function AdminPortal({
   const [cfgHomepageDisplayMode, setCfgHomepageDisplayMode] = useState<HomepageDisplayMode>(siteConfig?.homepage_display_mode || 'default');
   const [selectedModelConfigTab, setSelectedModelConfigTab] = useState<HomepageDisplayMode>(siteConfig?.homepage_display_mode || 'default');
 
+  useEffect(() => {
+    if (selectedModelConfigTab === 'whatsapp_widget') {
+      fetchWaLeads();
+    }
+    if (selectedModelConfigTab === 'product_landing') {
+      fetchProductOrders();
+    }
+  }, [selectedModelConfigTab]);
+
   // 1. Event Model States
   const [cfgEventBadgeText, setCfgEventBadgeText] = useState(siteConfig?.event_badge_text || 'Summit Nasional 2026');
   const [cfgEventDateLocation, setCfgEventDateLocation] = useState(siteConfig?.event_date_location || '16 - 18 Oktober 2026 • JCC Senayan, Jakarta');
@@ -538,6 +600,8 @@ export default function AdminPortal({
   const [cfgProductDiscountTag, setCfgProductDiscountTag] = useState(siteConfig?.product_discount_tag || 'HEMAT 37%');
   const [cfgProductCtaText, setCfgProductCtaText] = useState(siteConfig?.product_cta_text || 'Pesan Sekarang & Dapatkan Bonus');
   const [cfgProductWhatsapp, setCfgProductWhatsapp] = useState(siteConfig?.product_whatsapp || '6281234567890');
+  const [cfgProductMgmtHeading, setCfgProductMgmtHeading] = useState(siteConfig?.product_mgmt_heading || 'Panel Manajemen Produk Jualan');
+  const [cfgProductMgmtDesc, setCfgProductMgmtDesc] = useState(siteConfig?.product_mgmt_desc || 'Kelola daftar penawaran, produk digital, jasa, atau paket yang Anda pasarkan. Anda dapat menambah, mengedit, memperbarui status (Tersedia/Terjual), serta menetapkan nomor WhatsApp dan metode pembayaran untuk masing-masing item.');
 
   // 8. Classified Ads Model States
   const [cfgClassifiedMastheadTitle, setCfgClassifiedMastheadTitle] = useState(siteConfig?.classified_masthead_title || 'WARNA-WARTO BERITA');
@@ -555,6 +619,22 @@ export default function AdminPortal({
   const [configSuccessMsg, setConfigSuccessMsg] = useState('');
   const [configErrMsg, setConfigErrMsg] = useState('');
   const [isSavingConfig, setIsSavingConfig] = useState(false);
+  const [waLeads, setWaLeads] = useState<any[]>([]);
+  const [isLoadingWaLeads, setIsLoadingWaLeads] = useState(false);
+  const [waLeadsError, setWaLeadsError] = useState('');
+
+  const [productOrders, setProductOrders] = useState<any[]>([]);
+  const [isLoadingProductOrders, setIsLoadingProductOrders] = useState(false);
+  const [productOrdersError, setProductOrdersError] = useState('');
+
+  // Local state for WA Operator form management
+  const [opFormName, setOpFormName] = useState('');
+  const [opFormDept, setOpFormDept] = useState('');
+  const [opFormPhone, setOpFormPhone] = useState('');
+  const [opFormDesc, setOpFormDesc] = useState('');
+  const [opFormStatus, setOpFormStatus] = useState<'online' | 'offline'>('online');
+  const [editingOpId, setEditingOpId] = useState<string | null>(null);
+
   const hasInitializedFromPropsRef = useRef(false);
 
   // Sync state when props arrive
@@ -571,7 +651,7 @@ export default function AdminPortal({
   useEffect(() => {
     if (!currentUser) return;
     if (currentUser.role !== 'admin') {
-      const adminOnlyTabs = ['writers', 'autolinks', 'sitemap', 'comments', 'config'];
+      const adminOnlyTabs = ['writers', 'autolinks', 'sitemap', 'comments', 'config', 'wa_leads'];
       if (adminOnlyTabs.includes(activeTab)) {
         setActiveTab('posts');
       }
@@ -794,6 +874,8 @@ export default function AdminPortal({
       setCfgProductDiscountTag(siteConfig.product_discount_tag || 'HEMAT 37%');
       setCfgProductCtaText(siteConfig.product_cta_text || 'Pesan Sekarang & Dapatkan Bonus');
       setCfgProductWhatsapp(siteConfig.product_whatsapp || '6281234567890');
+      setCfgProductMgmtHeading(siteConfig.product_mgmt_heading || 'Panel Manajemen Produk Jualan');
+      setCfgProductMgmtDesc(siteConfig.product_mgmt_desc || 'Kelola daftar penawaran, produk digital, jasa, atau paket yang Anda pasarkan. Anda dapat menambah, mengedit, memperbarui status (Tersedia/Terjual), serta menetapkan nomor WhatsApp dan metode pembayaran untuk masing-masing item.');
 
       setCfgClassifiedMastheadTitle(siteConfig.classified_masthead_title || 'WARNA-WARTO BERITA');
       setCfgClassifiedMastheadSubtitle(siteConfig.classified_masthead_subtitle || 'LEMBARAN IKLAN BARIS, PENGUMUMAN & WARTA KELUARGA');
@@ -805,6 +887,16 @@ export default function AdminPortal({
       setCfgKbTitle(siteConfig.kb_title || 'Bagaimana Kami Bisa Membantu Pengasuhan Anda?');
       setCfgKbSubtitle(siteConfig.kb_subtitle || 'Cari jawaban terpercaya dari ribuan artikel, panduan medis, dan rekomendasi dokter spesialis anak.');
       setCfgKbSearchPlaceholder(siteConfig.kb_search_placeholder || 'Ketik topik (misal: jadwal MPASI, anak demam, speech delay, tantrum)...');
+
+      // WhatsApp Chat Widget Configuration Sync
+      setCfgWaEnabled(siteConfig.wa_widget_enabled ?? false);
+      setCfgWaPosition(siteConfig.wa_position || 'bottom-right');
+      setCfgWaHeaderTitle(siteConfig.wa_header_title || 'Hubungi Kami');
+      setCfgWaSubtitle(siteConfig.wa_subtitle || 'Ada yang bisa kami bantu?');
+      setCfgWaColorAccent(siteConfig.wa_color_accent || '#25D366');
+      setCfgWaOperators(siteConfig.wa_operators || []);
+      setCfgWaFormFields(siteConfig.wa_form_fields || ['name', 'phone', 'message']);
+      setCfgWaEnableRotation(siteConfig.wa_enable_rotation ?? false);
 
       hasInitializedFromPropsRef.current = true;
     }
@@ -915,6 +1007,8 @@ export default function AdminPortal({
         admin_login_subtitle: cfgAdminLoginSubtitle,
         admin_login_btn_text: cfgAdminLoginBtnText,
         admin_url_suffix: String(cfgAdminUrlSuffix || '9999').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 10),
+        product_mgmt_heading: cfgProductMgmtHeading,
+        product_mgmt_desc: cfgProductMgmtDesc,
 
         enable_adsense: cfgEnableAdsense,
         adsense_client_id: cfgAdsenseClientId,
@@ -1016,6 +1110,16 @@ export default function AdminPortal({
         kb_title: cfgKbTitle,
         kb_subtitle: cfgKbSubtitle,
         kb_search_placeholder: cfgKbSearchPlaceholder,
+
+        // WhatsApp Chat Widget Configuration
+        wa_widget_enabled: cfgWaEnabled,
+        wa_position: cfgWaPosition,
+        wa_header_title: cfgWaHeaderTitle,
+        wa_subtitle: cfgWaSubtitle,
+        wa_color_accent: cfgWaColorAccent,
+        wa_operators: cfgWaOperators,
+        wa_form_fields: cfgWaFormFields,
+        wa_enable_rotation: cfgWaEnableRotation,
       };
 
       onLivePreviewChange(draftConfig);
@@ -1051,7 +1155,9 @@ export default function AdminPortal({
     cfgProductBadgeText, cfgProductTitle, cfgProductSubtitle, cfgProductPrice, cfgProductOriginalPrice, cfgProductDiscountTag, cfgProductCtaText, cfgProductWhatsapp,
     cfgClassifiedMastheadTitle, cfgClassifiedMastheadSubtitle, cfgClassifiedEdition, cfgClassifiedPriceTag, cfgClassifiedPhone,
     cfgKbBadgeText, cfgKbTitle, cfgKbSubtitle, cfgKbSearchPlaceholder,
-    cfgProductsNavLabel, cfgProductsNavPath
+    cfgProductsNavLabel, cfgProductsNavPath,
+    // WA dependencies
+    cfgWaEnabled, cfgWaPosition, cfgWaHeaderTitle, cfgWaSubtitle, cfgWaColorAccent, cfgWaOperators, cfgWaFormFields, cfgWaEnableRotation
   ]);
 
   // Autofill Demo High-CTR AdSense Snippets
@@ -1119,6 +1225,15 @@ export default function AdminPortal({
         products_hero_image_caption: cfgProductsHeroImageCaption,
         products_empty_title: cfgProductsEmptyTitle,
         products_empty_subtitle: cfgProductsEmptySubtitle,
+
+        wa_widget_enabled: cfgWaEnabled,
+        wa_position: cfgWaPosition,
+        wa_header_title: cfgWaHeaderTitle,
+        wa_subtitle: cfgWaSubtitle,
+        wa_color_accent: cfgWaColorAccent,
+        wa_operators: cfgWaOperators,
+        wa_form_fields: cfgWaFormFields,
+        wa_enable_rotation: cfgWaEnableRotation,
 
         site_domain: cfgSiteDomain,
         default_theme_mode: cfgDefaultThemeMode,
@@ -1240,6 +1355,8 @@ export default function AdminPortal({
         admin_login_subtitle: cfgAdminLoginSubtitle,
         admin_login_btn_text: cfgAdminLoginBtnText,
         admin_url_suffix: String(cfgAdminUrlSuffix || '9999').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 10),
+        product_mgmt_heading: cfgProductMgmtHeading,
+        product_mgmt_desc: cfgProductMgmtDesc,
 
         // 10 Model Display Values
         event_badge_text: cfgEventBadgeText,
@@ -1735,7 +1852,7 @@ export default function AdminPortal({
 
       const data: any = await res.json();
       if (res.ok && data.user) {
-        setWriterSuccessMsg(writerModalMode === 'create' ? 'Penulis baru berhasil ditambahkan!' : 'Profil penulis berhasil diperbarui!');
+        setWriterSuccessMsg(writerModalMode === 'create' ? 'Penulis baru telah ditambahkan!' : 'Profil penulis berhasil diperbarui!');
         fetchWriters();
         setTimeout(() => setShowWriterModal(false), 1200);
       } else {
@@ -1965,140 +2082,217 @@ export default function AdminPortal({
         </button>
       </div>
 
-      {/* DASHBOARD NAVIGATION TABS */}
-      <div className="flex items-center gap-2 overflow-x-auto border-b border-slate-200 dark:border-slate-800 pb-2">
-        <button
-          onClick={() => setActiveTab('posts')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
-            activeTab === 'posts'
-              ? 'bg-rose-600 text-white shadow-sm'
-              : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-          }`}
-        >
-          <FileText className="w-4 h-4" />
-          <span>{currentUser?.role === 'writer' ? 'Artikel Saya' : 'Edit Artikel'} ({userRole === 'writer' ? userPosts.length : posts.length})</span>
-        </button>
+      {/* TWO-COLUMN LAYOUT: SIDEBAR + MAIN CONTENT */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        {/* LEFT COLUMN: THE GORGEOUS SIDEBAR NAVIGATION (lg:col-span-3) */}
+        <div className="lg:col-span-3 bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 lg:sticky lg:top-8">
+          <div className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800/60 pb-3">
+            <span className="text-[10px] font-black tracking-widest uppercase text-slate-400 dark:text-slate-500">
+              Menu Navigasi CMS
+            </span>
+          </div>
 
-        <button
-          onClick={() => setActiveTab('editor')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
-            activeTab === 'editor'
-              ? 'bg-rose-600 text-white shadow-sm'
-              : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-          }`}
-        >
-          <Edit3 className="w-4 h-4" />
-          <span>Draft Artikel</span>
-        </button>
-
-        {currentUser?.role === 'admin' && (
-          <>
+          <nav className="space-y-1">
+            {/* 1. Daftar Artikel */}
             <button
-              onClick={() => setActiveTab('writers')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
-                activeTab === 'writers'
-                  ? 'bg-rose-600 text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+              onClick={() => setActiveTab('posts')}
+              className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                activeTab === 'posts'
+                  ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              <Users className="w-4 h-4" />
-              <span>Kelola Tim & Penulis ({writers.length})</span>
+              <FileText className={`w-4 h-4 ${activeTab === 'posts' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+              <div className="flex-1 text-left flex items-center justify-between">
+                <span>Daftar Artikel</span>
+                <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
+                  activeTab === 'posts' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                }`}>
+                  {userRole === 'writer' ? userPosts.length : posts.length}
+                </span>
+              </div>
             </button>
 
+            {/* 2. Tulis Artikel */}
             <button
-              onClick={() => setActiveTab('autolinks')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
-                activeTab === 'autolinks'
-                  ? 'bg-rose-600 text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+              onClick={() => setActiveTab('editor')}
+              className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                activeTab === 'editor'
+                  ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              <LinkIcon className="w-4 h-4" />
-              <span>Auto-Linking Engine ({autolinks.length})</span>
+              <Edit3 className={`w-4 h-4 ${activeTab === 'editor' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+              <span className="flex-1 text-left">Tulis Artikel</span>
             </button>
+
+            {currentUser?.role === 'admin' && (
+              <>
+                {/* 3. Penulis & Editor */}
+                <button
+                  onClick={() => setActiveTab('writers')}
+                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                    activeTab === 'writers'
+                      ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Users className={`w-4 h-4 ${activeTab === 'writers' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+                  <div className="flex-1 text-left flex items-center justify-between">
+                    <span>Penulis & Editor</span>
+                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
+                      activeTab === 'writers' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                    }`}>
+                      {writers.length}
+                    </span>
+                  </div>
+                </button>
+
+                {/* 4. Auto-Linking */}
+                <button
+                  onClick={() => setActiveTab('autolinks')}
+                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                    activeTab === 'autolinks'
+                      ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <LinkIcon className={`w-4 h-4 ${activeTab === 'autolinks' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+                  <div className="flex-1 text-left flex items-center justify-between">
+                    <span>Auto-Linking</span>
+                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
+                      activeTab === 'autolinks' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                    }`}>
+                      {autolinks.length}
+                    </span>
+                  </div>
+                </button>
+
+                {/* 5. SEO & AI Agent Discovery */}
+                <button
+                  onClick={() => {
+                    setActiveTab('sitemap');
+                    fetchDnsAid(false);
+                  }}
+                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                    activeTab === 'sitemap'
+                      ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Zap className={`w-4 h-4 ${activeTab === 'sitemap' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+                  <span className="flex-1 text-left">SEO</span>
+                </button>
+
+                {/* 6. Cusdis Komentar & Webhook */}
+                <button
+                  onClick={() => {
+                    setActiveTab('comments');
+                    fetchComments();
+                  }}
+                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                    activeTab === 'comments'
+                      ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <MessageSquare className={`w-4 h-4 ${activeTab === 'comments' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+                  <div className="flex-1 text-left flex items-center justify-between">
+                    <span>💬 Komentar</span>
+                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
+                      activeTab === 'comments' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                    }`}>
+                      {comments.length}
+                    </span>
+                  </div>
+                </button>
+
+                {/* 7. Configs Situs */}
+                <button
+                  onClick={() => setActiveTab('config')}
+                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                    activeTab === 'config'
+                      ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Settings className={`w-4 h-4 ${activeTab === 'config' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+                  <span className="flex-1 text-left">⚙️ Configs Situs</span>
+                </button>
+
+                {/* 8. Database & Schema D1 */}
+                <button
+                  onClick={() => setActiveTab('database')}
+                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                    activeTab === 'database'
+                      ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Database className={`w-4 h-4 ${activeTab === 'database' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+                  <span className="flex-1 text-left">🗄️ Database D1</span>
+                </button>
+
+                {/* 9. Kelola Produk Jualan */}
+                <button
+                  onClick={() => setActiveTab('products')}
+                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                    activeTab === 'products'
+                      ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <ShoppingBag className={`w-4 h-4 ${activeTab === 'products' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+                  <span className="flex-1 text-left">🎨 Produk Jualan</span>
+                </button>
+
+                {/* 10. Laporan & Leads WA */}
+                <button
+                  onClick={() => {
+                    setActiveTab('wa_leads');
+                    fetchWaLeads();
+                    fetchProductOrders();
+                  }}
+                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                    activeTab === 'wa_leads'
+                      ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <BarChart2 className={`w-4 h-4 ${activeTab === 'wa_leads' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+                  <span className="flex-1 text-left">📊 Laporan WA</span>
+                </button>
+              </>
+            )}
+
+            {/* 11. Akun Admin & Hard Logout */}
+            {currentUser?.role !== 'writer' && (
+              <button
+                onClick={() => setActiveTab('security')}
+                className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                  activeTab === 'security'
+                    ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
+                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <Key className={`w-4 h-4 ${activeTab === 'security' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+                <span className="flex-1 text-left">🔐 Akun Admin</span>
+              </button>
+            )}
 
             <button
-              onClick={() => {
-                setActiveTab('sitemap');
-                fetchDnsAid(false);
-              }}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
-                activeTab === 'sitemap'
-                  ? 'bg-rose-600 text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-              }`}
+              onClick={onLogout}
+              className="w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 text-slate-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/20 dark:hover:text-red-400 border border-transparent hover:border-red-100"
             >
-              <Zap className="w-4 h-4" />
-              <span>SEO & AI Agent Discovery</span>
+              <LogOut className="w-4 h-4 text-slate-400" />
+              <span className="flex-1 text-left">Safe Logout</span>
             </button>
+          </nav>
+        </div>
 
-            <button
-              onClick={() => {
-                setActiveTab('comments');
-                fetchComments();
-              }}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
-                activeTab === 'comments'
-                  ? 'bg-rose-600 text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-              }`}
-            >
-              <MessageSquare className="w-4 h-4" />
-              <span>💬 Cusdis Komentar & Webhook ({comments.length})</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('config')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
-                activeTab === 'config'
-                  ? 'bg-rose-600 text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-              }`}
-            >
-              <Settings className="w-4 h-4" />
-              <span>⚙️ Configs Situs</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('database')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
-                activeTab === 'database'
-                  ? 'bg-rose-600 text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-              }`}
-            >
-              <Database className="w-4 h-4 text-indigo-400" />
-              <span>🗄️ Database & Schema D1</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('products')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
-                activeTab === 'products'
-                  ? 'bg-rose-600 text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-              }`}
-            >
-              <ShoppingBag className="w-4 h-4 text-emerald-400" />
-              <span>🎨 Kelola Produk Jualan</span>
-            </button>
-          </>
-        )}
-
-        {currentUser?.role !== 'writer' && (
-          <button
-            onClick={() => setActiveTab('security')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
-              activeTab === 'security'
-                ? 'bg-rose-600 text-white shadow-sm'
-                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            <Key className="w-4 h-4 text-amber-400" />
-            <span>🔐 {currentUser?.role === 'admin' ? 'Akun Admin & Hard Logout' : 'Profil & Password Saya'}</span>
-          </button>
-        )}
-      </div>
+        {/* RIGHT COLUMN: MAIN CONTENT FOR ACTIVE TAB (lg:col-span-9) */}
+        <div className="lg:col-span-9 space-y-8">
 
       {/* ------------------------------------------------------------- */}
       {/* TAB 1: MANAGE POSTS LIST */}
@@ -2125,7 +2319,7 @@ export default function AdminPortal({
                     ✍️
                   </div>
                   <div>
-                    <h4 className="font-extrabold text-slate-900 dark:text-white">Portal Khusus Penulis (Distraction-Free)</h4>
+                    <h4 className="font-extrabold text-slate-900 dark:text-white">Khusus Penulis (Distraction-Free)</h4>
                     <p className="text-[11px] text-slate-500">Tulis draf artikel Anda, sertakan gambar &amp; ringkasan, lalu klik <strong>"Kirim untuk Ditinjau"</strong> agar diperiksa oleh Tim Redaksi/Editor.</p>
                   </div>
                 </div>
@@ -2139,7 +2333,7 @@ export default function AdminPortal({
                     ⏳
                   </div>
                   <div>
-                    <h4 className="font-extrabold">Ada {pendingCount} Artikel Menunggu Moderasi &amp; Persetujuan Redaksi</h4>
+                    <h4 className="font-extrabold">Ada {pendingCount} Artikel Butuh Moderasi &amp; Persetujuan Redaksi</h4>
                     <p className="text-[11px] opacity-90">Periksa artikel yang dikirim Penulis, setujui untuk terbit langsung ke website, atau berikan catatan revisi.</p>
                   </div>
                 </div>
@@ -2303,7 +2497,7 @@ export default function AdminPortal({
                                 onClick={() => handleEditPost(post)}
                                 className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-rose-50 hover:text-rose-600 text-xs font-bold transition-colors"
                               >
-                                {userRole === 'writer' ? (post.status === 'draft' ? 'Lanjutkan Draf' : 'Edit Artikel') : 'Edit Artikel'}
+                                {userRole === 'writer' ? (post.status === 'draft' ? 'Lanjutkan Draf' : 'Daftar Artikel') : 'Daftar Artikel'}
                               </button>
 
                               {(userRole === 'admin' || userRole === 'editor') && post.status === 'pending_approval' && (
@@ -2415,7 +2609,7 @@ export default function AdminPortal({
             <div>
               <h3 className="font-extrabold text-slate-900 dark:text-white text-base flex items-center gap-2">
                 <Users className="w-5 h-5 text-rose-600" />
-                <span>Kelola Tim Penulis & Editor (E-E-A-T Compliance)</span>
+                <span>Kelola Penulis & Editor</span>
               </h3>
               <p className="text-xs text-slate-500 mt-1">
                 Tambahkan profil dokter, psikolog, atau praktisi pengasuhan anak. Data kredensial akan ditampilkan pada kotak bio penulis di akhir artikel untuk memenuhi standar E-E-A-T Google.
@@ -2735,7 +2929,7 @@ export default function AdminPortal({
           <div className="bg-rose-50 dark:bg-slate-800/60 p-6 rounded-3xl border border-rose-100 dark:border-slate-700 space-y-2">
             <h3 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-rose-600" />
-              <span>Auto-Linking Engine On-Page (SEO Automation)</span>
+              <span>Auto-Linking On-Page SEO</span>
             </h3>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
               Sistem ini secara otomatis memindai seluruh kata dalam artikel dan mengubah kata kunci terdaftar menjadi internal link menuju artikel pilihan Anda tanpa perlu mengedit artikel satu per satu.
@@ -2911,6 +3105,21 @@ export default function AdminPortal({
                 </div>
                 <div className="flex items-center justify-end mt-3">
                   <ExternalLink className="w-4 h-4 text-emerald-500" />
+                </div>
+              </a>
+
+              <a
+                href="/llms-full.txt"
+                target="_blank"
+                rel="noreferrer"
+                className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-rose-400 transition-colors flex flex-col justify-between"
+              >
+                <div>
+                  <div className="font-bold text-sm text-slate-900 dark:text-white">📖 /llms-full.txt</div>
+                  <div className="text-xs text-slate-500 mt-1">Kumpulan seluruh teks konten website dalam satu file Markdown terkompilasi untuk AI</div>
+                </div>
+                <div className="flex items-center justify-end mt-3">
+                  <ExternalLink className="w-4 h-4 text-rose-500" />
                 </div>
               </a>
             </div>
@@ -3895,6 +4104,7 @@ export default function AdminPortal({
                     { id: 'product_landing', label: 'Product Landing' },
                     { id: 'classified_ads', label: 'Iklan Baris' },
                     { id: 'knowledge_base', label: 'Knowledge Base' },
+                    { id: 'whatsapp_widget', label: 'WhatsApp Chat' },
                   ].map((tab) => (
                     <button
                       key={tab.id}
@@ -4671,6 +4881,36 @@ export default function AdminPortal({
                       </div>
                     </div>
 
+                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-4">
+                      <h4 className="text-xs font-black uppercase tracking-wider text-rose-600 dark:text-rose-400">
+                        Pengaturan Tampilan Header Panel Manajemen Produk Jualan (Niche Agnostic)
+                      </h4>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                          Heading Panel Manajemen (product_mgmt_heading)
+                        </label>
+                        <input
+                          type="text"
+                          value={cfgProductMgmtHeading}
+                          onChange={(e) => setCfgProductMgmtHeading(e.target.value)}
+                          placeholder="Panel Manajemen Produk Jualan"
+                          className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-semibold focus:ring-2 focus:ring-rose-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                          Deskripsi / Petunjuk Menu Manajemen (product_mgmt_desc)
+                        </label>
+                        <textarea
+                          rows={3}
+                          value={cfgProductMgmtDesc}
+                          onChange={(e) => setCfgProductMgmtDesc(e.target.value)}
+                          placeholder="Kelola daftar penawaran, produk digital, jasa, atau paket..."
+                          className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-semibold focus:ring-2 focus:ring-rose-500"
+                        />
+                      </div>
+                    </div>
+
                     <div>
                       <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                         Nama / Judul Paket Produk (product_title)
@@ -4746,6 +4986,84 @@ export default function AdminPortal({
                           className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-semibold focus:ring-2 focus:ring-rose-500"
                         />
                       </div>
+                    </div>
+
+                    {/* Log Pemesanan Produk (Product Orders Leads Tracking) */}
+                    <div className="mt-6 bg-slate-50 dark:bg-slate-950 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+                      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                        <div>
+                          <h4 className="text-xs font-extrabold uppercase text-slate-900 dark:text-white tracking-wider flex items-center gap-1.5">
+                            🛍️ Log Pemesanan & Pembelian Produk (Product Orders Tracking)
+                          </h4>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
+                            Daftar pembeli yang melakukan pemesanan produk lewat tombol "Beli" di katalog jualan WhatsApp Anda.
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={fetchProductOrders}
+                          className="px-3 py-1 bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700/80 rounded-lg text-[10px] font-black text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition-all uppercase tracking-wider shadow-sm"
+                        >
+                          Segarkan Log
+                        </button>
+                      </div>
+
+                      {productOrdersError && (
+                        <div className="p-3 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-xl text-xs font-bold">
+                          {productOrdersError}
+                        </div>
+                      )}
+
+                      {isLoadingProductOrders ? (
+                        <div className="text-center py-8 text-xs font-bold text-slate-400">
+                          Sedang mengambil log pemesanan...
+                        </div>
+                      ) : productOrders.length === 0 ? (
+                        <div className="text-center py-10 border-2 border-dashed border-slate-200 dark:border-slate-800/60 rounded-xl bg-white dark:bg-slate-900">
+                          <p className="text-xs text-slate-400 font-bold">
+                            Belum ada log pemesanan produk terekam.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                          <table className="w-full text-left text-xs">
+                            <thead className="bg-slate-50 dark:bg-slate-950 text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 font-bold border-b border-slate-150 dark:border-slate-800">
+                              <tr>
+                                <th className="px-4 py-2.5">Tanggal / Waktu</th>
+                                <th className="px-4 py-2.5">Nama Pembeli</th>
+                                <th className="px-4 py-2.5">Nomor HP/WA</th>
+                                <th className="px-4 py-2.5">Produk Dipesan</th>
+                                <th className="px-4 py-2.5 text-right">Harga</th>
+                                <th className="px-4 py-2.5">Catatan Pembeli</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-semibold text-slate-700 dark:text-slate-300">
+                              {productOrders.map((order: any) => (
+                                <tr key={order.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/40 text-[11px]">
+                                  <td className="px-4 py-3 text-[10px] font-mono text-slate-400 dark:text-slate-500 whitespace-nowrap">
+                                    {order.created_at ? new Date(order.created_at).toLocaleString('id-ID') : '-'}
+                                  </td>
+                                  <td className="px-4 py-3 font-extrabold text-slate-900 dark:text-white">
+                                    {order.buyer_name || '-'}
+                                  </td>
+                                  <td className="px-4 py-3 font-mono">
+                                    {order.buyer_phone || '-'}
+                                  </td>
+                                  <td className="px-4 py-3 font-extrabold text-rose-600 dark:text-rose-400">
+                                    {order.product_title || '-'}
+                                  </td>
+                                  <td className="px-4 py-3 text-right font-mono font-bold text-slate-900 dark:text-white">
+                                    {order.product_price ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(order.product_price) : '-'}
+                                  </td>
+                                  <td className="px-4 py-3 max-w-[200px] truncate font-medium text-slate-500 dark:text-slate-400" title={order.buyer_notes}>
+                                    {order.buyer_notes || '-'}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -4889,6 +5207,666 @@ export default function AdminPortal({
                         className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-semibold focus:ring-2 focus:ring-rose-500"
                       />
                     </div>
+                  </div>
+                )}
+
+                {/* 11. WHATSAPP CHAT WIDGET PANEL */}
+                {selectedModelConfigTab === 'whatsapp_widget' && (
+                  <div className="space-y-6">
+                    {/* Two-Column Workspace */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                      
+                      {/* Left Column: Settings Panel & Operator CRUD */}
+                      <div className="lg:col-span-7 space-y-6">
+                        
+                        {/* Box 1: General configuration */}
+                        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                            <h4 className="text-xs font-extrabold uppercase text-emerald-600 dark:text-emerald-400 tracking-wider flex items-center gap-1.5">
+                              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                              Konfigurasi Widget & Tampilan
+                            </h4>
+                            <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] text-slate-500 dark:text-slate-400 font-bold">
+                              Niche-Agnostic
+                            </span>
+                          </div>
+
+                          {/* Toggle Widget */}
+                          <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 dark:border-slate-800/80">
+                            <div>
+                              <label className="text-xs font-black text-slate-800 dark:text-slate-200 block">
+                                Status Widget Melayang (WhatsApp Chat Box)
+                              </label>
+                              <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">
+                                Aktifkan untuk menampilkan tombol WhatsApp melayang di sudut layar website Anda.
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setCfgWaEnabled(!cfgWaEnabled)}
+                              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                                cfgWaEnabled ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-800'
+                              }`}
+                            >
+                              <span
+                                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                  cfgWaEnabled ? 'translate-x-5' : 'translate-x-0'
+                                }`}
+                              />
+                            </button>
+                          </div>
+
+                          {/* Configuration form */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                                Judul Header (wa_header_title)
+                              </label>
+                              <input
+                                type="text"
+                                value={cfgWaHeaderTitle}
+                                onChange={(e) => setCfgWaHeaderTitle(e.target.value)}
+                                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-semibold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-emerald-500"
+                                placeholder="Hubungi Kami / Customer Support"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                                Subtitle / Slogan (wa_subtitle)
+                              </label>
+                              <input
+                                type="text"
+                                value={cfgWaSubtitle}
+                                onChange={(e) => setCfgWaSubtitle(e.target.value)}
+                                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-semibold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-emerald-500"
+                                placeholder="Ada yang bisa kami bantu?"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                                Posisi Tombol Melayang (wa_position)
+                              </label>
+                              <select
+                                value={cfgWaPosition}
+                                onChange={(e: any) => setCfgWaPosition(e.target.value)}
+                                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-semibold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-emerald-500"
+                              >
+                                <option value="bottom-right">Bottom-Right (Kanan Bawah)</option>
+                                <option value="bottom-left">Bottom-Left (Kiri Bawah)</option>
+                                <option value="bottom-center">Bottom-Center (Tengah Bawah)</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                                Warna Aksen Widget (wa_color_accent)
+                              </label>
+                              <div className="flex gap-2">
+                                <input
+                                  type="color"
+                                  value={cfgWaColorAccent}
+                                  onChange={(e) => setCfgWaColorAccent(e.target.value)}
+                                  className="w-12 h-9 p-0.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white cursor-pointer"
+                                />
+                                <input
+                                  type="text"
+                                  value={cfgWaColorAccent}
+                                  onChange={(e) => setCfgWaColorAccent(e.target.value)}
+                                  className="flex-1 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-mono font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-emerald-500"
+                                  placeholder="#25D366"
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Custom Fields Checklist */}
+                          <div className="space-y-2">
+                            <label className="block text-xs font-black text-slate-700 dark:text-slate-300">
+                              Kolom Form Pengirim (wa_form_fields)
+                            </label>
+                            <span className="text-[10px] text-slate-500 dark:text-slate-400 block -mt-1 mb-2">
+                              Pilih kolom informasi apa saja yang wajib diisi pengirim sebelum dialihkan ke WhatsApp operator.
+                            </span>
+                            <div className="flex flex-wrap gap-4 p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 dark:border-slate-800/80">
+                              {['name', 'phone', 'email', 'message'].map((fld) => {
+                                const isChecked = cfgWaFormFields.includes(fld);
+                                const labelMap: Record<string, string> = {
+                                  name: 'Nama Lengkap',
+                                  phone: 'Nomor HP / WhatsApp',
+                                  email: 'Alamat Email',
+                                  message: 'Pesan / Keluhan',
+                                };
+                                return (
+                                  <label key={fld} className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      onChange={() => {
+                                        if (isChecked) {
+                                          setCfgWaFormFields(cfgWaFormFields.filter((f) => f !== fld));
+                                        } else {
+                                          setCfgWaFormFields([...cfgWaFormFields, fld]);
+                                        }
+                                      }}
+                                      className="rounded text-emerald-600 focus:ring-emerald-500 h-3.5 w-3.5"
+                                    />
+                                    {labelMap[fld]}
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* Rotation Setting */}
+                          <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 dark:border-slate-800/80">
+                            <div className="pr-4">
+                              <label className="text-xs font-black text-slate-800 dark:text-slate-200 block">
+                                Rotasi Otomatis (Load Balancing / Round-Robin)
+                              </label>
+                              <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">
+                                Jika diaktifkan, jika sebuah tujuan/departemen memiliki beberapa operator online, sistem akan mendistribusikan chat secara merata (Round-Robin) kepada operator-operator tersebut secara bergantian.
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setCfgWaEnableRotation(!cfgWaEnableRotation)}
+                              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                                cfgWaEnableRotation ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-800'
+                              }`}
+                            >
+                              <span
+                                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                  cfgWaEnableRotation ? 'translate-x-5' : 'translate-x-0'
+                                }`}
+                              />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Box 2: Operator Dynamic Management */}
+                        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                          <div className="border-b border-slate-100 dark:border-slate-800 pb-3 flex justify-between items-center">
+                            <h4 className="text-xs font-extrabold uppercase text-slate-900 dark:text-white tracking-wider">
+                              Manajemen Operator / Departemen ({cfgWaOperators.length})
+                            </h4>
+                            {editingOpId && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingOpId(null);
+                                  setOpFormName('');
+                                  setOpFormDept('');
+                                  setOpFormPhone('');
+                                  setOpFormDesc('');
+                                  setOpFormStatus('online');
+                                }}
+                                className="text-[10px] font-bold text-red-500 hover:text-red-600 transition-colors"
+                              >
+                                Batal Edit
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Operator Input Form */}
+                          <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 dark:border-slate-800 space-y-3">
+                            <h5 className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                              {editingOpId ? 'Form Edit Operator' : 'Tambah Operator Baru'}
+                            </h5>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                                  Nama Operator / Nama Staf
+                                </label>
+                                <input
+                                  type="text"
+                                  value={opFormName}
+                                  onChange={(e) => setOpFormName(e.target.value)}
+                                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-semibold focus:ring-1 focus:ring-emerald-500"
+                                  placeholder="Contoh: Siti Rahma"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                                  Departemen / Tujuan Layanan
+                                </label>
+                                <input
+                                  type="text"
+                                  value={opFormDept}
+                                  onChange={(e) => setOpFormDept(e.target.value)}
+                                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-semibold focus:ring-1 focus:ring-emerald-500"
+                                  placeholder="Contoh: Layanan MPASI / CS Penjualan"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                                  No. WhatsApp (Aktif & Berawalan Negara)
+                                </label>
+                                <input
+                                  type="text"
+                                  value={opFormPhone}
+                                  onChange={(e) => setOpFormPhone(e.target.value)}
+                                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-semibold focus:ring-1 focus:ring-emerald-500"
+                                  placeholder="Contoh: 6281234567890"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                                  Status Operator Saat Ini
+                                </label>
+                                <select
+                                  value={opFormStatus}
+                                  onChange={(e: any) => setOpFormStatus(e.target.value)}
+                                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-semibold focus:ring-1 focus:ring-emerald-500"
+                                >
+                                  <option value="online">Online (Aktif / Siap Melayani)</option>
+                                  <option value="offline">Offline (Tutup / Sedang Sibuk)</option>
+                                </select>
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-[10px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                                Deskripsi Singkat / Keterangan Keahlian
+                              </label>
+                              <input
+                                type="text"
+                                value={opFormDesc}
+                                onChange={(e) => setOpFormDesc(e.target.value)}
+                                className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-semibold focus:ring-1 focus:ring-emerald-500"
+                                placeholder="Contoh: Pakar gizi anak & konsultasi diet balita"
+                              />
+                            </div>
+
+                            <div className="pt-1">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (!opFormName || !opFormDept || !opFormPhone) {
+                                    alert('Mohon isi Nama, Departemen, dan No. WhatsApp operator!');
+                                    return;
+                                  }
+
+                                  if (editingOpId) {
+                                    // Update existing
+                                    setCfgWaOperators(
+                                      cfgWaOperators.map((op: any) =>
+                                        op.id === editingOpId
+                                          ? {
+                                              ...op,
+                                              name: opFormName,
+                                              department: opFormDept,
+                                              phone: opFormPhone,
+                                              description: opFormDesc,
+                                              status: opFormStatus,
+                                            }
+                                          : op
+                                      )
+                                    );
+                                    setEditingOpId(null);
+                                  } else {
+                                    // Add new
+                                    const newOp = {
+                                      id: Date.now().toString(),
+                                      name: opFormName,
+                                      department: opFormDept,
+                                      phone: opFormPhone,
+                                      description: opFormDesc,
+                                      status: opFormStatus,
+                                    };
+                                    setCfgWaOperators([...cfgWaOperators, newOp]);
+                                  }
+
+                                  // Reset form fields
+                                  setOpFormName('');
+                                  setOpFormDept('');
+                                  setOpFormPhone('');
+                                  setOpFormDesc('');
+                                  setOpFormStatus('online');
+                                }}
+                                className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[10px] uppercase tracking-wider rounded-lg shadow-sm transition-all flex items-center justify-center gap-1.5"
+                              >
+                                {editingOpId ? 'Simpan Perubahan Operator' : 'Tambahkan Operator'}
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Operator Listing Table */}
+                          {cfgWaOperators.length === 0 ? (
+                            <div className="text-center p-6 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
+                              <p className="text-xs text-slate-400 font-bold">
+                                Belum ada operator ditambahkan. Tambahkan di atas terlebih dahulu!
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="overflow-x-auto rounded-xl border border-slate-150 dark:border-slate-800/80">
+                              <table className="w-full text-left text-xs">
+                                <thead className="bg-slate-50 dark:bg-slate-950 text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 font-bold border-b border-slate-100 dark:border-slate-800">
+                                  <tr>
+                                    <th className="px-4 py-2.5">Operator & Keahlian</th>
+                                    <th className="px-4 py-2.5">Departemen</th>
+                                    <th className="px-4 py-2.5">WhatsApp</th>
+                                    <th className="px-4 py-2.5 text-center">Status</th>
+                                    <th className="px-4 py-2.5 text-right">Aksi</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-semibold text-slate-700 dark:text-slate-300">
+                                  {cfgWaOperators.map((op: any, index: number) => (
+                                    <tr key={op.id || index} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/40">
+                                      <td className="px-4 py-3">
+                                        <div className="font-extrabold text-slate-900 dark:text-white">{op.name}</div>
+                                        <div className="text-[10px] text-slate-400 mt-0.5 font-medium">{op.description || '-'}</div>
+                                      </td>
+                                      <td className="px-4 py-3 text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                                        {op.department}
+                                      </td>
+                                      <td className="px-4 py-3 font-mono text-[11px]">
+                                        {op.phone}
+                                      </td>
+                                      <td className="px-4 py-3 text-center">
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            // 1-click status toggle
+                                            setCfgWaOperators(
+                                              cfgWaOperators.map((o: any) =>
+                                                o.id === op.id
+                                                  ? { ...o, status: o.status === 'online' ? 'offline' : 'online' }
+                                                  : o
+                                              )
+                                            );
+                                          }}
+                                          className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold tracking-wider uppercase border ${
+                                            op.status === 'online'
+                                              ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+                                              : 'bg-slate-100 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700'
+                                          }`}
+                                        >
+                                          {op.status === 'online' ? 'ONLINE' : 'OFFLINE'}
+                                        </button>
+                                      </td>
+                                      <td className="px-4 py-3 text-right space-x-2 whitespace-nowrap">
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setEditingOpId(op.id);
+                                            setOpFormName(op.name);
+                                            setOpFormDept(op.department);
+                                            setOpFormPhone(op.phone);
+                                            setOpFormDesc(op.description || '');
+                                            setOpFormStatus(op.status || 'online');
+                                          }}
+                                          className="text-[10px] text-indigo-500 hover:text-indigo-600 font-extrabold"
+                                        >
+                                          Edit
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            if (confirm(`Yakin ingin menghapus operator ${op.name}?`)) {
+                                              setCfgWaOperators(cfgWaOperators.filter((o: any) => o.id !== op.id));
+                                            }
+                                          }}
+                                          className="text-[10px] text-red-500 hover:text-red-600 font-extrabold"
+                                        >
+                                          Hapus
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
+                        </div>
+
+                      </div>
+
+                      {/* Right Column: Live Interactive Preview */}
+                      <div className="lg:col-span-5 space-y-6">
+                        
+                        {/* Live Widget Interactive Preview Box */}
+                        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm sticky top-6 space-y-4">
+                          <div className="flex items-center gap-1.5 border-b border-slate-100 dark:border-slate-800 pb-3">
+                            <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse" />
+                            <h4 className="text-xs font-extrabold uppercase text-indigo-600 dark:text-indigo-400 tracking-wider">
+                              Live Interactive Preview (Real-time)
+                            </h4>
+                          </div>
+
+                          <p className="text-[10px] text-slate-400 dark:text-slate-500">
+                            Berikut adalah simulasi tampilan langsung panel WhatsApp chat box Anda sesuai konfigurasi saat ini. Klik pilihan tujuan untuk menguji pengisian formulir.
+                          </p>
+
+                          {/* Simulation Area */}
+                          <div className="p-4 bg-slate-100 dark:bg-slate-950 rounded-2xl flex items-center justify-center min-h-[460px] border border-slate-200/50 dark:border-slate-800/50 relative overflow-hidden">
+                            
+                            {/* Embedded Simulation Frame */}
+                            <div className="bg-white dark:bg-slate-900 shadow-xl rounded-2xl w-[320px] max-w-full overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col scale-95 transition-all duration-300">
+                              
+                              {/* Simulate Widget Header */}
+                              <div
+                                style={{ backgroundColor: cfgWaColorAccent || '#25D366' }}
+                                className="p-4 text-white flex justify-between items-center"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <div className="p-1.5 bg-white/20 rounded-lg">
+                                    <span className="text-xs">💬</span>
+                                  </div>
+                                  <div>
+                                    <h5 className="font-extrabold text-xs tracking-wide leading-tight">
+                                      {cfgWaHeaderTitle || 'Hubungi Kami'}
+                                    </h5>
+                                    <p className="text-[9px] opacity-95 mt-0.5 font-medium">
+                                      {cfgWaSubtitle || 'Halo! Ada yang bisa kami bantu?'}
+                                    </p>
+                                  </div>
+                                </div>
+                                <span className="text-[9px] font-bold bg-white/20 px-2 py-0.5 rounded-full">
+                                  Mock
+                                </span>
+                              </div>
+
+                              {/* Simulate Widget Body */}
+                              <div className="p-4 space-y-3 min-h-[220px]">
+                                {cfgWaOperators.length === 0 ? (
+                                  <div className="text-center py-8 text-slate-400 dark:text-slate-500 text-[10px] space-y-2">
+                                    <span>⚠️</span>
+                                    <p className="font-bold">Silakan tambahkan operator di samping kiri untuk menguji Live Preview widget.</p>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <p className="text-[9px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                                      Silakan Pilih Tujuan / Departemen:
+                                    </p>
+                                    <div className="space-y-2">
+                                      {Array.from(new Set(cfgWaOperators.map((o: any) => o.department).filter(Boolean))).map((dept: any) => {
+                                        const ops = cfgWaOperators.filter((o: any) => o.department === dept);
+                                        const isOnline = ops.some((o: any) => o.status === 'online');
+
+                                        return (
+                                          <div
+                                            key={dept}
+                                            className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-850 bg-slate-50/50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-all cursor-pointer text-left"
+                                          >
+                                            <div className="flex-1 min-w-0 pr-2">
+                                              <div className="font-bold text-[11px] text-slate-800 dark:text-slate-200">
+                                                {dept}
+                                              </div>
+                                              <div className="text-[9px] text-slate-400 dark:text-slate-500 mt-0.5 truncate">
+                                                {ops.length > 1 
+                                                  ? `${ops.length} Operator (Rotasi)` 
+                                                  : ops[0]?.description || 'Hubungi tim bantuan kami'}
+                                              </div>
+                                            </div>
+                                            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${isOnline ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'}`} />
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+
+                                    {/* Simulated Form Fields Preview */}
+                                    <div className="border-t border-slate-100 dark:border-slate-800 pt-3 mt-2 space-y-2">
+                                      <p className="text-[9px] font-extrabold text-slate-400 dark:text-slate-505 uppercase tracking-widest">
+                                        Simulasi Tampilan Formulir:
+                                      </p>
+                                      <div className="space-y-2 opacity-60 pointer-events-none">
+                                        {cfgWaFormFields.includes('name') && (
+                                          <div>
+                                            <label className="block text-[8px] font-bold text-slate-400 uppercase">Nama Lengkap</label>
+                                            <input type="text" placeholder="Masukkan nama..." className="w-full p-1.5 text-[10px] rounded-lg border bg-slate-50 dark:bg-slate-950 font-bold" />
+                                          </div>
+                                        )}
+                                        {cfgWaFormFields.includes('phone') && (
+                                          <div>
+                                            <label className="block text-[8px] font-bold text-slate-400 uppercase">No. HP / WhatsApp</label>
+                                            <input type="text" placeholder="Masukkan WhatsApp..." className="w-full p-1.5 text-[10px] rounded-lg border bg-slate-50 dark:bg-slate-950 font-bold" />
+                                          </div>
+                                        )}
+                                        {cfgWaFormFields.includes('email') && (
+                                          <div>
+                                            <label className="block text-[8px] font-bold text-slate-400 uppercase">Alamat Email</label>
+                                            <input type="email" placeholder="Masukkan email..." className="w-full p-1.5 text-[10px] rounded-lg border bg-slate-50 dark:bg-slate-950 font-bold" />
+                                          </div>
+                                        )}
+                                        {cfgWaFormFields.includes('message') && (
+                                          <div>
+                                            <label className="block text-[8px] font-bold text-slate-400 uppercase">Pesan Anda</label>
+                                            <textarea rows={2} placeholder="Masukkan pesan..." className="w-full p-1.5 text-[10px] rounded-lg border bg-slate-50 dark:bg-slate-950 resize-none font-bold" />
+                                          </div>
+                                        )}
+                                        <button
+                                          type="button"
+                                          style={{ backgroundColor: cfgWaColorAccent || '#25D366' }}
+                                          className="w-full py-2 text-white font-extrabold text-[9px] uppercase tracking-wider rounded-lg shadow-sm"
+                                        >
+                                          Kirim ke WhatsApp (Simulasi)
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+
+                              {/* Simulate Widget Footer */}
+                              <div className="px-4 py-2 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-[9px] text-slate-400 dark:text-slate-500 font-bold">
+                                <span>Preview Terintegrasi</span>
+                                <span className="bg-slate-250/50 px-1.5 py-0.5 rounded text-[8px]">
+                                  Secure Chat
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Floating Mock Icon Badge at bottom right of sandbox */}
+                            <div className="absolute bottom-4 right-4">
+                              <div
+                                style={{ backgroundColor: cfgWaColorAccent || '#25D366' }}
+                                className="w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg cursor-pointer"
+                              >
+                                💬
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                    {/* Leads Logs Table (Click-to-Chat Leads Logs) */}
+                    <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+                      <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                        <div>
+                          <h4 className="text-xs font-extrabold uppercase text-slate-900 dark:text-white tracking-wider flex items-center gap-1.5">
+                            📊 Log Inisiasi Percakapan (Click-to-Chat Leads Tracking)
+                          </h4>
+                          <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
+                            Daftar pelanggan yang telah menekan tombol "Kirim ke WhatsApp" untuk berkonsultasi melalui widget WhatsApp di website ini.
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={fetchWaLeads}
+                          className="px-3 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700/80 rounded-lg text-[10px] font-black text-slate-600 dark:text-slate-300 transition-all uppercase tracking-wider"
+                        >
+                          Segarkan Log
+                        </button>
+                      </div>
+
+                      {waLeadsError && (
+                        <div className="p-3 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-xl text-xs font-bold">
+                          {waLeadsError}
+                        </div>
+                      )}
+
+                      {isLoadingWaLeads ? (
+                        <div className="text-center py-8 text-xs font-bold text-slate-400">
+                          Sedang mengambil log leads...
+                        </div>
+                      ) : waLeads.length === 0 ? (
+                        <div className="text-center py-10 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
+                          <p className="text-xs text-slate-400 font-bold">
+                            Belum ada log inisiasi chat terekam.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="overflow-x-auto rounded-xl border border-slate-150 dark:border-slate-800/80">
+                          <table className="w-full text-left text-xs">
+                            <thead className="bg-slate-50 dark:bg-slate-950 text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 font-bold border-b border-slate-100 dark:border-slate-800">
+                              <tr>
+                                <th className="px-4 py-2.5">Tanggal / Waktu</th>
+                                <th className="px-4 py-2.5">Nama Pelanggan</th>
+                                <th className="px-4 py-2.5">Nomor HP</th>
+                                <th className="px-4 py-2.5">Tujuan / Dept</th>
+                                <th className="px-4 py-2.5">Assigned Operator Phone</th>
+                                <th className="px-4 py-2.5">Pesan Awal</th>
+                                <th className="px-4 py-2.5">Halaman Asal</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-semibold text-slate-700 dark:text-slate-300">
+                              {waLeads.map((lead: any) => (
+                                <tr key={lead.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/40 text-[11px]">
+                                  <td className="px-4 py-3 text-[10px] font-mono text-slate-400 dark:text-slate-500 whitespace-nowrap">
+                                    {lead.created_at ? new Date(lead.created_at).toLocaleString('id-ID') : '-'}
+                                  </td>
+                                  <td className="px-4 py-3 font-extrabold text-slate-900 dark:text-white">
+                                    {lead.customer_name || '-'}
+                                  </td>
+                                  <td className="px-4 py-3 font-mono">
+                                    {lead.customer_phone || '-'}
+                                  </td>
+                                  <td className="px-4 py-3 text-slate-500 dark:text-slate-400">
+                                    {lead.department || '-'}
+                                  </td>
+                                  <td className="px-4 py-3 font-mono">
+                                    {lead.assigned_operator_phone || '-'}
+                                  </td>
+                                  <td className="px-4 py-3 max-w-[200px] truncate" title={lead.initial_message}>
+                                    {lead.initial_message || '-'}
+                                  </td>
+                                  <td className="px-4 py-3 max-w-[150px] truncate" title={lead.page_url}>
+                                    <a
+                                      href={lead.page_url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-indigo-500 hover:underline"
+                                    >
+                                      {lead.page_url ? lead.page_url.replace(window.location.origin, '') : '-'}
+                                    </a>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+
                   </div>
                 )}
               </div>
@@ -6364,7 +7342,7 @@ export default function AdminPortal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Nama Lengkap Admin / Penulis
+                  Nama Lengkap Admin / Editor / Penulis
                 </label>
                 <input
                   type="text"
@@ -6847,15 +7825,235 @@ export default function AdminPortal({
       {activeTab === 'products' && currentUser?.role === 'admin' && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 space-y-6 shadow-sm">
           <div className="space-y-1">
-            <h2 className="text-xl font-black text-slate-900 dark:text-white">Panel Manajemen Produk Jualan</h2>
+            <h2 className="text-xl font-black text-slate-900 dark:text-white">
+              {siteConfig?.product_mgmt_heading || 'Panel Manajemen Produk Jualan'}
+            </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Kelola daftar lukisan orisinal yang Anda pasarkan. Anda dapat menambah, mengedit, memperbarui status (Tersedia/Terjual), serta menetapkan kode QRIS pembayaran dan no WhatsApp untuk masing-masing karya.
+              {siteConfig?.product_mgmt_desc || 'Kelola daftar lukisan orisinal yang Anda pasarkan. Anda dapat menambah, mengedit, memperbarui status (Tersedia/Terjual), serta menetapkan kode QRIS pembayaran dan no WhatsApp untuk masing-masing karya.'}
             </p>
           </div>
           <div className="h-px bg-slate-100 dark:bg-slate-800" />
           <InteractiveProductSale isAdmin={true} currentUser={currentUser} />
         </div>
       )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* TAB 11: WHATSAPP REPORTS & LEADS LOGS (ROLE ADMIN ONLY) */}
+      {/* ------------------------------------------------------------- */}
+      {activeTab === 'wa_leads' && currentUser?.role === 'admin' && (
+        <div className="space-y-8">
+          {/* Header Stats */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-sm">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                  <span>📊 Pusat Laporan Leads & Pemesanan WhatsApp</span>
+                  <span className="text-[10px] bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                    Real-time
+                  </span>
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Pantau performa interaksi website Anda secara menyeluruh mulai dari inisiasi chat konsultasi hingga riwayat pemesanan produk katalog.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    fetchWaLeads();
+                    fetchProductOrders();
+                  }}
+                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 active:scale-95 transition-all rounded-xl text-xs font-bold text-white shadow-md flex items-center gap-2 font-black uppercase tracking-wider text-[10px]"
+                >
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin-slow" />
+                  <span>Segarkan Semua Laporan</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+              <div className="p-4 bg-slate-50 dark:bg-slate-950/50 rounded-2xl border border-slate-150 dark:border-slate-800/80">
+                <div className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Total Chat Leads</div>
+                <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">{waLeads.length} <span className="text-xs font-semibold text-slate-400">leads</span></div>
+                <p className="text-[10px] text-slate-400 mt-2">Pelanggan yang menginisiasi chat via widget melayang.</p>
+              </div>
+              <div className="p-4 bg-slate-50 dark:bg-slate-950/50 rounded-2xl border border-slate-150 dark:border-slate-800/80">
+                <div className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Total Pemesanan Produk</div>
+                <div className="text-2xl font-black text-rose-600 dark:text-rose-400 mt-1">
+                  {productOrders.length} <span className="text-xs font-semibold text-slate-400">pesanan</span>
+                </div>
+                <p className="text-[10px] text-slate-400 mt-2">Pelanggan yang memesan item dari katalog jualan.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Panel 1: Chat Leads Logs */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 space-y-4 shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-150 dark:border-slate-800 pb-4">
+              <div>
+                <h3 className="text-sm font-extrabold uppercase text-slate-900 dark:text-white tracking-wider flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                  💬 Log Chat Leads (Click-to-Chat Widget)
+                </h3>
+                <p className="text-[10px] text-slate-500 mt-1">
+                  Pengunjung yang mengisi form pada widget melayang untuk konsultasi WhatsApp.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={fetchWaLeads}
+                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700/80 text-[10px] font-black text-slate-600 dark:text-slate-300 transition-all rounded-lg uppercase tracking-wider"
+              >
+                Segarkan Chat Log
+              </button>
+            </div>
+
+            {waLeadsError && (
+              <div className="p-3 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-xl text-xs font-bold">
+                {waLeadsError}
+              </div>
+            )}
+
+            {isLoadingWaLeads ? (
+              <div className="text-center py-12 text-xs font-bold text-slate-400">
+                Sedang memuat data chat leads...
+              </div>
+            ) : waLeads.length === 0 ? (
+              <div className="text-center py-12 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl bg-slate-50/50 dark:bg-slate-950/10">
+                <p className="text-xs text-slate-400 font-bold">Belum ada chat lead terekam.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto rounded-xl border border-slate-150 dark:border-slate-800/80 bg-white dark:bg-slate-950">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50 dark:bg-slate-950 text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 font-bold border-b border-slate-150 dark:border-slate-850">
+                    <tr>
+                      <th className="px-4 py-3">Tanggal / Waktu</th>
+                      <th className="px-4 py-3">Nama Pelanggan</th>
+                      <th className="px-4 py-3">Nomor HP</th>
+                      <th className="px-4 py-3">Tujuan / Dept</th>
+                      <th className="px-4 py-3">Operator Dituju</th>
+                      <th className="px-4 py-3">Pesan Awal</th>
+                      <th className="px-4 py-3">Halaman Asal</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-semibold text-slate-700 dark:text-slate-300">
+                    {waLeads.map((lead: any) => (
+                      <tr key={lead.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/40 text-[11px]">
+                        <td className="px-4 py-3.5 text-[10px] font-mono text-slate-400 whitespace-nowrap">
+                          {lead.created_at ? new Date(lead.created_at).toLocaleString('id-ID') : '-'}
+                        </td>
+                        <td className="px-4 py-3.5 font-extrabold text-slate-900 dark:text-white">
+                          {lead.customer_name || '-'}
+                        </td>
+                        <td className="px-4 py-3.5 font-mono">
+                          {lead.customer_phone || '-'}
+                        </td>
+                        <td className="px-4 py-3.5 text-slate-500 dark:text-slate-400">
+                          {lead.department || '-'}
+                        </td>
+                        <td className="px-4 py-3.5 font-mono text-slate-400">
+                          {lead.assigned_operator_phone || '-'}
+                        </td>
+                        <td className="px-4 py-3.5 max-w-[200px] truncate" title={lead.initial_message}>
+                          {lead.initial_message || '-'}
+                        </td>
+                        <td className="px-4 py-3.5 max-w-[150px] truncate text-slate-400" title={lead.page_url}>
+                          {lead.page_url ? (
+                            <a href={lead.page_url} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1 text-rose-500">
+                              <ExternalLink className="w-3 h-3" />
+                              <span>Buka Link</span>
+                            </a>
+                          ) : '-'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Panel 2: Product Orders Logs */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 space-y-4 shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-150 dark:border-slate-800 pb-4">
+              <div>
+                <h3 className="text-sm font-extrabold uppercase text-slate-900 dark:text-white tracking-wider flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
+                  🛍️ Log Pemesanan & Pembelian Produk (Product Orders Tracking)
+                </h3>
+                <p className="text-[10px] text-slate-500 mt-1">
+                  Pelanggan yang memesan item dari katalog jualan melalui tombol checkout.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={fetchProductOrders}
+                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700/80 text-[10px] font-black text-slate-600 dark:text-slate-300 transition-all rounded-lg uppercase tracking-wider"
+              >
+                Segarkan Order Log
+              </button>
+            </div>
+
+            {productOrdersError && (
+              <div className="p-3 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-xl text-xs font-bold">
+                {productOrdersError}
+              </div>
+            )}
+
+            {isLoadingProductOrders ? (
+              <div className="text-center py-12 text-xs font-bold text-slate-400">
+                Sedang memuat data order...
+              </div>
+            ) : productOrders.length === 0 ? (
+              <div className="text-center py-12 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl bg-slate-50/50 dark:bg-slate-950/10">
+                <p className="text-xs text-slate-400 font-bold">Belum ada order jualan terekam.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto rounded-xl border border-slate-150 dark:border-slate-800/80 bg-white dark:bg-slate-950">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50 dark:bg-slate-950 text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 font-bold border-b border-slate-150 dark:border-slate-850">
+                    <tr>
+                      <th className="px-4 py-3">Tanggal / Waktu</th>
+                      <th className="px-4 py-3">Nama Pembeli</th>
+                      <th className="px-4 py-3">Nomor HP/WA</th>
+                      <th className="px-4 py-3">Produk Dipesan</th>
+                      <th className="px-4 py-3 text-right">Harga Satuan</th>
+                      <th className="px-4 py-3">Catatan Pembeli</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-semibold text-slate-700 dark:text-slate-300">
+                    {productOrders.map((order: any) => (
+                      <tr key={order.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/40 text-[11px]">
+                        <td className="px-4 py-3.5 text-[10px] font-mono text-slate-400 whitespace-nowrap">
+                          {order.created_at ? new Date(order.created_at).toLocaleString('id-ID') : '-'}
+                        </td>
+                        <td className="px-4 py-3.5 font-extrabold text-slate-900 dark:text-white">
+                          {order.buyer_name || '-'}
+                        </td>
+                        <td className="px-4 py-3.5 font-mono">
+                          {order.buyer_phone || '-'}
+                        </td>
+                        <td className="px-4 py-3.5 font-extrabold text-rose-600 dark:text-rose-400">
+                          {order.product_title || '-'}
+                        </td>
+                        <td className="px-4 py-3.5 text-right font-mono font-bold text-slate-900 dark:text-white">
+                          {order.product_price ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(order.product_price) : '-'}
+                        </td>
+                        <td className="px-4 py-3.5 text-slate-500 dark:text-slate-400 max-w-[250px] truncate" title={order.buyer_notes}>
+                          {order.buyer_notes || '-'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+        </div> {/* Close RIGHT COLUMN lg:col-span-9 */}
+      </div> {/* Close TWO-COLUMN GRID */}
 
     </div>
   );

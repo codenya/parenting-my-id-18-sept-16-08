@@ -10,7 +10,7 @@ import {
   List, ListOrdered, CheckSquare, Quote, Code, Table, Minus, 
   Link as LinkIcon, Link2, Image as ImageIcon, Upload, Eye, Edit3, Columns, 
   Undo, Redo, Sparkles, CheckCircle2, RefreshCw, X, Copy, Check, FileText,
-  Users, History, RotateCcw, Award, ShieldCheck, Send, AlertTriangle, AlertCircle, ThumbsUp, XCircle, Video
+  Users, History, RotateCcw, Award, ShieldCheck, Send, AlertTriangle, AlertCircle, ThumbsUp, XCircle, Video, ShoppingBag
 } from 'lucide-react';
 
 interface RichPostEditorProps {
@@ -192,6 +192,30 @@ export default function RichPostEditor({
 
   const [showImageModal, setShowImageModal] = useState(false);
   const [showVideoModal, setShowVideoModal] = useState(false);
+  const [showProductPickerModal, setShowProductPickerModal] = useState(false);
+  const [pickerProducts, setPickerProducts] = useState<any[]>([]);
+  const [pickerLoading, setPickerLoading] = useState(false);
+
+  const handleOpenProductPicker = async () => {
+    setShowProductPickerModal(true);
+    setPickerLoading(true);
+    try {
+      const res = await fetch('/api/products');
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) setPickerProducts(data);
+      }
+    } catch (err) {
+      console.error('Failed to load products for picker:', err);
+    } finally {
+      setPickerLoading(false);
+    }
+  };
+
+  const handleSelectProductToInsert = (productSlug: string) => {
+    applyFormatting('\n\n[produk:', ']\n\n', productSlug);
+    setShowProductPickerModal(false);
+  };
   const [videoPlatform, setVideoPlatform] = useState<'youtube' | 'tiktok' | 'instagram'>('youtube');
   const [videoUrl, setVideoUrl] = useState('');
   const [imageUrl, setImageUrl] = useState('');
@@ -3538,6 +3562,14 @@ export default function RichPostEditor({
               </button>
               <button
                 type="button"
+                onClick={handleOpenProductPicker}
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 font-bold shadow-xs active:bg-rose-200 shrink-0"
+                title="Sisipkan Kotak Produk Penawaran"
+              >
+                <ShoppingBag className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
                 onClick={() => {
                   if (textareaRef.current) {
                     const start = textareaRef.current.selectionStart;
@@ -3730,6 +3762,16 @@ export default function RichPostEditor({
                   >
                     <Video className="w-3.5 h-3.5" />
                     <span>Video</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleOpenProductPicker}
+                    className="px-2 py-1 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-300 font-bold text-xs hover:bg-rose-100 transition-colors flex items-center gap-1"
+                    title="Sisipkan Kotak Produk Penawaran"
+                  >
+                    <ShoppingBag className="w-3.5 h-3.5" />
+                    <span>Produk</span>
                   </button>
 
                   <button
@@ -5034,6 +5076,75 @@ export default function RichPostEditor({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* MODAL PICK PRODUCT TO INSERT */}
+      {/* ------------------------------------------------------------- */}
+      {showProductPickerModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 flex-shrink-0">
+              <h3 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                <ShoppingBag className="w-4 h-4 text-rose-600" />
+                <span>Pilih Produk Jualan untuk Disematkan</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowProductPickerModal(false)}
+                className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+              {pickerLoading ? (
+                <div className="py-12 text-center space-y-2">
+                  <div className="w-8 h-8 border-4 border-rose-600 border-t-transparent rounded-full animate-spin mx-auto" />
+                  <p className="text-xs text-slate-500 font-bold">Memuat daftar produk...</p>
+                </div>
+              ) : pickerProducts.length === 0 ? (
+                <div className="py-12 text-center space-y-2 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
+                  <p className="text-xs font-bold text-slate-500">Belum ada produk jualan yang dibuat.</p>
+                  <p className="text-[11px] text-slate-400">Silakan buat produk terlebih dahulu di menu "Jualan / Produk" Portal Admin.</p>
+                </div>
+              ) : (
+                pickerProducts.map((prod) => (
+                  <div
+                    key={prod.id}
+                    onClick={() => handleSelectProductToInsert(prod.slug)}
+                    className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-rose-500 hover:bg-rose-50/30 dark:hover:bg-rose-950/20 cursor-pointer transition-all flex items-center gap-4 group"
+                  >
+                    <img src={prod.imageUrl} alt={prod.title} className="w-14 h-14 object-cover rounded-xl flex-shrink-0 bg-slate-200" />
+                    <div className="flex-1 min-w-0 space-y-0.5">
+                      <h4 className="text-xs font-extrabold text-slate-900 dark:text-white truncate group-hover:text-rose-600">
+                        {prod.title}
+                      </h4>
+                      <p className="text-[11px] text-rose-600 dark:text-rose-400 font-black">
+                        Rp {Number(prod.price).toLocaleString('id-ID')}
+                      </p>
+                      <p className="text-[10px] text-slate-400 font-mono">Slug: {prod.slug}</p>
+                    </div>
+                    <span className="px-3 py-1.5 rounded-xl bg-rose-600 text-white font-extrabold text-xs shadow-xs opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                      Pilih & Sisipkan
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="flex items-center justify-end pt-2 flex-shrink-0 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setShowProductPickerModal(false)}
+                className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs"
+              >
+                Tutup
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -494,6 +494,53 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }
   };
 
+  // Helper to ensure chat_leads table schema exists in D1 (auto-bootstrap jika belum ada)
+  const syncAndPrepareChatLeadsTable = async (db: any): Promise<Set<string>> => {
+    try {
+      await db.prepare(`
+        CREATE TABLE IF NOT EXISTS chat_leads (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          customer_name TEXT,
+          customer_phone TEXT,
+          department TEXT NOT NULL,
+          assigned_operator_phone TEXT,
+          initial_message TEXT,
+          page_url TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `).run();
+      const colInfo = await db.prepare('PRAGMA table_info(chat_leads)').all();
+      return new Set<string>((colInfo?.results || []).map((c: any) => c.name));
+    } catch (err) {
+      console.error('Error preparing chat_leads table in D1:', err);
+      return new Set<string>(['id', 'department', 'created_at']);
+    }
+  };
+
+  // Helper to ensure product_orders table schema exists in D1 (auto-bootstrap jika belum ada)
+  const syncAndPrepareProductOrdersTable = async (db: any): Promise<Set<string>> => {
+    try {
+      await db.prepare(`
+        CREATE TABLE IF NOT EXISTS product_orders (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          buyer_name TEXT,
+          buyer_phone TEXT,
+          buyer_notes TEXT,
+          product_id INTEGER,
+          product_title TEXT,
+          product_slug TEXT,
+          product_price REAL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `).run();
+      const colInfo = await db.prepare('PRAGMA table_info(product_orders)').all();
+      return new Set<string>((colInfo?.results || []).map((c: any) => c.name));
+    } catch (err) {
+      console.error('Error preparing product_orders table in D1:', err);
+      return new Set<string>(['id', 'buyer_name', 'created_at']);
+    }
+  };
+
   // Security: Authenticate Bearer or session token (Stateless HMAC-SHA256 JWT, zero D1 query load)
   const authenticateRequest = async (allowedRoles?: string[]): Promise<{ user?: any; errorResponse?: Response }> => {
     const authHeader = request.headers.get('Authorization') || request.headers.get('x-session-token') || '';
@@ -1801,7 +1848,108 @@ Sitemap: ${siteUrl}/sitemap.xml
       return jsonResponse({}, 200, cacheHeaders);
     }
 
-    // 7.1 GET /api/dns-aid (DNS for AI Discovery RFC 9460 & draft-mozleywilliams-dnsop-dnsaid)
+    // 7.1 GET /api/whatsapp/leads (Admin only)
+    if (path === '/api/whatsapp/leads' && method === 'GET') {
+      const auth = await authenticateRequest(['admin']);
+      if (auth.errorResponse) return auth.errorResponse;
+
+      if (env.DB) {
+        try {
+          await syncAndPrepareChatLeadsTable(env.DB);
+          const { results } = await env.DB.prepare('SELECT * FROM chat_leads ORDER BY id DESC LIMIT 100').all();
+          return jsonResponse(results || []);
+        } catch (e: any) {
+          console.error('Error fetching chat leads from D1:', e);
+          return jsonResponse({ error: e?.message || 'Gagal mengambil data chat leads.' }, 500);
+        }
+      }
+      return jsonResponse([]);
+    }
+
+    // 7.2 POST /api/whatsapp/lead (Public log)
+    if (path === '/api/whatsapp/lead' && method === 'POST') {
+      try {
+        const body = await request.json() as any;
+        const { customer_name, customer_phone, department, assigned_operator_phone, initial_message, page_url } = body;
+
+        if (!department) {
+          return jsonResponse({ error: 'Departemen tidak boleh kosong.' }, 400);
+        }
+
+        if (env.DB) {
+          await syncAndPrepareChatLeadsTable(env.DB);
+          await env.DB.prepare(`
+            INSERT INTO chat_leads (customer_name, customer_phone, department, assigned_operator_phone, initial_message, page_url)
+            VALUES (?, ?, ?, ?, ?, ?)
+          `).bind(
+            customer_name || null,
+            customer_phone || null,
+            department,
+            assigned_operator_phone || null,
+            initial_message || null,
+            page_url || null
+          ).run();
+        }
+
+        return jsonResponse({ success: true, message: 'Lead berhasil dicatat.' });
+      } catch (e: any) {
+        console.error('Error logging chat lead to D1:', e);
+        return jsonResponse({ error: e?.message || 'Gagal menyimpan lead.' }, 500);
+      }
+    }
+
+    // 7.4 GET /api/products/orders (Admin only)
+    if (path === '/api/products/orders' && method === 'GET') {
+      const auth = await authenticateRequest(['admin']);
+      if (auth.errorResponse) return auth.errorResponse;
+
+      if (env.DB) {
+        try {
+          await syncAndPrepareProductOrdersTable(env.DB);
+          const { results } = await env.DB.prepare('SELECT * FROM product_orders ORDER BY id DESC LIMIT 100').all();
+          return jsonResponse(results || []);
+        } catch (e: any) {
+          console.error('Error fetching product orders from D1:', e);
+          return jsonResponse({ error: e?.message || 'Gagal mengambil data log pembelian produk.' }, 500);
+        }
+      }
+      return jsonResponse([]);
+    }
+
+    // 7.5 POST /api/products/order (Public log)
+    if (path === '/api/products/order' && method === 'POST') {
+      try {
+        const body = await request.json() as any;
+        const { buyer_name, buyer_phone, buyer_notes, product_id, product_title, product_slug, product_price } = body;
+
+        if (!buyer_name || !buyer_phone) {
+          return jsonResponse({ error: 'Nama Lengkap dan Nomor HP wajib diisi.' }, 400);
+        }
+
+        if (env.DB) {
+          await syncAndPrepareProductOrdersTable(env.DB);
+          await env.DB.prepare(`
+            INSERT INTO product_orders (buyer_name, buyer_phone, buyer_notes, product_id, product_title, product_slug, product_price)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+          `).bind(
+            buyer_name || null,
+            buyer_phone || null,
+            buyer_notes || null,
+            product_id || null,
+            product_title || null,
+            product_slug || null,
+            product_price || null
+          ).run();
+        }
+
+        return jsonResponse({ success: true, message: 'Log pembelian produk berhasil dicatat.' });
+      } catch (e: any) {
+        console.error('Error logging product order to D1:', e);
+        return jsonResponse({ error: e?.message || 'Gagal menyimpan log pembelian.' }, 500);
+      }
+    }
+
+    // 7.3 GET /api/dns-aid (DNS for AI Discovery RFC 9460 & draft-mozleywilliams-dnsop-dnsaid)
     if (path === '/api/dns-aid' && method === 'GET') {
       try {
         const queryParamDomain = url.searchParams.get('domain');

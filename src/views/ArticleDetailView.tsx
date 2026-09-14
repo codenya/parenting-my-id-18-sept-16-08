@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { Post, AutoLink, SiteConfig } from '../types';
-import { applyAutoLinks, preprocessMarkdownLineBreaks, renderResponsiveVideoEmbeds } from '../lib/autolink';
+import { applyAutoLinks, preprocessMarkdownLineBreaks, renderResponsiveVideoEmbeds, renderProductEmbeds } from '../lib/autolink';
 import { marked } from 'marked';
 import { Clock, Eye, Calendar, ArrowLeft, Share2, Check, Bookmark, Sparkles, MessageCircle, Twitter, Facebook, Copy, Award, CheckCircle2, Linkedin, Instagram, Globe, Users, ShieldCheck } from 'lucide-react';
 import SEOHelper from '../components/SEOHelper';
@@ -188,6 +188,14 @@ export default function ArticleDetailView({
 
   const [currentViews, setCurrentViews] = useState(post ? post.views : 0);
   const [hasTrackedView, setHasTrackedView] = useState(false);
+  const [products, setProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => { if (Array.isArray(data)) setProducts(data); })
+      .catch(err => console.error('Failed to fetch products for article embeds:', err));
+  }, []);
   const articleContainerRef = useRef<HTMLDivElement | null>(null);
   const midpointSentinelRef = useRef<HTMLDivElement | null>(null);
   const hasTriggeredRef = useRef(false);
@@ -344,6 +352,9 @@ export default function ArticleDetailView({
     // Render responsive videos
     rawHtml = renderResponsiveVideoEmbeds(rawHtml);
 
+    // Render product embeds [produk:slug]
+    rawHtml = renderProductEmbeds(rawHtml, products);
+
     const items: { id: string; text: string; level: number }[] = [];
 
     // Inject id attributes into <h2> and <h3> tags for TOC scrolling, and build tocItems
@@ -384,7 +395,7 @@ export default function ArticleDetailView({
 
     const finalHtml = applyAutoLinks(rawHtml, autolinks);
     return { parsedHtml: finalHtml, tocItems: items };
-  }, [post, autolinks, siteConfig?.reference_heading_label]);
+  }, [post, autolinks, siteConfig?.reference_heading_label, products]);
 
   // Handle Autolink Clicks inside article body
   useEffect(() => {

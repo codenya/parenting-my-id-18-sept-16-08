@@ -159,3 +159,53 @@ export function renderResponsiveVideoEmbeds(html: string): string {
 
   return result;
 }
+
+/**
+ * Parses product shortcodes [produk:slug] or [product:slug] and converts them into
+ * a gorgeous, high-converting interactive product promo box inside articles.
+ */
+export function renderProductEmbeds(html: string, products: any[]): string {
+  if (!html || !products || products.length === 0) return html;
+
+  let result = html;
+  const productRegex = /\[(?:produk|product):\s*([^\s\]]+)\s*\]/gi;
+
+  result = result.replace(productRegex, (match, slug) => {
+    const cleanSlug = slug.trim().toLowerCase();
+    const product = products.find(p => p.slug.toLowerCase() === cleanSlug);
+
+    if (!product) {
+      return `<div class="p-4 my-4 rounded-xl border border-dashed border-rose-300 bg-rose-50/50 text-xs text-rose-600 font-bold">⚠️ Produk dengan slug "${slug}" tidak ditemukan.</div>`;
+    }
+
+    return `
+      <div class="my-8 p-5 sm:p-6 rounded-3xl border border-rose-200 dark:border-rose-950/60 bg-gradient-to-br from-rose-50/60 via-white to-pink-50/40 dark:from-slate-900 dark:via-slate-900 dark:to-rose-950/20 shadow-md flex flex-col sm:flex-row items-center gap-5 transition-all hover:shadow-lg">
+        <div class="w-full sm:w-40 h-36 flex-shrink-0 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 shadow-inner">
+          <img src="${product.imageUrl}" alt="${product.title}" class="w-full h-full object-cover" />
+        </div>
+        <div class="flex-1 space-y-2 text-center sm:text-left">
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 font-black text-[10px] uppercase tracking-wider">
+            ⭐ Rekomendasi Produk Pilihan
+          </div>
+          <h4 class="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-snug">
+            ${product.title}
+          </h4>
+          <p class="text-xs text-slate-600 dark:text-slate-300 line-clamp-2">
+            ${product.description}
+          </p>
+          <div class="flex flex-wrap items-center justify-center sm:justify-between gap-3 pt-2">
+            <div class="text-rose-600 dark:text-rose-400 font-black text-base sm:text-lg">
+              Rp ${Number(product.price).toLocaleString('id-ID')}
+            </div>
+            <a href="/produk/${product.slug}" class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold shadow-sm flex items-center gap-1.5 transition-all transform hover:scale-[1.02]">
+              <span>Lihat & Pesan Sekarang</span> <span>→</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  return result;
+}
+

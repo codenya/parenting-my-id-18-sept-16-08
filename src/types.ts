@@ -40,7 +40,8 @@ export type HomepageDisplayMode =
   | 'corporate'
   | 'product_landing'
   | 'classified_ads'
-  | 'knowledge_base';
+  | 'knowledge_base'
+  | 'whatsapp_widget';
 
 export interface SiteConfig {
   site_name: string;
@@ -259,6 +260,8 @@ export interface SiteConfig {
   product_discount_tag?: string;
   product_whatsapp?: string;
   product_cta_text?: string;
+  product_mgmt_heading?: string;
+  product_mgmt_desc?: string;
 
   // Model 9: Iklan Baris Koran Dulu
   newspaper_name?: string;
@@ -291,6 +294,23 @@ export interface SiteConfig {
   products_hero_image_caption?: string;
   products_empty_title?: string;
   products_empty_subtitle?: string;
+
+  // WhatsApp Chat Widget Configuration
+  wa_widget_enabled?: boolean;
+  wa_position?: 'bottom-right' | 'bottom-left' | 'bottom-center';
+  wa_header_title?: string;
+  wa_subtitle?: string;
+  wa_color_accent?: string;
+  wa_operators?: {
+    id: string;
+    name: string;
+    department: string;
+    phone: string;
+    status: 'online' | 'offline';
+    description: string;
+  }[];
+  wa_form_fields?: string[]; // ["name", "phone", "message"]
+  wa_enable_rotation?: boolean;
 }
 
 export type PostStatus = 'draft' | 'pending_approval' | 'published' | 'rejected';
