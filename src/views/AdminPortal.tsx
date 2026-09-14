@@ -82,6 +82,13 @@ export default function AdminPortal({
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isZenMode, setIsZenMode] = useState(false);
 
+  // Auto-collapse sidebar when on the editor tab
+  useEffect(() => {
+    if (activeTab === 'editor') {
+      setIsSidebarCollapsed(true);
+    }
+  }, [activeTab]);
+
   // Comments & Cusdis Webhook State
   const [comments, setComments] = useState<any[]>([]);
   const [commentFilter, setCommentFilter] = useState<'all' | 'pending' | 'approved'>('all');
@@ -2107,7 +2114,8 @@ export default function AdminPortal({
             )}
             <button
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 transition-colors"
+              className="p-1.5 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white shadow-md transition-all hover:scale-110 active:scale-95 duration-200 border border-rose-400 dark:border-rose-300 ring-2 ring-rose-100 dark:ring-rose-950 flex items-center justify-center animate-pulse"
+              style={{ animationDuration: '2.5s' }}
               title={isSidebarCollapsed ? "Lebarkan Sidebar" : "Sembunyikan Label Sidebar"}
             >
               {isSidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
