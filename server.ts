@@ -257,6 +257,142 @@ let mockComments = [
 
 let mockChatLeads: any[] = [];
 
+let mockSuratPembaca: any[] = [
+  {
+    id: 1,
+    judul: 'Apresiasi untuk Pembenahan Taman Kota & Fasilitas Bermain Anak',
+    isi: 'Saya ingin menyampaikan apresiasi tinggi kepada pemerintah kota yang telah membenahi fasilitas taman bermain anak di pusat kota. Wahana kini bersih, aman, dan dilengkapi keran cuci tangan serta bangku pendamping yang nyaman. Diharapkan seluruh pengunjung ikut menjaga kebersihannya.',
+    nama: 'Siti Rahmawati',
+    kota: 'Surabaya',
+    pekerjaan: 'Ibu Rumah Tangga',
+    tahunLahir: 1988,
+    phone: '081234567890',
+    ipAddress: '127.0.0.1',
+    status: 'published',
+    createdAt: new Date(Date.now() - 3600000 * 24 * 2).toISOString(),
+    updatedAt: new Date(Date.now() - 3600000 * 24 * 2).toISOString(),
+  },
+  {
+    id: 2,
+    judul: 'Mohon Perbaikan Penerangan Jalan Umum Wilayah Melati',
+    isi: 'Lampu penerangan jalan umum (PJU) di kawasan perumahan Melati telah padam selama hampir tiga minggu. Hal ini meresahkan warga saat beraktivitas malam hari. Mohon dinas terkait segera menindaklanjuti demi keamanan dan kenyamanan bersama.',
+    nama: 'Bambang Wijaya',
+    kota: 'Bandung',
+    pekerjaan: 'Karyawan Swasta',
+    tahunLahir: 1982,
+    phone: '085678901234',
+    ipAddress: '127.0.0.1',
+    status: 'published',
+    createdAt: new Date(Date.now() - 3600000 * 24 * 5).toISOString(),
+    updatedAt: new Date(Date.now() - 3600000 * 24 * 5).toISOString(),
+  },
+  {
+    id: 3,
+    judul: 'Usulan Penambahan Rute Bus Sekolah Gratis',
+    isi: 'Layanan bus sekolah gratis sangat membantu para siswa, namun jalurnya saat ini masih terbatas di jalan utama. Kami mengusulkan agar rute penjemputan diperluas hingga ke kawasan pemukiman warga.',
+    nama: 'Hendra Kurniawan',
+    kota: 'Semarang',
+    pekerjaan: 'Guru',
+    tahunLahir: 1990,
+    phone: '081901234567',
+    ipAddress: '127.0.0.1',
+    status: 'pending',
+    createdAt: new Date(Date.now() - 3600000 * 6).toISOString(),
+    updatedAt: new Date(Date.now() - 3600000 * 6).toISOString(),
+  }
+];
+
+let mockIklanBaris: any[] = [
+  {
+    id: 1,
+    kategori: 'Otomotif',
+    keteranganBarang: 'HONDA BRIO E CVT 2021 Putih Mulus. KM 25rb Service Rutin Resmi. Pajak Panjang Bln 09-2027. Surat Lengkap Atas Nama Sendiri. Bebas Banjir/Tabrakan. SIAP PAKAI.',
+    harga: 'Rp 145.000.000 (Nego)',
+    nama: 'Dedi Supriadi',
+    kota: 'Jakarta Selatan',
+    pekerjaan: 'Wiraswasta',
+    tahunLahir: 1985,
+    phone: '0812-9876-5432',
+    ipAddress: '127.0.0.1',
+    status: 'published',
+    createdAt: new Date(Date.now() - 3600000 * 24 * 1).toISOString(),
+    updatedAt: new Date(Date.now() - 3600000 * 24 * 1).toISOString(),
+  },
+  {
+    id: 2,
+    kategori: 'Properti',
+    keteranganBarang: 'DIJUAL RUMAH MINIMALIS SIAP HUNI. LT 90m² LB 60m², 2KT 1KM. Garasi, Canopy, Air PAM + Jetpump. SHM Lengkap. Dekat Stasiun KRL & Akses Tol.',
+    harga: 'Rp 650.000.000',
+    nama: 'Hj. Ningrum',
+    kota: 'Bogor',
+    pekerjaan: 'Pensiunan',
+    tahunLahir: 1968,
+    phone: '0813-1122-3344',
+    ipAddress: '127.0.0.1',
+    status: 'published',
+    createdAt: new Date(Date.now() - 3600000 * 24 * 3).toISOString(),
+    updatedAt: new Date(Date.now() - 3600000 * 24 * 3).toISOString(),
+  },
+  {
+    id: 3,
+    kategori: 'Elektronik',
+    keteranganBarang: 'LAPTOP MACBOOK AIR M1 2020 RAM 8GB SSD 256GB Space Gray. Fullset Box & Charger Ori. Battery Health 89% Mulus No Minus.',
+    harga: 'Rp 8.500.000',
+    nama: 'Rian Prasetyo',
+    kota: 'Yogyakarta',
+    pekerjaan: 'Mahasiswa',
+    tahunLahir: 2001,
+    phone: '0877-6655-4433',
+    ipAddress: '127.0.0.1',
+    status: 'published',
+    createdAt: new Date(Date.now() - 3600000 * 24 * 4).toISOString(),
+    updatedAt: new Date(Date.now() - 3600000 * 24 * 4).toISOString(),
+  },
+  {
+    id: 4,
+    kategori: 'Jasa',
+    keteranganBarang: 'JASA RENOVASI RUMAH & BOCORAN ATAP. Pengecatan, Pasang Keramik, Kanopi, Instalasi Listrik. Bergaransi & Berpengalaman 15 Tahun.',
+    harga: 'Harga Bersahabat',
+    nama: 'Tukang Pro',
+    kota: 'Tangerang',
+    pekerjaan: 'Kontraktor',
+    tahunLahir: 1978,
+    phone: '0852-1234-5678',
+    ipAddress: '127.0.0.1',
+    status: 'published',
+    createdAt: new Date(Date.now() - 3600000 * 24 * 6).toISOString(),
+    updatedAt: new Date(Date.now() - 3600000 * 24 * 6).toISOString(),
+  }
+];
+
+// Anti-Spam & Rate Limiting Helpers
+const guestIpRateLimitMap = new Map<string, number>();
+function checkGuestIpCooldown(ip: string, cooldownMs = 15000): boolean {
+  const now = Date.now();
+  const last = guestIpRateLimitMap.get(ip) || 0;
+  if (now - last < cooldownMs) {
+    return false;
+  }
+  guestIpRateLimitMap.set(ip, now);
+  return true;
+}
+
+function cleanTextAndStripUrls(text: string): string {
+  if (!text) return '';
+  // Strip all HTML tags for Anti-XSS
+  let clean = text.replace(/<[^>]*>?/gm, '');
+  // Convert any active URL into plain text domain string
+  clean = clean.replace(/https?:\/\/[^\s]+/gi, (match) => {
+    try {
+      const u = new URL(match);
+      return u.hostname + u.pathname;
+    } catch {
+      return match.replace(/https?:\/\//gi, '');
+    }
+  });
+  return clean.trim();
+}
+
 let mockPosts: any[] = [
   {
     id: 1,
@@ -421,6 +557,8 @@ function loadServerData() {
     const autolinksFile = path.join(DATA_DIR, 'autolinks.json');
     const commentsFile = path.join(DATA_DIR, 'comments.json');
     const chatLeadsFile = path.join(DATA_DIR, 'chat_leads.json');
+    const suratPembacaFile = path.join(DATA_DIR, 'surat_pembaca.json');
+    const iklanBarisFile = path.join(DATA_DIR, 'iklan_baris.json');
 
     // 1. Fallback to unified store.json if individual files don't exist
     if (fs.existsSync(storeFile) && (!fs.existsSync(postsFile) || !fs.existsSync(usersFile))) {
@@ -431,6 +569,8 @@ function loadServerData() {
         if (storeData.autolinks && Array.isArray(storeData.autolinks)) mockAutolinks = storeData.autolinks;
         if (storeData.comments && Array.isArray(storeData.comments)) mockComments = storeData.comments;
         if (storeData.chatLeads && Array.isArray(storeData.chatLeads)) mockChatLeads = storeData.chatLeads;
+        if (storeData.suratPembaca && Array.isArray(storeData.suratPembaca)) mockSuratPembaca = storeData.suratPembaca;
+        if (storeData.iklanBaris && Array.isArray(storeData.iklanBaris)) mockIklanBaris = storeData.iklanBaris;
         console.log('[Persistence] Successfully loaded unified state from fallback store.json');
       } catch (e) {
         console.error('[Persistence] Error loading unified fallback store.json, trying individual files...', e);
@@ -473,9 +613,23 @@ function loadServerData() {
       fs.writeFileSync(chatLeadsFile, JSON.stringify(mockChatLeads, null, 2), 'utf-8');
     }
 
+    if (fs.existsSync(suratPembacaFile)) {
+      const data = JSON.parse(fs.readFileSync(suratPembacaFile, 'utf-8'));
+      if (Array.isArray(data)) mockSuratPembaca = data;
+    } else {
+      fs.writeFileSync(suratPembacaFile, JSON.stringify(mockSuratPembaca, null, 2), 'utf-8');
+    }
+
+    if (fs.existsSync(iklanBarisFile)) {
+      const data = JSON.parse(fs.readFileSync(iklanBarisFile, 'utf-8'));
+      if (Array.isArray(data)) mockIklanBaris = data;
+    } else {
+      fs.writeFileSync(iklanBarisFile, JSON.stringify(mockIklanBaris, null, 2), 'utf-8');
+    }
+
     // 3. Ensure unified store.json is updated/created
     if (!fs.existsSync(storeFile)) {
-      const storeObj = { posts: mockPosts, users: mockUsers, autolinks: mockAutolinks, comments: mockComments };
+      const storeObj = { posts: mockPosts, users: mockUsers, autolinks: mockAutolinks, comments: mockComments, suratPembaca: mockSuratPembaca, iklanBaris: mockIklanBaris };
       fs.writeFileSync(storeFile, JSON.stringify(storeObj, null, 2), 'utf-8');
     }
   } catch (err) {
@@ -492,9 +646,11 @@ function saveServerData() {
     fs.writeFileSync(path.join(DATA_DIR, 'autolinks.json'), JSON.stringify(mockAutolinks, null, 2), 'utf-8');
     fs.writeFileSync(path.join(DATA_DIR, 'comments.json'), JSON.stringify(mockComments, null, 2), 'utf-8');
     fs.writeFileSync(path.join(DATA_DIR, 'chat_leads.json'), JSON.stringify(mockChatLeads, null, 2), 'utf-8');
+    fs.writeFileSync(path.join(DATA_DIR, 'surat_pembaca.json'), JSON.stringify(mockSuratPembaca, null, 2), 'utf-8');
+    fs.writeFileSync(path.join(DATA_DIR, 'iklan_baris.json'), JSON.stringify(mockIklanBaris, null, 2), 'utf-8');
 
     // Save fallback unified state to store.json
-    const storeObj = { posts: mockPosts, users: mockUsers, autolinks: mockAutolinks, comments: mockComments, chatLeads: mockChatLeads };
+    const storeObj = { posts: mockPosts, users: mockUsers, autolinks: mockAutolinks, comments: mockComments, chatLeads: mockChatLeads, suratPembaca: mockSuratPembaca, iklanBaris: mockIklanBaris };
     fs.writeFileSync(path.join(DATA_DIR, 'store.json'), JSON.stringify(storeObj, null, 2), 'utf-8');
   } catch (err) {
     console.error('[Persistence] Error saving data to disk:', err);
@@ -943,6 +1099,390 @@ app.post('/api/whatsapp/lead', (req, res) => {
 // GET WhatsApp Leads (Admin Protected)
 app.get('/api/whatsapp/leads', requireAuth(['admin']), (req, res) => {
   res.json(mockChatLeads);
+});
+
+// ============================================================================
+// SURAT PEMBACA API ENDPOINTS (GUEST SUBMISSION + EDITOR MODERATION)
+// ============================================================================
+
+// 1. GET /api/surat-pembaca (Public / Admin)
+app.get('/api/surat-pembaca', async (req, res) => {
+  try {
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.max(1, Math.min(100, Number(req.query.limit) || 10));
+    const reqStatus = String(req.query.status || 'published');
+
+    // Check if user is authenticated admin/editor
+    let isStaff = false;
+    const authHeader = req.headers.authorization || (req.headers['x-session-token'] as string);
+    const cookieHeader = req.headers.cookie;
+    const token = extractTokenFromHeaderOrCookie(authHeader, cookieHeader);
+    if (token) {
+      const jwtSecret = process.env.JWT_SECRET || 'parenting-unified-jwt-secret-key-2026-secure';
+      if (token.includes('.') && token.split('.').length === 3) {
+        const jwtResult = await verifyJwtHmacSha256(token, jwtSecret);
+        if (jwtResult.valid && jwtResult.payload && (jwtResult.payload.role === 'admin' || jwtResult.payload.role === 'editor')) {
+          isStaff = true;
+        }
+      } else {
+        const parts = token.split('_');
+        if (parts.length >= 3 && parts[0] === 'session') {
+          const userId = Number(parts[1]);
+          const role = parts.length >= 4 && isNaN(Number(parts[2])) ? parts[2] : (mockUsers.find(u => u.id === userId)?.role || 'admin');
+          if (role === 'admin' || role === 'editor') isStaff = true;
+        }
+      }
+    }
+
+    let filtered = [...mockSuratPembaca];
+
+    // Non-staff can ONLY see published items
+    if (!isStaff) {
+      filtered = filtered.filter(item => item.status === 'published');
+    } else if (reqStatus !== 'all') {
+      filtered = filtered.filter(item => item.status === reqStatus);
+    }
+
+    // Sort by newest first
+    filtered.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+
+    const total = filtered.length;
+    const totalPages = Math.ceil(total / limit) || 1;
+    const startIndex = (page - 1) * limit;
+    const items = filtered.slice(startIndex, startIndex + limit);
+
+    // For non-staff, remove IP Address field for privacy
+    const sanitizedItems = items.map(item => {
+      if (!isStaff) {
+        const { ipAddress, ...rest } = item;
+        return rest;
+      }
+      return item;
+    });
+
+    res.json({
+      success: true,
+      items: sanitizedItems,
+      total,
+      page,
+      limit,
+      totalPages,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: 'Gagal mengambil surat pembaca: ' + err.message });
+  }
+});
+
+// 2. POST /api/surat-pembaca (Guest Submission with Anti-Spam & Anti-XSS)
+app.post('/api/surat-pembaca', async (req, res) => {
+  try {
+    const { nama, kota, pekerjaan, tahunLahir, phone, judul, isi, turnstileToken, website_url_hp } = req.body || {};
+
+    // 1. Honeypot Trap Check (Bot Prevention)
+    if (website_url_hp) {
+      return res.json({
+        success: true,
+        message: 'Surat pembaca Anda telah berhasil dikirim! Surat akan diperiksa dan diedit oleh tim Editor sebelum ditayangkan.',
+      });
+    }
+
+    // 2. IP Rate Limiting Check
+    const clientIp = (req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1') as string;
+    if (!checkGuestIpCooldown(clientIp, 15000)) {
+      return res.status(429).json({ error: 'Terlalu banyak pengiriman. Harap tunggu beberapa detik sebelum mengirim lagi.' });
+    }
+
+    // 3. Cloudflare Turnstile Verification if enabled
+    let isTurnstileEnabled = true;
+    try {
+      const configPath = path.join(process.cwd(), 'public', 'site_config.json');
+      if (fs.existsSync(configPath)) {
+        const parsed = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+        if (parsed.enable_comment_turnstile === false || parsed.enable_comment_turnstile === 'false') {
+          isTurnstileEnabled = false;
+        }
+      }
+    } catch (e) {}
+
+    if (isTurnstileEnabled && turnstileToken) {
+      const isValidTurnstile = await verifyTurnstileToken(turnstileToken);
+      if (!isValidTurnstile) {
+        return res.status(400).json({ error: 'Verifikasi keamanan Turnstile gagal. Silakan coba lagi.' });
+      }
+    }
+
+    // 4. Input Validation
+    if (!nama || !kota || !pekerjaan || !tahunLahir || !phone || !judul || !isi) {
+      return res.status(400).json({ error: 'Seluruh kolom isian formulir surat pembaca wajib diisi.' });
+    }
+
+    // 5. Anti-XSS & URL to Plain Text Sanitization
+    const cleanNama = cleanTextAndStripUrls(String(nama));
+    const cleanKota = cleanTextAndStripUrls(String(kota));
+    const cleanPekerjaan = cleanTextAndStripUrls(String(pekerjaan));
+    const cleanPhone = cleanTextAndStripUrls(String(phone));
+    const cleanJudul = cleanTextAndStripUrls(String(judul));
+    const cleanIsi = cleanTextAndStripUrls(String(isi));
+
+    const newItem = {
+      id: Date.now(),
+      nama: cleanNama,
+      kota: cleanKota,
+      pekerjaan: cleanPekerjaan,
+      tahunLahir: Number(tahunLahir),
+      phone: cleanPhone,
+      judul: cleanJudul,
+      isi: cleanIsi,
+      ipAddress: clientIp,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    mockSuratPembaca.unshift(newItem);
+    saveServerData();
+
+    res.json({
+      success: true,
+      message: 'Surat pembaca Anda telah berhasil dikirim! Surat akan diperiksa dan diedit oleh tim Editor sebelum ditayangkan.',
+      item: newItem,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: 'Gagal mengirim surat pembaca: ' + err.message });
+  }
+});
+
+// 3. PUT /api/surat-pembaca/:id (Admin & Editor Moderation)
+app.put('/api/surat-pembaca/:id', requireAuth(['admin', 'editor']), (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const item = mockSuratPembaca.find(l => l.id === id);
+    if (!item) {
+      return res.status(404).json({ error: 'Surat pembaca tidak ditemukan.' });
+    }
+
+    const { judul, isi, nama, kota, pekerjaan, phone, status } = req.body || {};
+
+    if (judul !== undefined) item.judul = cleanTextAndStripUrls(String(judul));
+    if (isi !== undefined) item.isi = cleanTextAndStripUrls(String(isi));
+    if (nama !== undefined) item.nama = cleanTextAndStripUrls(String(nama));
+    if (kota !== undefined) item.kota = cleanTextAndStripUrls(String(kota));
+    if (pekerjaan !== undefined) item.pekerjaan = cleanTextAndStripUrls(String(pekerjaan));
+    if (phone !== undefined) item.phone = cleanTextAndStripUrls(String(phone));
+    if (status !== undefined) item.status = status;
+    item.updatedAt = new Date().toISOString();
+
+    saveServerData();
+    res.json({ success: true, message: 'Surat pembaca berhasil diperbarui.', item });
+  } catch (err: any) {
+    res.status(500).json({ error: 'Gagal mengedit surat pembaca: ' + err.message });
+  }
+});
+
+// 4. DELETE /api/surat-pembaca/:id (Admin & Editor Delete)
+app.delete('/api/surat-pembaca/:id', requireAuth(['admin', 'editor']), (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    mockSuratPembaca = mockSuratPembaca.filter(l => l.id !== id);
+    saveServerData();
+    res.json({ success: true, message: 'Surat pembaca berhasil dihapus.' });
+  } catch (err: any) {
+    res.status(500).json({ error: 'Gagal menghapus surat pembaca: ' + err.message });
+  }
+});
+
+// ============================================================================
+// IKLAN BARIS API ENDPOINTS (GUEST SUBMISSION + KOMPAS PRINT STYLE MODERATION)
+// ============================================================================
+
+// 1. GET /api/iklan-baris (Public / Admin)
+app.get('/api/iklan-baris', async (req, res) => {
+  try {
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.max(1, Math.min(100, Number(req.query.limit) || 12));
+    const reqStatus = String(req.query.status || 'published');
+    const reqKategori = req.query.kategori ? String(req.query.kategori) : null;
+
+    let isStaff = false;
+    const authHeader = req.headers.authorization || (req.headers['x-session-token'] as string);
+    const cookieHeader = req.headers.cookie;
+    const token = extractTokenFromHeaderOrCookie(authHeader, cookieHeader);
+    if (token) {
+      const jwtSecret = process.env.JWT_SECRET || 'parenting-unified-jwt-secret-key-2026-secure';
+      if (token.includes('.') && token.split('.').length === 3) {
+        const jwtResult = await verifyJwtHmacSha256(token, jwtSecret);
+        if (jwtResult.valid && jwtResult.payload && (jwtResult.payload.role === 'admin' || jwtResult.payload.role === 'editor')) {
+          isStaff = true;
+        }
+      } else {
+        const parts = token.split('_');
+        if (parts.length >= 3 && parts[0] === 'session') {
+          const userId = Number(parts[1]);
+          const role = parts.length >= 4 && isNaN(Number(parts[2])) ? parts[2] : (mockUsers.find(u => u.id === userId)?.role || 'admin');
+          if (role === 'admin' || role === 'editor') isStaff = true;
+        }
+      }
+    }
+
+    let filtered = [...mockIklanBaris];
+
+    if (!isStaff) {
+      filtered = filtered.filter(item => item.status === 'published');
+    } else if (reqStatus !== 'all') {
+      filtered = filtered.filter(item => item.status === reqStatus);
+    }
+
+    if (reqKategori && reqKategori !== 'Semua') {
+      filtered = filtered.filter(item => item.kategori?.toLowerCase() === reqKategori.toLowerCase());
+    }
+
+    filtered.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+
+    const total = filtered.length;
+    const totalPages = Math.ceil(total / limit) || 1;
+    const startIndex = (page - 1) * limit;
+    const items = filtered.slice(startIndex, startIndex + limit);
+
+    const sanitizedItems = items.map(item => {
+      if (!isStaff) {
+        const { ipAddress, ...rest } = item;
+        return rest;
+      }
+      return item;
+    });
+
+    res.json({
+      success: true,
+      items: sanitizedItems,
+      total,
+      page,
+      limit,
+      totalPages,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: 'Gagal mengambil iklan baris: ' + err.message });
+  }
+});
+
+// 2. POST /api/iklan-baris (Guest Submission with Anti-Spam & Anti-XSS)
+app.post('/api/iklan-baris', async (req, res) => {
+  try {
+    const { kategori, keteranganBarang, harga, nama, kota, pekerjaan, tahunLahir, phone, turnstileToken, website_url_hp } = req.body || {};
+
+    // 1. Honeypot Trap Check
+    if (website_url_hp) {
+      return res.json({
+        success: true,
+        message: 'Iklan baris Anda berhasil dikirim! Iklan akan diperiksa dan diedit oleh tim Editor sebelum ditayangkan.',
+      });
+    }
+
+    // 2. IP Rate Limiting Check
+    const clientIp = (req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1') as string;
+    if (!checkGuestIpCooldown(clientIp, 15000)) {
+      return res.status(429).json({ error: 'Terlalu banyak pengiriman. Harap tunggu beberapa detik sebelum mengirim lagi.' });
+    }
+
+    // 3. Cloudflare Turnstile Verification if enabled
+    let isTurnstileEnabled = true;
+    try {
+      const configPath = path.join(process.cwd(), 'public', 'site_config.json');
+      if (fs.existsSync(configPath)) {
+        const parsed = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+        if (parsed.enable_comment_turnstile === false || parsed.enable_comment_turnstile === 'false') {
+          isTurnstileEnabled = false;
+        }
+      }
+    } catch (e) {}
+
+    if (isTurnstileEnabled && turnstileToken) {
+      const isValidTurnstile = await verifyTurnstileToken(turnstileToken);
+      if (!isValidTurnstile) {
+        return res.status(400).json({ error: 'Verifikasi keamanan Turnstile gagal. Silakan coba lagi.' });
+      }
+    }
+
+    // 4. Input Validation
+    if (!kategori || !keteranganBarang || !harga || !nama || !kota || !pekerjaan || !tahunLahir || !phone) {
+      return res.status(400).json({ error: 'Seluruh kolom isian formulir iklan baris wajib diisi.' });
+    }
+
+    // 5. Anti-XSS & URL to Plain Text Sanitization
+    const cleanKategori = cleanTextAndStripUrls(String(kategori));
+    const cleanKet = cleanTextAndStripUrls(String(keteranganBarang));
+    const cleanHarga = cleanTextAndStripUrls(String(harga));
+    const cleanNama = cleanTextAndStripUrls(String(nama));
+    const cleanKota = cleanTextAndStripUrls(String(kota));
+    const cleanPekerjaan = cleanTextAndStripUrls(String(pekerjaan));
+    const cleanPhone = cleanTextAndStripUrls(String(phone));
+
+    const newItem = {
+      id: Date.now(),
+      kategori: cleanKategori,
+      keteranganBarang: cleanKet,
+      harga: cleanHarga,
+      nama: cleanNama,
+      kota: cleanKota,
+      pekerjaan: cleanPekerjaan,
+      tahunLahir: Number(tahunLahir),
+      phone: cleanPhone,
+      ipAddress: clientIp,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    mockIklanBaris.unshift(newItem);
+    saveServerData();
+
+    res.json({
+      success: true,
+      message: 'Iklan baris Anda berhasil dikirim! Iklan akan diperiksa dan diedit oleh tim Editor sebelum ditayangkan.',
+      item: newItem,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: 'Gagal mengirim iklan baris: ' + err.message });
+  }
+});
+
+// 3. PUT /api/iklan-baris/:id (Admin & Editor Moderation)
+app.put('/api/iklan-baris/:id', requireAuth(['admin', 'editor']), (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const item = mockIklanBaris.find(i => i.id === id);
+    if (!item) {
+      return res.status(404).json({ error: 'Iklan baris tidak ditemukan.' });
+    }
+
+    const { kategori, keteranganBarang, harga, nama, kota, pekerjaan, phone, status } = req.body || {};
+
+    if (kategori !== undefined) item.kategori = cleanTextAndStripUrls(String(kategori));
+    if (keteranganBarang !== undefined) item.keteranganBarang = cleanTextAndStripUrls(String(keteranganBarang));
+    if (harga !== undefined) item.harga = cleanTextAndStripUrls(String(harga));
+    if (nama !== undefined) item.nama = cleanTextAndStripUrls(String(nama));
+    if (kota !== undefined) item.kota = cleanTextAndStripUrls(String(kota));
+    if (pekerjaan !== undefined) item.pekerjaan = cleanTextAndStripUrls(String(pekerjaan));
+    if (phone !== undefined) item.phone = cleanTextAndStripUrls(String(phone));
+    if (status !== undefined) item.status = status;
+    item.updatedAt = new Date().toISOString();
+
+    saveServerData();
+    res.json({ success: true, message: 'Iklan baris berhasil diperbarui.', item });
+  } catch (err: any) {
+    res.status(500).json({ error: 'Gagal mengedit iklan baris: ' + err.message });
+  }
+});
+
+// 4. DELETE /api/iklan-baris/:id (Admin & Editor Delete)
+app.delete('/api/iklan-baris/:id', requireAuth(['admin', 'editor']), (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    mockIklanBaris = mockIklanBaris.filter(i => i.id !== id);
+    saveServerData();
+    res.json({ success: true, message: 'Iklan baris berhasil dihapus.' });
+  } catch (err: any) {
+    res.status(500).json({ error: 'Gagal menghapus iklan baris: ' + err.message });
+  }
 });
 
 // GET Cusdis Webhook Endpoint (Health Check)
@@ -1395,12 +1935,14 @@ app.get('/api/database/tables', requireAuth(['admin']), (req, res) => {
     const uniqueCategories = Array.from(new Set(mockPosts.map((p) => p.category).filter(Boolean)));
 
     const tables = [
-      { name: 'users', rowCount: mockUsers.length, description: 'Akun pengguna, hak akses, peran, dan kredensial' },
+      { name: 'users', rowCount: mockUsers.length, description: 'Akun pengguna, hak akses, peran (admin, writer, editor, guest), dan kredensial' },
       { name: 'posts', rowCount: mockPosts.length, description: 'Seluruh artikel, konten, SEO meta, dan view count' },
       { name: 'configs', rowCount: configCount, description: 'Konfigurasi situs dinamis key-value' },
       { name: 'categories', rowCount: uniqueCategories.length || 6, description: 'Kategori dan taksonomi artikel' },
       { name: 'autolinks', rowCount: mockAutolinks.length, description: 'Aturan internal auto-linking engine' },
       { name: 'comments', rowCount: mockComments.length, description: 'Komentar artikel native dan sinkronisasi Cusdis' },
+      { name: 'surat_pembaca', rowCount: mockSuratPembaca.length, description: 'Surat pembaca opini publik kiriman guest' },
+      { name: 'iklan_baris', rowCount: mockIklanBaris.length, description: 'Iklan baris komersial cetak gaya Kompas kiriman guest' },
       { name: 'login_attempts', rowCount: 0, description: 'Pelacakan IP pengamanan anti brute force' },
     ];
 
@@ -1506,7 +2048,7 @@ CREATE TABLE IF NOT EXISTS users (
   email TEXT NOT NULL,
   password_hash TEXT NOT NULL,
   name TEXT,
-  role TEXT CHECK(role IN ('admin', 'writer', 'editor')),
+  role TEXT CHECK(role IN ('admin', 'writer', 'editor', 'guest')),
   avatar TEXT,
   bio TEXT,
   created_at TEXT,
@@ -1516,6 +2058,43 @@ CREATE TABLE IF NOT EXISTS users (
   social_linkedin TEXT,
   social_website TEXT
 );
+
+CREATE TABLE IF NOT EXISTS surat_pembaca (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nama TEXT NOT NULL,
+  kota TEXT NOT NULL,
+  pekerjaan TEXT NOT NULL,
+  tahun_lahir INTEGER NOT NULL,
+  phone TEXT NOT NULL,
+  ip_address TEXT,
+  judul TEXT NOT NULL,
+  isi TEXT NOT NULL,
+  status TEXT DEFAULT 'pending',
+  rejection_reason TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS iklan_baris (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nama TEXT NOT NULL,
+  kota TEXT NOT NULL,
+  pekerjaan TEXT NOT NULL,
+  tahun_lahir INTEGER NOT NULL,
+  phone TEXT NOT NULL,
+  ip_address TEXT,
+  kategori TEXT NOT NULL,
+  keterangan_barang TEXT NOT NULL,
+  harga TEXT NOT NULL,
+  status TEXT DEFAULT 'pending',
+  rejection_reason TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_surat_pembaca_status ON surat_pembaca(status);
+CREATE INDEX IF NOT EXISTS idx_iklan_baris_status ON iklan_baris(status);
+CREATE INDEX IF NOT EXISTS idx_iklan_baris_kategori ON iklan_baris(kategori);
 
 CREATE TABLE IF NOT EXISTS products (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1575,7 +2154,7 @@ app.post('/api/database/dump', requireAuth(['admin']), (req, res) => {
   try {
     const { tables: reqTables, includeSchema = true, includeData = true, insertMode = 'INSERT OR REPLACE INTO', addDropTable = false, format = 'sql' } = req.body || {};
 
-    const availableTables = ['users', 'posts', 'configs', 'categories', 'autolinks', 'comments', 'login_attempts'];
+    const availableTables = ['users', 'posts', 'configs', 'categories', 'autolinks', 'comments', 'surat_pembaca', 'iklan_baris', 'login_attempts'];
     const targetTables = Array.isArray(reqTables) && reqTables.length > 0 ? reqTables : availableTables;
 
     const escapeSqlVal = (val: any): string => {

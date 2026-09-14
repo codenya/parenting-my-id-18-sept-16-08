@@ -8,7 +8,7 @@ import {
   Heading3, List, ListOrdered, Quote, Image as ImageIcon, Code, UserCheck, 
   ExternalLink, Search, Zap, AlertCircle, Settings, Key, Copy, Check, 
   LogOut, Globe, Palette, Layout, MessageSquare, Droplet, Users, Award, History, RotateCcw, X, Menu, LayoutGrid, Database, ShoppingBag, BarChart2,
-  ChevronLeft, ChevronRight, Maximize2, Minimize2
+  ChevronLeft, ChevronRight, Maximize2, Minimize2, Mail, Tag
 } from 'lucide-react';
 import { generateSlug } from '../lib/autolink';
 import RichPostEditor from '../components/RichPostEditor';
@@ -18,6 +18,8 @@ import { getAuthHeaders } from '../lib/auth';
 import TurnstileWidget from '../components/TurnstileWidget';
 import DatabaseBackupManager from '../components/DatabaseBackupManager';
 import InteractiveProductSale from '../components/InteractiveProductSale';
+import AdminSuratPembacaManager from '../components/AdminSuratPembacaManager';
+import AdminIklanBarisManager from '../components/AdminIklanBarisManager';
 
 interface AdminPortalProps {
   currentUser: User | null;
@@ -75,8 +77,8 @@ export default function AdminPortal({
     }
   }, []);
 
-  // Admin tabs: 'posts' | 'editor' | 'writers' | 'autolinks' | 'sitemap' | 'config' | 'security' | 'comments' | 'database' | 'products' | 'wa_leads'
-  const [activeTab, setActiveTab] = useState<'posts' | 'editor' | 'writers' | 'autolinks' | 'sitemap' | 'config' | 'security' | 'comments' | 'database' | 'products' | 'wa_leads'>('posts');
+  // Admin tabs: 'posts' | 'editor' | 'writers' | 'autolinks' | 'sitemap' | 'config' | 'security' | 'comments' | 'database' | 'products' | 'wa_leads' | 'surat_pembaca' | 'iklan_baris'
+  const [activeTab, setActiveTab] = useState<'posts' | 'editor' | 'writers' | 'autolinks' | 'sitemap' | 'config' | 'security' | 'comments' | 'database' | 'products' | 'wa_leads' | 'surat_pembaca' | 'iklan_baris'>('posts');
 
   // Sidebar controls
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -2348,6 +2350,45 @@ export default function AdminPortal({
                   <BarChart2 className={`w-4 h-4 shrink-0 ${activeTab === 'wa_leads' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
                   {!isSidebarCollapsed && (
                     <span className="flex-1 text-left whitespace-nowrap overflow-hidden">📊 Laporan WA</span>
+                  )}
+                </button>
+              </>
+            )}
+
+            {/* Surat Pembaca & Iklan Baris for Editor & Admin */}
+            {currentUser?.role !== 'writer' && (
+              <>
+                <button
+                  onClick={() => setActiveTab('surat_pembaca')}
+                  title="Surat Pembaca"
+                  className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                    isSidebarCollapsed ? 'justify-center px-2' : 'px-4'
+                  } ${
+                    activeTab === 'surat_pembaca'
+                      ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Mail className={`w-4 h-4 shrink-0 ${activeTab === 'surat_pembaca' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+                  {!isSidebarCollapsed && (
+                    <span className="flex-1 text-left whitespace-nowrap overflow-hidden">✉️ Surat Pembaca</span>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('iklan_baris')}
+                  title="Iklan Baris"
+                  className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                    isSidebarCollapsed ? 'justify-center px-2' : 'px-4'
+                  } ${
+                    activeTab === 'iklan_baris'
+                      ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Tag className={`w-4 h-4 shrink-0 ${activeTab === 'iklan_baris' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+                  {!isSidebarCollapsed && (
+                    <span className="flex-1 text-left whitespace-nowrap overflow-hidden">📢 Iklan Baris</span>
                   )}
                 </button>
               </>
@@ -7393,6 +7434,20 @@ export default function AdminPortal({
             </div>
           </div>
         </form>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* TAB: SURAT PEMBACA */}
+      {/* ------------------------------------------------------------- */}
+      {activeTab === 'surat_pembaca' && (
+        <AdminSuratPembacaManager />
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* TAB: IKLAN BARIS */}
+      {/* ------------------------------------------------------------- */}
+      {activeTab === 'iklan_baris' && (
+        <AdminIklanBarisManager />
       )}
 
       {/* ------------------------------------------------------------- */}

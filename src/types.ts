@@ -1,4 +1,35 @@
-export type UserRole = 'admin' | 'editor' | 'writer';
+export type UserRole = 'admin' | 'editor' | 'writer' | 'guest';
+
+export interface SuratPembaca {
+  id: number;
+  judul: string;
+  isi: string;
+  nama: string;
+  kota: string;
+  pekerjaan: string;
+  tahunLahir: number;
+  phone: string;
+  ipAddress?: string;
+  status: 'pending' | 'published' | 'rejected';
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface IklanBarisItem {
+  id: number;
+  kategori: string;
+  keteranganBarang: string;
+  harga: string;
+  nama: string;
+  kota: string;
+  pekerjaan: string;
+  tahunLahir: number;
+  phone: string;
+  ipAddress?: string;
+  status: 'pending' | 'published' | 'rejected';
+  createdAt: string;
+  updatedAt?: string;
+}
 
 export interface User {
   id: number;
