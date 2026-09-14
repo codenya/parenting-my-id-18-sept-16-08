@@ -160,12 +160,16 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       path.startsWith('/api/categories') || 
       path.startsWith('/api/tags') ||
       path.startsWith('/api/config') ||
-      path.startsWith('/api/dns-aid')
+      path.startsWith('/api/dns-aid') ||
+      path.startsWith('/api/surat-pembaca') ||
+      path.startsWith('/api/iklan-baris')
     ));
 
     const isPublicPost = (method === 'POST' && (
       path.startsWith('/api/comments') ||
       path.startsWith('/api/newsletter') ||
+      path.startsWith('/api/surat-pembaca') ||
+      path.startsWith('/api/iklan-baris') ||
       /^\/api\/posts\/[^/]+\/view\/?$/.test(path)
     ));
 
@@ -3120,6 +3124,492 @@ Berdasarkan judul artikel: "${title}" dan isi: "${(content || '').slice(0, 500)}
       return jsonResponse({ success: true });
     }
 
+    // =========================================================================
+    // SURAT PEMBACA & IKLAN BARIS ENDPOINTS (Cloudflare Pages & D1)
+    // =========================================================================
+    const cfMockSuratPembaca = [
+      {
+        id: 1,
+        nama: 'Siti Rahmawati',
+        kota: 'Surabaya',
+        pekerjaan: 'Ibu Rumah Tangga',
+        tahunLahir: 1988,
+        phone: '081234567890',
+        judul: 'Apresiasi untuk Pembenahan Taman Kota & Fasilitas Bermain Anak',
+        isi: 'Saya ingin menyampaikan apresiasi tinggi kepada pemerintah kota yang telah membenahi fasilitas taman bermain anak di pusat kota. Wahana kini bersih, aman, dan dilengkapi keran cuci tangan serta bangku pendamping yang nyaman. Diharapkan seluruh pengunjung ikut menjaga kebersihannya.',
+        status: 'published',
+        createdAt: '2026-09-12T15:42:09.441Z',
+        updatedAt: '2026-09-12T15:42:09.441Z'
+      },
+      {
+        id: 2,
+        nama: 'Bambang Wijaya',
+        kota: 'Bandung',
+        pekerjaan: 'Karyawan Swasta',
+        tahunLahir: 1982,
+        phone: '085678901234',
+        judul: 'Mohon Perbaikan Penerangan Jalan Umum Wilayah Melati',
+        isi: 'Lampu penerangan jalan umum (PJU) di kawasan perumahan Melati telah padam selama hampir tiga minggu. Hal ini meresahkan warga saat beraktivitas malam hari. Mohon dinas terkait segera menindaklanjuti demi keamanan dan kenyamanan bersama.',
+        status: 'published',
+        createdAt: '2026-09-09T15:42:09.441Z',
+        updatedAt: '2026-09-09T15:42:09.441Z'
+      }
+    ];
+
+    const cfMockIklanBaris = [
+      {
+        id: 1,
+        kategori: 'Otomotif',
+        keteranganBarang: 'HONDA BRIO E CVT 2021 Putih Mulus. KM 25rb Service Rutin Resmi. Pajak Panjang Bln 09-2027. Surat Lengkap Atas Nama Sendiri. Bebas Banjir/Tabrakan. SIAP PAKAI.',
+        harga: 'Rp 145.000.000 (Nego)',
+        nama: 'Dedi Supriadi',
+        kota: 'Jakarta Selatan',
+        pekerjaan: 'Wiraswasta',
+        tahunLahir: 1985,
+        phone: '0812-9876-5432',
+        status: 'published',
+        createdAt: '2026-09-13T15:42:09.441Z',
+        updatedAt: '2026-09-13T15:42:09.441Z'
+      },
+      {
+        id: 2,
+        kategori: 'Properti',
+        keteranganBarang: 'DIJUAL RUMAH MINIMALIS SIAP HUNI. LT 90m² LB 60m², 2KT 1KM. Garasi, Canopy, Air PAM + Jetpump. SHM Lengkap. Dekat Stasiun KRL & Akses Tol.',
+        harga: 'Rp 650.000.000',
+        nama: 'Hj. Ningrum',
+        kota: 'Bogor',
+        pekerjaan: 'Pensiunan',
+        tahunLahir: 1968,
+        phone: '0813-1122-3344',
+        status: 'published',
+        createdAt: '2026-09-11T15:42:09.441Z',
+        updatedAt: '2026-09-11T15:42:09.441Z'
+      },
+      {
+        id: 3,
+        kategori: 'Elektronik',
+        keteranganBarang: 'LAPTOP MACBOOK AIR M1 2020 RAM 8GB SSD 256GB Space Gray. Fullset Box & Charger Ori. Battery Health 89% Mulus No Minus.',
+        harga: 'Rp 8.500.000',
+        nama: 'Rian Prasetyo',
+        kota: 'Yogyakarta',
+        pekerjaan: 'Mahasiswa',
+        tahunLahir: 2001,
+        phone: '0877-6655-4433',
+        status: 'published',
+        createdAt: '2026-09-10T15:42:09.441Z',
+        updatedAt: '2026-09-10T15:42:09.441Z'
+      },
+      {
+        id: 4,
+        kategori: 'Jasa',
+        keteranganBarang: 'JASA RENOVASI RUMAH & BOCORAN ATAP. Pengecatan, Pasang Keramik, Kanopi, Instalasi Listrik. Bergaransi & Berpengalaman 15 Tahun.',
+        harga: 'Harga Bersahabat',
+        nama: 'Tukang Pro',
+        kota: 'Tangerang',
+        pekerjaan: 'Kontraktor',
+        tahunLahir: 1978,
+        phone: '0852-1234-5678',
+        status: 'published',
+        createdAt: '2026-09-08T15:42:09.441Z',
+        updatedAt: '2026-09-08T15:42:09.441Z'
+      }
+    ];
+
+    // GET /api/surat-pembaca
+    if (path === '/api/surat-pembaca' && method === 'GET') {
+      if (env.DB) {
+        try {
+          await env.DB.prepare(`
+            CREATE TABLE IF NOT EXISTS surat_pembaca (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              nama TEXT NOT NULL,
+              kota TEXT NOT NULL,
+              pekerjaan TEXT NOT NULL,
+              tahun_lahir INTEGER NOT NULL,
+              phone TEXT NOT NULL,
+              ip_address TEXT,
+              judul TEXT NOT NULL,
+              isi TEXT NOT NULL,
+              status TEXT DEFAULT 'pending',
+              rejection_reason TEXT,
+              created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+              updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+          `).run();
+
+          const countRes: any = await env.DB.prepare("SELECT COUNT(*) as cnt FROM surat_pembaca").first();
+          if (!countRes || Number(countRes.cnt) === 0) {
+            for (const item of cfMockSuratPembaca) {
+              await env.DB.prepare(`
+                INSERT INTO surat_pembaca (nama, kota, pekerjaan, tahun_lahir, phone, judul, isi, status, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              `).bind(item.nama, item.kota, item.pekerjaan, item.tahunLahir, item.phone, item.judul, item.isi, item.status, item.createdAt, item.updatedAt).run();
+            }
+          }
+
+          const page = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
+          const limit = Math.max(1, parseInt(url.searchParams.get('limit') || '5'));
+          const offset = (page - 1) * limit;
+          const statusParam = url.searchParams.get('status') || 'published';
+
+          let whereClause = "WHERE status = ?";
+          let bindings: any[] = [statusParam];
+          if (statusParam === 'all') {
+            whereClause = "";
+            bindings = [];
+          }
+
+          const countQuery = `SELECT COUNT(*) as total FROM surat_pembaca ${whereClause}`;
+          const totalRes: any = bindings.length > 0
+            ? await env.DB.prepare(countQuery).bind(...bindings).first()
+            : await env.DB.prepare(countQuery).first();
+          const total = totalRes ? Number(totalRes.total) : 0;
+
+          const dataQuery = `SELECT id, nama, kota, pekerjaan, tahun_lahir as tahunLahir, phone, judul, isi, status, rejection_reason as rejectionReason, created_at as createdAt, updated_at as updatedAt FROM surat_pembaca ${whereClause} ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+          const dataBindings = [...bindings, limit, offset];
+          const { results } = await env.DB.prepare(dataQuery).bind(...dataBindings).all();
+
+          return jsonResponse({
+            success: true,
+            items: results || [],
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit) || 1
+          });
+        } catch (e: any) {
+          console.error('D1 surat_pembaca GET error:', e);
+        }
+      }
+
+      const page = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
+      const limit = Math.max(1, parseInt(url.searchParams.get('limit') || '5'));
+      const statusParam = url.searchParams.get('status') || 'published';
+      const filtered = statusParam === 'all' ? cfMockSuratPembaca : cfMockSuratPembaca.filter(s => s.status === statusParam);
+      const paginated = filtered.slice((page - 1) * limit, page * limit);
+      return jsonResponse({
+        success: true,
+        items: paginated,
+        total: filtered.length,
+        page,
+        limit,
+        totalPages: Math.ceil(filtered.length / limit) || 1
+      });
+    }
+
+    // POST /api/surat-pembaca
+    if (path === '/api/surat-pembaca' && method === 'POST') {
+      try {
+        const body: any = await request.json().catch(() => ({}));
+        const { nama, kota, pekerjaan, tahunLahir, phone, judul, isi, website_hp } = body;
+
+        if (website_hp) {
+          return jsonResponse({ error: 'Permintaan ditolak: Spam terdeteksi.' }, 400);
+        }
+
+        if (!nama || !kota || !pekerjaan || !tahunLahir || !phone || !judul || !isi) {
+          return jsonResponse({ error: 'Semua kolom formulir Surat Pembaca wajib diisi.' }, 400);
+        }
+
+        const clientIp = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || '127.0.0.1';
+        const cleanNama = String(nama).replace(/<[^>]*>?/gm, '').trim();
+        const cleanKota = String(kota).replace(/<[^>]*>?/gm, '').trim();
+        const cleanPekerjaan = String(pekerjaan).replace(/<[^>]*>?/gm, '').trim();
+        const cleanJudul = String(judul).replace(/<[^>]*>?/gm, '').trim();
+        const cleanIsi = String(isi).replace(/<[^>]*>?/gm, '').trim();
+
+        if (env.DB) {
+          await env.DB.prepare(`
+            CREATE TABLE IF NOT EXISTS surat_pembaca (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              nama TEXT NOT NULL,
+              kota TEXT NOT NULL,
+              pekerjaan TEXT NOT NULL,
+              tahun_lahir INTEGER NOT NULL,
+              phone TEXT NOT NULL,
+              ip_address TEXT,
+              judul TEXT NOT NULL,
+              isi TEXT NOT NULL,
+              status TEXT DEFAULT 'pending',
+              rejection_reason TEXT,
+              created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+              updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+          `).run();
+
+          const insertRes = await env.DB.prepare(`
+            INSERT INTO surat_pembaca (nama, kota, pekerjaan, tahun_lahir, phone, ip_address, judul, isi, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+          `).bind(cleanNama, cleanKota, cleanPekerjaan, Number(tahunLahir), String(phone), clientIp, cleanJudul, cleanIsi).run();
+
+          return jsonResponse({
+            success: true,
+            id: insertRes?.meta?.last_row_id || Date.now(),
+            message: 'Surat Pembaca Anda berhasil dikirim dan sedang menunggu moderasi redaksi.'
+          });
+        }
+
+        return jsonResponse({
+          success: true,
+          id: Date.now(),
+          message: 'Surat Pembaca Anda berhasil dikirim dan sedang menunggu moderasi redaksi.'
+        });
+      } catch (err: any) {
+        return jsonResponse({ error: err.message }, 500);
+      }
+    }
+
+    // PUT /api/surat-pembaca/:id
+    if (path.startsWith('/api/surat-pembaca/') && method === 'PUT') {
+      const auth = await authenticateRequest(['admin', 'editor']);
+      if (auth.errorResponse) return auth.errorResponse;
+
+      try {
+        const id = path.split('/')[3];
+        const body: any = await request.json().catch(() => ({}));
+        const { status, rejectionReason, judul, isi } = body;
+
+        if (env.DB) {
+          await env.DB.prepare(`
+            UPDATE surat_pembaca 
+            SET status = COALESCE(?, status), 
+                rejection_reason = COALESCE(?, rejection_reason), 
+                judul = COALESCE(?, judul), 
+                isi = COALESCE(?, isi), 
+                updated_at = CURRENT_TIMESTAMP 
+            WHERE id = ?
+          `).bind(status || null, rejectionReason || null, judul || null, isi || null, id).run();
+        }
+
+        return jsonResponse({ success: true, message: `Surat Pembaca #${id} berhasil diperbarui.` });
+      } catch (e: any) {
+        return jsonResponse({ error: e.message }, 500);
+      }
+    }
+
+    // DELETE /api/surat-pembaca/:id
+    if (path.startsWith('/api/surat-pembaca/') && method === 'DELETE') {
+      const auth = await authenticateRequest(['admin', 'editor']);
+      if (auth.errorResponse) return auth.errorResponse;
+
+      try {
+        const id = path.split('/')[3];
+        if (env.DB) {
+          await env.DB.prepare("DELETE FROM surat_pembaca WHERE id = ?").bind(id).run();
+        }
+        return jsonResponse({ success: true, message: `Surat Pembaca #${id} berhasil dihapus.` });
+      } catch (e: any) {
+        return jsonResponse({ error: e.message }, 500);
+      }
+    }
+
+    // GET /api/iklan-baris
+    if (path === '/api/iklan-baris' && method === 'GET') {
+      if (env.DB) {
+        try {
+          await env.DB.prepare(`
+            CREATE TABLE IF NOT EXISTS iklan_baris (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              nama TEXT NOT NULL,
+              kota TEXT NOT NULL,
+              pekerjaan TEXT NOT NULL,
+              tahun_lahir INTEGER NOT NULL,
+              phone TEXT NOT NULL,
+              ip_address TEXT,
+              kategori TEXT NOT NULL,
+              keterangan_barang TEXT NOT NULL,
+              harga TEXT NOT NULL,
+              status TEXT DEFAULT 'pending',
+              rejection_reason TEXT,
+              created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+              updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+          `).run();
+
+          const countRes: any = await env.DB.prepare("SELECT COUNT(*) as cnt FROM iklan_baris").first();
+          if (!countRes || Number(countRes.cnt) === 0) {
+            for (const item of cfMockIklanBaris) {
+              await env.DB.prepare(`
+                INSERT INTO iklan_baris (nama, kota, pekerjaan, tahun_lahir, phone, kategori, keterangan_barang, harga, status, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              `).bind(item.nama, item.kota, item.pekerjaan, item.tahunLahir, item.phone, item.kategori, item.keteranganBarang, item.harga, item.status, item.createdAt, item.updatedAt).run();
+            }
+          }
+
+          const page = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
+          const limit = Math.max(1, parseInt(url.searchParams.get('limit') || '12'));
+          const offset = (page - 1) * limit;
+          const statusParam = url.searchParams.get('status') || 'published';
+          const kategoriParam = url.searchParams.get('kategori') || '';
+
+          const whereClauses: string[] = [];
+          const bindings: any[] = [];
+
+          if (statusParam !== 'all') {
+            whereClauses.push("status = ?");
+            bindings.push(statusParam);
+          }
+
+          if (kategoriParam && kategoriParam !== 'Semua') {
+            whereClauses.push("kategori = ?");
+            bindings.push(kategoriParam);
+          }
+
+          const whereSql = whereClauses.length > 0 ? "WHERE " + whereClauses.join(" AND ") : "";
+
+          const countQuery = `SELECT COUNT(*) as total FROM iklan_baris ${whereSql}`;
+          const totalRes: any = bindings.length > 0
+            ? await env.DB.prepare(countQuery).bind(...bindings).first()
+            : await env.DB.prepare(countQuery).first();
+          const total = totalRes ? Number(totalRes.total) : 0;
+
+          const dataQuery = `SELECT id, nama, kota, pekerjaan, tahun_lahir as tahunLahir, phone, kategori, keterangan_barang as keteranganBarang, harga, status, rejection_reason as rejectionReason, created_at as createdAt, updated_at as updatedAt FROM iklan_baris ${whereSql} ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+          const dataBindings = [...bindings, limit, offset];
+          const { results } = await env.DB.prepare(dataQuery).bind(...dataBindings).all();
+
+          return jsonResponse({
+            success: true,
+            items: results || [],
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit) || 1
+          });
+        } catch (e: any) {
+          console.error('D1 iklan_baris GET error:', e);
+        }
+      }
+
+      const page = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
+      const limit = Math.max(1, parseInt(url.searchParams.get('limit') || '12'));
+      const statusParam = url.searchParams.get('status') || 'published';
+      const kategoriParam = url.searchParams.get('kategori') || '';
+
+      let filtered = statusParam === 'all' ? cfMockIklanBaris : cfMockIklanBaris.filter(i => i.status === statusParam);
+      if (kategoriParam && kategoriParam !== 'Semua') {
+        filtered = filtered.filter(i => i.kategori === kategoriParam);
+      }
+
+      const paginated = filtered.slice((page - 1) * limit, page * limit);
+      return jsonResponse({
+        success: true,
+        items: paginated,
+        total: filtered.length,
+        page,
+        limit,
+        totalPages: Math.ceil(filtered.length / limit) || 1
+      });
+    }
+
+    // POST /api/iklan-baris
+    if (path === '/api/iklan-baris' && method === 'POST') {
+      try {
+        const body: any = await request.json().catch(() => ({}));
+        const { nama, kota, pekerjaan, tahunLahir, phone, kategori, keteranganBarang, harga, website_hp } = body;
+
+        if (website_hp) {
+          return jsonResponse({ error: 'Permintaan ditolak: Spam terdeteksi.' }, 400);
+        }
+
+        if (!nama || !kota || !pekerjaan || !tahunLahir || !phone || !kategori || !keteranganBarang || !harga) {
+          return jsonResponse({ error: 'Semua kolom formulir Iklan Baris wajib diisi.' }, 400);
+        }
+
+        const clientIp = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || '127.0.0.1';
+        const cleanNama = String(nama).replace(/<[^>]*>?/gm, '').trim();
+        const cleanKota = String(kota).replace(/<[^>]*>?/gm, '').trim();
+        const cleanPekerjaan = String(pekerjaan).replace(/<[^>]*>?/gm, '').trim();
+        const cleanKategori = String(kategori).replace(/<[^>]*>?/gm, '').trim();
+        const cleanKeterangan = String(keteranganBarang).replace(/<[^>]*>?/gm, '').trim();
+        const cleanHarga = String(harga).replace(/<[^>]*>?/gm, '').trim();
+
+        if (env.DB) {
+          await env.DB.prepare(`
+            CREATE TABLE IF NOT EXISTS iklan_baris (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              nama TEXT NOT NULL,
+              kota TEXT NOT NULL,
+              pekerjaan TEXT NOT NULL,
+              tahun_lahir INTEGER NOT NULL,
+              phone TEXT NOT NULL,
+              ip_address TEXT,
+              kategori TEXT NOT NULL,
+              keterangan_barang TEXT NOT NULL,
+              harga TEXT NOT NULL,
+              status TEXT DEFAULT 'pending',
+              rejection_reason TEXT,
+              created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+              updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+          `).run();
+
+          const insertRes = await env.DB.prepare(`
+            INSERT INTO iklan_baris (nama, kota, pekerjaan, tahun_lahir, phone, ip_address, kategori, keterangan_barang, harga, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+          `).bind(cleanNama, cleanKota, cleanPekerjaan, Number(tahunLahir), String(phone), clientIp, cleanKategori, cleanKeterangan, cleanHarga).run();
+
+          return jsonResponse({
+            success: true,
+            id: insertRes?.meta?.last_row_id || Date.now(),
+            message: 'Pemasangan Iklan Baris Anda telah berhasil dan sedang menunggu moderasi redaksi.'
+          });
+        }
+
+        return jsonResponse({
+          success: true,
+          id: Date.now(),
+          message: 'Pemasangan Iklan Baris Anda telah berhasil dan sedang menunggu moderasi redaksi.'
+        });
+      } catch (err: any) {
+        return jsonResponse({ error: err.message }, 500);
+      }
+    }
+
+    // PUT /api/iklan-baris/:id
+    if (path.startsWith('/api/iklan-baris/') && method === 'PUT') {
+      const auth = await authenticateRequest(['admin', 'editor']);
+      if (auth.errorResponse) return auth.errorResponse;
+
+      try {
+        const id = path.split('/')[3];
+        const body: any = await request.json().catch(() => ({}));
+        const { status, rejectionReason, kategori, keteranganBarang, harga } = body;
+
+        if (env.DB) {
+          await env.DB.prepare(`
+            UPDATE iklan_baris 
+            SET status = COALESCE(?, status), 
+                rejection_reason = COALESCE(?, rejection_reason), 
+                kategori = COALESCE(?, kategori), 
+                keterangan_barang = COALESCE(?, keterangan_barang), 
+                harga = COALESCE(?, harga), 
+                updated_at = CURRENT_TIMESTAMP 
+            WHERE id = ?
+          `).bind(status || null, rejectionReason || null, kategori || null, keteranganBarang || null, harga || null, id).run();
+        }
+
+        return jsonResponse({ success: true, message: `Iklan Baris #${id} berhasil diperbarui.` });
+      } catch (e: any) {
+        return jsonResponse({ error: e.message }, 500);
+      }
+    }
+
+    // DELETE /api/iklan-baris/:id
+    if (path.startsWith('/api/iklan-baris/') && method === 'DELETE') {
+      const auth = await authenticateRequest(['admin', 'editor']);
+      if (auth.errorResponse) return auth.errorResponse;
+
+      try {
+        const id = path.split('/')[3];
+        if (env.DB) {
+          await env.DB.prepare("DELETE FROM iklan_baris WHERE id = ?").bind(id).run();
+        }
+        return jsonResponse({ success: true, message: `Iklan Baris #${id} berhasil dihapus.` });
+      } catch (e: any) {
+        return jsonResponse({ error: e.message }, 500);
+      }
+    }
+
     // 11. GET /api/webhooks/cusdis or GET /api/cusdis-webhook (Health / Browser Check)
     if ((path === '/api/webhooks/cusdis' || path === '/api/cusdis-webhook') && method === 'GET') {
       return jsonResponse({
@@ -3216,6 +3706,8 @@ Berdasarkan judul artikel: "${title}" dan isi: "${(content || '').slice(0, 500)}
             else if (tableName === 'categories') description = 'Kategori dan taksonomi artikel';
             else if (tableName === 'autolinks') description = 'Aturan internal auto-linking engine';
             else if (tableName === 'comments') description = 'Komentar artikel native dan sinkronisasi Cusdis';
+            else if (tableName === 'surat_pembaca') description = 'Surat pembaca opini publik kiriman guest';
+            else if (tableName === 'iklan_baris') description = 'Iklan baris promosi jual/beli/jasa kiriman guest';
             else if (tableName === 'login_attempts') description = 'Pelacakan IP pengamanan anti brute force';
 
             tablesList.push({
@@ -3248,6 +3740,8 @@ Berdasarkan judul artikel: "${title}" dan isi: "${(content || '').slice(0, 500)}
           { name: 'categories', rowCount: 6, description: 'Kategori dan taksonomi artikel' },
           { name: 'autolinks', rowCount: 5, description: 'Aturan internal auto-linking engine' },
           { name: 'comments', rowCount: 12, description: 'Komentar artikel native dan sinkronisasi Cusdis' },
+          { name: 'surat_pembaca', rowCount: cfMockSuratPembaca.length, description: 'Surat pembaca opini publik kiriman guest' },
+          { name: 'iklan_baris', rowCount: cfMockIklanBaris.length, description: 'Iklan baris promosi jual/beli/jasa kiriman guest' },
           { name: 'login_attempts', rowCount: 0, description: 'Pelacakan IP pengamanan anti brute force' },
         ],
       });
