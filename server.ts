@@ -2579,7 +2579,161 @@ app.get('/baca/:slug', (req, res, next) => {
   }
 });
 
-// 8.B. SSR / STATIC HTML PRE-RENDERING FOR AUTHOR PROFILE PAGES (/author/:username) FOR GOOGLEBOT & CRAWLERS / AI AGENTS
+// 8.B.1. SSR / STATIC HTML PRE-RENDERING FOR AUTHORS INDEX PAGE (/author)
+app.get(['/author', '/author/'], (req, res, next) => {
+  try {
+    const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    
+    let siteName = 'Parenting';
+    let siteDescription = 'Portal informasi dan panduan pengasuhan anak modern, nutrisi balita, serta kesehatan keluarga Indonesia.';
+    try {
+      const configPath = path.join(process.cwd(), 'public', 'site_config.json');
+      if (fs.existsSync(configPath)) {
+        const fileData = fs.readFileSync(configPath, 'utf-8');
+        const parsed = JSON.parse(fileData);
+        siteName = parsed.site_name || siteName;
+        siteDescription = parsed.site_description || siteDescription;
+      }
+    } catch (e) {
+      console.error('Error loading config for author index:', e);
+    }
+
+    const pageTitle = `Daftar Penulis & Tim Redaksi | ${siteName}`;
+    const pageDesc = `Profil tim pakar, dokter, psikolog, dan penulis terverifikasi yang berkontribusi dalam edukasi pengasuhan anak di ${siteName}.`;
+    const canonicalUrl = `${siteUrl}/author`;
+
+    const authorsList = mockUsers.map((u) => {
+      const cleanName = (u.name || '')
+        .toLowerCase()
+        .replace(/^(dr\.|dr|prof\.|prof|dra\.|dra|psi\.)\s+/g, '')
+        .replace(/,\s*[a-z.\s]+$/i, '')
+        .trim();
+      const slug = cleanName.replace(/[^a-z0-9]+/g, '-');
+      return {
+        ...u,
+        slug: slug || `author-${u.id}`,
+      };
+    });
+
+    // Markdown content negotiation for AI Agents
+    const acceptHeader = (req.headers['accept'] as string) || '';
+    if (negotiateContent(acceptHeader) === 'markdown') {
+      const mdLines = [
+        `# Tim Redaksi & Penulis Terverifikasi ${siteName}`,
+        pageDesc,
+        '',
+        `## Daftar Penulis (${authorsList.length} Orang)`,
+        ...authorsList.map((a) => `- [${a.name}](${siteUrl}/author/${a.slug}) - ${a.title || 'Penulis'} (${a.bio || ''})`),
+        '',
+        '---',
+        `*Informasi penulis dipublikasikan di [${siteName}](${siteUrl})*`,
+      ];
+      const markdownText = mdLines.filter(Boolean).join('\n');
+      const tokenCount = Math.max(1, Math.ceil(markdownText.length / 4));
+
+      res.setHeader('Content-Type', 'text/markdown; charset=utf-8');
+      res.setHeader('x-markdown-tokens', tokenCount.toString());
+      res.setHeader('Vary', 'Accept');
+      res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400');
+      return res.status(200).send(markdownText);
+    }
+
+    // Pre-render HTML cards for authors
+    const authorsHtml = authorsList.map((a) => `
+      <div style="margin-bottom: 24px; padding: 24px; border: 1px solid #e2e8f0; border-radius: 20px; background: #ffffff; display: flex; gap: 20px; align-items: center;">
+        <img src="${a.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=50'}" alt="${a.name}" style="width: 80px; height: 80px; border-radius: 16px; object-fit: cover; border: 2px solid #e11d48;" />
+        <div>
+          ${a.isVerifiedAcademic ? `<span style="display: inline-block; padding: 2px 8px; background: #fff1f2; color: #e11d48; font-size: 10px; font-weight: 800; border-radius: 9999px; text-transform: uppercase; margin-bottom: 4px;">${a.verifiedAcademicLabel || 'Terverifikasi'}</span>` : ''}
+          <h3 style="font-size: 1.3rem; font-weight: 900; margin: 0 0 4px 0;">
+            <a href="/author/${a.slug}" style="color: #0f172a; text-decoration: none;">${a.name}</a>
+          </h3>
+          ${a.title ? `<p style="font-size: 0.85rem; font-weight: 700; color: #e11d48; margin: 0 0 8px 0;">${a.title}</p>` : ''}
+          <p style="font-size: 0.9rem; color: #475569; margin: 0; line-height: 1.5;">${a.bio || ''}</p>
+        </div>
+      </div>
+    `).join('');
+
+    const preRenderedBody = `
+      <div style="min-height: 100vh; background-color: #f8fafc; color: #0f172a; font-family: system-ui, -apple-system, sans-serif; padding-bottom: 48px;">
+        <header style="background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 16px;">
+          <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+            <a href="/" style="color: #e11d48; font-weight: 900; font-size: 1.3rem; text-decoration: none;">👶 ${siteName}</a>
+          </div>
+        </header>
+        <main style="max-width: 800px; margin: 40px auto; padding: 0 16px;">
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); margin-bottom: 32px; text-align: center;">
+            <span style="display: inline-block; padding: 4px 12px; background: #e11d48; color: #ffffff; font-size: 10px; font-weight: 800; border-radius: 9999px; text-transform: uppercase; margin-bottom: 12px;">Tim Redaksi</span>
+            <h1 style="font-size: 2.2rem; font-weight: 900; margin: 0 0 8px 0; color: #0f172a;">Penulis & Pakar Terverifikasi</h1>
+            <p style="color: #475569; font-size: 1rem; line-height: 1.6; max-width: 600px; margin: 0 auto;">${pageDesc}</p>
+          </div>
+
+          <h2 style="font-size: 1.4rem; font-weight: 900; color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 24px;">
+            Menampilkan ${authorsList.length} Tim Penulis
+          </h2>
+          ${authorsHtml}
+        </main>
+      </div>
+    `;
+
+    const schemaCollection = {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      'name': pageTitle,
+      'description': pageDesc,
+      'url': canonicalUrl,
+      'publisher': {
+        '@type': 'Organization',
+        'name': siteName,
+        'url': siteUrl,
+      },
+      'mainEntity': {
+        '@type': 'ItemList',
+        'numberOfItems': authorsList.length,
+        'itemListElement': authorsList.map((a, index) => ({
+          '@type': 'ListItem',
+          'position': index + 1,
+          'item': {
+            '@type': 'Person',
+            'name': a.name,
+            'jobTitle': a.title || 'Penulis',
+            'url': `${siteUrl}/author/${a.slug}`,
+            'image': a.avatar || undefined,
+          },
+        })),
+      },
+    };
+
+    const seoTags = `
+      <title>${pageTitle}</title>
+      <meta name="description" content="${pageDesc}" />
+      <link rel="canonical" href="${canonicalUrl}" />
+      <meta property="og:title" content="${pageTitle}" />
+      <meta property="og:description" content="${pageDesc}" />
+      <meta property="og:url" content="${canonicalUrl}" />
+      <meta property="og:type" content="website" />
+      <script type="application/ld+json">${JSON.stringify(schemaCollection)}</script>
+    `;
+
+    let htmlFilePath = path.join(process.cwd(), 'dist', 'index.html');
+    if (!fs.existsSync(htmlFilePath)) {
+      htmlFilePath = path.join(process.cwd(), 'index.html');
+    }
+
+    let htmlTemplate = fs.readFileSync(htmlFilePath, 'utf-8');
+    htmlTemplate = htmlTemplate.replace(/<!--\s*SEO_INJECTION_POINT\s*-->/i, seoTags);
+    htmlTemplate = htmlTemplate.replace(/<title>.*?<\/title>/i, `<title>${pageTitle}</title>`);
+    htmlTemplate = htmlTemplate.replace(/<div\s+id="root"><\/div>/i, `<div id="root">${preRenderedBody}</div>`);
+
+    res.header('Content-Type', 'text/html; charset=utf-8');
+    res.header('Vary', 'Accept');
+    return res.send(htmlTemplate);
+  } catch (e) {
+    console.error('Error rendering author index:', e);
+    return next();
+  }
+});
+
+// 8.B.2. SSR / STATIC HTML PRE-RENDERING FOR AUTHOR PROFILE PAGES (/author/:username) FOR GOOGLEBOT & CRAWLERS / AI AGENTS
 app.get('/author/:username', (req, res, next) => {
   const { username } = req.params;
   
@@ -2750,7 +2904,164 @@ app.get('/author/:username', (req, res, next) => {
   }
 });
 
-// 8.C. SSR / STATIC HTML PRE-RENDERING FOR TAG ARCHIVE PAGES (/tag/:tag) FOR GOOGLEBOT & CRAWLERS / AI AGENTS
+// 8.C.1. SSR / STATIC HTML PRE-RENDERING FOR TAGS INDEX PAGE (/tag)
+app.get(['/tag', '/tag/'], (req, res, next) => {
+  try {
+    const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    
+    let siteName = 'Parenting';
+    let siteDescription = 'Portal informasi dan panduan pengasuhan anak modern, nutrisi balita, serta kesehatan keluarga Indonesia.';
+    try {
+      const configPath = path.join(process.cwd(), 'public', 'site_config.json');
+      if (fs.existsSync(configPath)) {
+        const fileData = fs.readFileSync(configPath, 'utf-8');
+        const parsed = JSON.parse(fileData);
+        siteName = parsed.site_name || siteName;
+        siteDescription = parsed.site_description || siteDescription;
+      }
+    } catch (e) {
+      console.error('Error loading config for tag index:', e);
+    }
+
+    const pageTitle = `Daftar Tag & Topik Artikel | ${siteName}`;
+    const pageDesc = `Jelajahi kumpulan topik, kata kunci, dan tag artikel seputar dunia pengasuhan anak, kesehatan balita, dan edukasi keluarga di ${siteName}.`;
+    const canonicalUrl = `${siteUrl}/tag`;
+
+    // Extract all unique tags
+    const allTagsMap = new Map<string, { name: string; slug: string; count: number }>();
+    mockPosts.forEach((post) => {
+      if (post.status && post.status !== 'published') return;
+      if (!post.tags) return;
+      const tagsArr = post.tags.split(',').map((t: string) => t.trim()).filter(Boolean);
+      tagsArr.forEach((rawTag: string) => {
+        const slug = rawTag.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        if (!slug) return;
+        const existing = allTagsMap.get(slug);
+        if (existing) {
+          existing.count += 1;
+        } else {
+          allTagsMap.set(slug, {
+            name: rawTag,
+            slug: slug,
+            count: 1,
+          });
+        }
+      });
+    });
+
+    const tagsList = Array.from(allTagsMap.values()).sort((a, b) => b.count - a.count);
+
+    // Markdown content negotiation for AI Agents
+    const acceptHeader = (req.headers['accept'] as string) || '';
+    if (negotiateContent(acceptHeader) === 'markdown') {
+      const mdLines = [
+        `# Indeks Tag & Topik Artikel ${siteName}`,
+        pageDesc,
+        '',
+        `## Kumpulan Tag (${tagsList.length} Topik)`,
+        ...tagsList.map((t) => `- [#${t.name}](${siteUrl}/tag/${t.slug}) (${t.count} Artikel)`),
+        '',
+        '---',
+        `*Informasi tag dipublikasikan di [${siteName}](${siteUrl})*`,
+      ];
+      const markdownText = mdLines.filter(Boolean).join('\n');
+      const tokenCount = Math.max(1, Math.ceil(markdownText.length / 4));
+
+      res.setHeader('Content-Type', 'text/markdown; charset=utf-8');
+      res.setHeader('x-markdown-tokens', tokenCount.toString());
+      res.setHeader('Vary', 'Accept');
+      res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400');
+      return res.status(200).send(markdownText);
+    }
+
+    // Pre-render HTML cards for tags
+    const tagsHtml = tagsList.map((t) => `
+      <div style="display: inline-block; margin: 6px; padding: 12px 20px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+        <a href="/tag/${t.slug}" style="color: #e11d48; font-weight: 800; text-decoration: none; font-size: 1.05rem;">#${t.name}</a>
+        <span style="font-size: 0.75rem; color: #64748b; margin-left: 8px; font-weight: 600; background: #f1f5f9; padding: 2px 8px; border-radius: 9999px;">${t.count} artikel</span>
+      </div>
+    `).join('');
+
+    const preRenderedBody = `
+      <div style="min-height: 100vh; background-color: #f8fafc; color: #0f172a; font-family: system-ui, -apple-system, sans-serif; padding-bottom: 48px;">
+        <header style="background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 16px;">
+          <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+            <a href="/" style="color: #e11d48; font-weight: 900; font-size: 1.3rem; text-decoration: none;">👶 ${siteName}</a>
+          </div>
+        </header>
+        <main style="max-width: 800px; margin: 40px auto; padding: 0 16px;">
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); margin-bottom: 32px; text-align: center;">
+            <span style="display: inline-block; padding: 4px 12px; background: #e11d48; color: #ffffff; font-size: 10px; font-weight: 800; border-radius: 9999px; text-transform: uppercase; margin-bottom: 12px;">Tag & Topik</span>
+            <h1 style="font-size: 2.2rem; font-weight: 900; margin: 0 0 8px 0; color: #0f172a;">Jelajahi Berdasarkan Topik</h1>
+            <p style="color: #475569; font-size: 1rem; line-height: 1.6; max-width: 600px; margin: 0 auto;">${pageDesc}</p>
+          </div>
+
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px; margin-bottom: 24px;">
+            <h2 style="font-size: 1.3rem; font-weight: 900; color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 16px;">
+              ${tagsList.length} Tag Terpopuler
+            </h2>
+            <div style="line-height: 2;">
+              ${tagsHtml}
+            </div>
+          </div>
+        </main>
+      </div>
+    `;
+
+    const schemaCollection = {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      'name': pageTitle,
+      'description': pageDesc,
+      'url': canonicalUrl,
+      'publisher': {
+        '@type': 'Organization',
+        'name': siteName,
+        'url': siteUrl,
+      },
+      'mainEntity': {
+        '@type': 'ItemList',
+        'numberOfItems': tagsList.length,
+        'itemListElement': tagsList.map((t, index) => ({
+          '@type': 'ListItem',
+          'position': index + 1,
+          'name': `#${t.name}`,
+          'url': `${siteUrl}/tag/${t.slug}`,
+        })),
+      },
+    };
+
+    const seoTags = `
+      <title>${pageTitle}</title>
+      <meta name="description" content="${pageDesc}" />
+      <link rel="canonical" href="${canonicalUrl}" />
+      <meta property="og:title" content="${pageTitle}" />
+      <meta property="og:description" content="${pageDesc}" />
+      <meta property="og:url" content="${canonicalUrl}" />
+      <meta property="og:type" content="website" />
+      <script type="application/ld+json">${JSON.stringify(schemaCollection)}</script>
+    `;
+
+    let htmlFilePath = path.join(process.cwd(), 'dist', 'index.html');
+    if (!fs.existsSync(htmlFilePath)) {
+      htmlFilePath = path.join(process.cwd(), 'index.html');
+    }
+
+    let htmlTemplate = fs.readFileSync(htmlFilePath, 'utf-8');
+    htmlTemplate = htmlTemplate.replace(/<!--\s*SEO_INJECTION_POINT\s*-->/i, seoTags);
+    htmlTemplate = htmlTemplate.replace(/<title>.*?<\/title>/i, `<title>${pageTitle}</title>`);
+    htmlTemplate = htmlTemplate.replace(/<div\s+id="root"><\/div>/i, `<div id="root">${preRenderedBody}</div>`);
+
+    res.header('Content-Type', 'text/html; charset=utf-8');
+    res.header('Vary', 'Accept');
+    return res.send(htmlTemplate);
+  } catch (e) {
+    console.error('Error rendering tag index:', e);
+    return next();
+  }
+});
+
+// 8.C.2. SSR / STATIC HTML PRE-RENDERING FOR TAG ARCHIVE PAGES (/tag/:tag) FOR GOOGLEBOT & CRAWLERS / AI AGENTS
 app.get(['/tag/:tag', '/tag/:tag/'], (req, res, next) => {
   let { tag } = req.params;
   if (!tag) return next();
@@ -2921,7 +3232,162 @@ app.get(['/tag/:tag', '/tag/:tag/'], (req, res, next) => {
   }
 });
 
-// 8.D. SSR / STATIC HTML PRE-RENDERING FOR CATEGORY PAGES (/kategori/:category) FOR GOOGLEBOT & CRAWLERS / AI AGENTS
+// 8.D.1. SSR / STATIC HTML PRE-RENDERING FOR CATEGORIES INDEX PAGE (/kategori)
+app.get(['/kategori', '/kategori/'], (req, res, next) => {
+  try {
+    const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    
+    let siteName = 'Parenting';
+    let siteDescription = 'Portal informasi dan panduan pengasuhan anak modern, nutrisi balita, serta kesehatan keluarga Indonesia.';
+    try {
+      const configPath = path.join(process.cwd(), 'public', 'site_config.json');
+      if (fs.existsSync(configPath)) {
+        const fileData = fs.readFileSync(configPath, 'utf-8');
+        const parsed = JSON.parse(fileData);
+        siteName = parsed.site_name || siteName;
+        siteDescription = parsed.site_description || siteDescription;
+      }
+    } catch (e) {
+      console.error('Error loading config for category index:', e);
+    }
+
+    const pageTitle = `Daftar Kategori Artikel | ${siteName}`;
+    const pageDesc = `Temukan artikel, tips pengasuhan anak, nutrisi, dan tumbuh kembang berdasarkan kategori topik pilihan di ${siteName}.`;
+    const canonicalUrl = `${siteUrl}/kategori`;
+
+    // Extract all unique categories
+    const categoriesMap = new Map<string, { name: string; slug: string; count: number; excerpt?: string }>();
+    mockPosts.forEach((post) => {
+      if (post.status && post.status !== 'published') return;
+      const catName = post.category || 'Umum';
+      const slug = catName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      const existing = categoriesMap.get(slug);
+      if (existing) {
+        existing.count += 1;
+      } else {
+        categoriesMap.set(slug, {
+          name: catName,
+          slug: slug,
+          count: 1,
+          excerpt: post.excerpt,
+        });
+      }
+    });
+
+    const categoriesList = Array.from(categoriesMap.values()).sort((a, b) => b.count - a.count);
+
+    // Markdown content negotiation for AI Agents
+    const acceptHeader = (req.headers['accept'] as string) || '';
+    if (negotiateContent(acceptHeader) === 'markdown') {
+      const mdLines = [
+        `# Indeks Kategori Artikel ${siteName}`,
+        pageDesc,
+        '',
+        `## Kumpulan Kategori (${categoriesList.length} Kategori Utama)`,
+        ...categoriesList.map((c) => `- [${c.name}](${siteUrl}/kategori/${c.slug}) (${c.count} Artikel) - ${c.excerpt || ''}`),
+        '',
+        '---',
+        `*Informasi kategori dipublikasikan di [${siteName}](${siteUrl})*`,
+      ];
+      const markdownText = mdLines.filter(Boolean).join('\n');
+      const tokenCount = Math.max(1, Math.ceil(markdownText.length / 4));
+
+      res.setHeader('Content-Type', 'text/markdown; charset=utf-8');
+      res.setHeader('x-markdown-tokens', tokenCount.toString());
+      res.setHeader('Vary', 'Accept');
+      res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400');
+      return res.status(200).send(markdownText);
+    }
+
+    // Pre-render HTML cards for categories
+    const categoriesHtml = categoriesList.map((c) => `
+      <div style="margin-bottom: 20px; padding: 24px; border: 1px solid #e2e8f0; border-radius: 20px; background: #ffffff;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <h3 style="font-size: 1.4rem; font-weight: 900; margin: 0;">
+            <a href="/kategori/${c.slug}" style="color: #0f172a; text-decoration: none;">${c.name}</a>
+          </h3>
+          <span style="font-size: 0.75rem; color: #e11d48; font-weight: 800; background: #fff1f2; padding: 4px 12px; border-radius: 9999px;">${c.count} Artikel</span>
+        </div>
+        <p style="font-size: 0.95rem; color: #475569; margin: 0; line-height: 1.6;">${c.excerpt || `Kumpulan panduan dan edukasi seputar ${c.name}.`}</p>
+      </div>
+    `).join('');
+
+    const preRenderedBody = `
+      <div style="min-height: 100vh; background-color: #f8fafc; color: #0f172a; font-family: system-ui, -apple-system, sans-serif; padding-bottom: 48px;">
+        <header style="background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 16px;">
+          <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+            <a href="/" style="color: #e11d48; font-weight: 900; font-size: 1.3rem; text-decoration: none;">👶 ${siteName}</a>
+          </div>
+        </header>
+        <main style="max-width: 800px; margin: 40px auto; padding: 0 16px;">
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); margin-bottom: 32px; text-align: center;">
+            <span style="display: inline-block; padding: 4px 12px; background: #e11d48; color: #ffffff; font-size: 10px; font-weight: 800; border-radius: 9999px; text-transform: uppercase; margin-bottom: 12px;">Kategori Utama</span>
+            <h1 style="font-size: 2.2rem; font-weight: 900; margin: 0 0 8px 0; color: #0f172a;">Jelajahi Berdasarkan Kategori</h1>
+            <p style="color: #475569; font-size: 1rem; line-height: 1.6; max-width: 600px; margin: 0 auto;">${pageDesc}</p>
+          </div>
+
+          <h2 style="font-size: 1.4rem; font-weight: 900; color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 24px;">
+            Daftar ${categoriesList.length} Kategori Utama
+          </h2>
+          ${categoriesHtml}
+        </main>
+      </div>
+    `;
+
+    const schemaCollection = {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      'name': pageTitle,
+      'description': pageDesc,
+      'url': canonicalUrl,
+      'publisher': {
+        '@type': 'Organization',
+        'name': siteName,
+        'url': siteUrl,
+      },
+      'mainEntity': {
+        '@type': 'ItemList',
+        'numberOfItems': categoriesList.length,
+        'itemListElement': categoriesList.map((c, index) => ({
+          '@type': 'ListItem',
+          'position': index + 1,
+          'name': c.name,
+          'url': `${siteUrl}/kategori/${c.slug}`,
+        })),
+      },
+    };
+
+    const seoTags = `
+      <title>${pageTitle}</title>
+      <meta name="description" content="${pageDesc}" />
+      <link rel="canonical" href="${canonicalUrl}" />
+      <meta property="og:title" content="${pageTitle}" />
+      <meta property="og:description" content="${pageDesc}" />
+      <meta property="og:url" content="${canonicalUrl}" />
+      <meta property="og:type" content="website" />
+      <script type="application/ld+json">${JSON.stringify(schemaCollection)}</script>
+    `;
+
+    let htmlFilePath = path.join(process.cwd(), 'dist', 'index.html');
+    if (!fs.existsSync(htmlFilePath)) {
+      htmlFilePath = path.join(process.cwd(), 'index.html');
+    }
+
+    let htmlTemplate = fs.readFileSync(htmlFilePath, 'utf-8');
+    htmlTemplate = htmlTemplate.replace(/<!--\s*SEO_INJECTION_POINT\s*-->/i, seoTags);
+    htmlTemplate = htmlTemplate.replace(/<title>.*?<\/title>/i, `<title>${pageTitle}</title>`);
+    htmlTemplate = htmlTemplate.replace(/<div\s+id="root"><\/div>/i, `<div id="root">${preRenderedBody}</div>`);
+
+    res.header('Content-Type', 'text/html; charset=utf-8');
+    res.header('Vary', 'Accept');
+    return res.send(htmlTemplate);
+  } catch (e) {
+    console.error('Error rendering category index:', e);
+    return next();
+  }
+});
+
+// 8.D.2. SSR / STATIC HTML PRE-RENDERING FOR CATEGORY PAGES (/kategori/:category) FOR GOOGLEBOT & CRAWLERS / AI AGENTS
 app.get(['/kategori/:category', '/kategori/:category/'], (req, res, next) => {
   let { category } = req.params;
   if (!category) return next();
