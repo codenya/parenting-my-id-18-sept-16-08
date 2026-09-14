@@ -4189,6 +4189,30 @@ app.get('/.well-known/api-catalog', (req, res) => {
             href: '/.well-known/oauth-protected-resource',
             type: 'application/json',
           },
+          {
+            href: '/.well-known/agent-card.json',
+            type: 'application/json',
+          },
+          {
+            href: '/.well-known/skills.json',
+            type: 'application/json',
+          },
+          {
+            href: '/.well-known/agent-skills/index.json',
+            type: 'application/json',
+          },
+          {
+            href: '/.well-known/mcp-server.json',
+            type: 'application/json',
+          },
+          {
+            href: '/.well-known/web-bot-auth.json',
+            type: 'application/json',
+          },
+          {
+            href: '/.well-known/webmcp.json',
+            type: 'application/json',
+          },
         ],
         'oauth-authorization-server': [
           {
@@ -4387,7 +4411,14 @@ app.get(['/.well-known/agent-card.json', '/.well-known/a2a.json', '/.well-known/
 });
 
 // Skills Index Endpoint
-app.get(['/.well-known/skills.json', '/.well-known/agent-skills.json'], (req, res) => {
+app.get([
+  '/.well-known/skills.json',
+  '/.well-known/agent-skills.json',
+  '/.well-known/agent-skills/index.json',
+  '/.well-known/agent-skills/index',
+  '/.well-known/agent-skills',
+  '/.well-known/agent-skills/skills.json'
+], (req, res) => {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Cache-Control', 'public, max-age=3600');
   res.setHeader('Access-Control-Allow-Origin', '*');

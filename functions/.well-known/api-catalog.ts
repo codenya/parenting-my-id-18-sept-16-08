@@ -25,6 +25,10 @@ export const onRequest: PagesFunction<Env> = async () => {
             "type": "application/json"
           },
           {
+            "href": "/.well-known/agent-skills/index.json",
+            "type": "application/json"
+          },
+          {
             "href": "/.well-known/mcp-server.json",
             "type": "application/json"
           },
