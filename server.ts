@@ -2237,6 +2237,37 @@ app.post('/api/database/dump', requireAuth(['admin']), (req, res) => {
   attempts INTEGER DEFAULT 0,
   last_attempt INTEGER DEFAULT 0
 );`,
+      surat_pembaca: `CREATE TABLE IF NOT EXISTS surat_pembaca (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nama TEXT NOT NULL,
+  kota TEXT NOT NULL,
+  pekerjaan TEXT NOT NULL,
+  tahun_lahir INTEGER NOT NULL,
+  phone TEXT NOT NULL,
+  ip_address TEXT,
+  judul TEXT NOT NULL,
+  isi TEXT NOT NULL,
+  status TEXT DEFAULT 'pending',
+  rejection_reason TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);`,
+      iklan_baris: `CREATE TABLE IF NOT EXISTS iklan_baris (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nama TEXT NOT NULL,
+  kota TEXT NOT NULL,
+  pekerjaan TEXT NOT NULL,
+  tahun_lahir INTEGER NOT NULL,
+  phone TEXT NOT NULL,
+  ip_address TEXT,
+  kategori TEXT NOT NULL,
+  keterangan_barang TEXT NOT NULL,
+  harga TEXT NOT NULL,
+  status TEXT DEFAULT 'pending',
+  rejection_reason TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);`,
     };
 
     // Prepare table data rows
@@ -2308,13 +2339,15 @@ app.post('/api/database/dump', requireAuth(['admin']), (req, res) => {
         id: c.id,
         post_id: c.post_id || null,
         post_slug: c.post_slug || '',
-        user_name: c.user_name || 'Anonim',
+        user_name: c.user_name || '',
         user_email: c.user_email || '',
         user_avatar: c.user_avatar || '',
         content: c.content || '',
         status: c.status || 'approved',
         created_at: c.created_at || new Date().toISOString(),
       })),
+      surat_pembaca: mockSuratPembaca,
+      iklan_baris: mockIklanBaris,
       login_attempts: [],
     };
 
