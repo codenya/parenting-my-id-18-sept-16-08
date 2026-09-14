@@ -829,10 +829,10 @@ export default function RichPostEditor({
       {/* ------------------------------------------------------------- */}
       {/* MAIN CONTENT EDITOR SECTION */}
       {/* ------------------------------------------------------------- */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="space-y-6">
         
-        {/* EDITOR AREA (8 COLS) */}
-        <div className="lg:col-span-8 space-y-4">
+        {/* EDITOR AREA (FULL WIDTH) */}
+        <div className="w-full space-y-4">
           <div className={`rounded-3xl p-5 sm:p-7 border transition-colors ${
             userRole === 'writer'
               ? 'bg-[#FAF9F6] dark:bg-slate-900 border-[#E5E3DC] dark:border-slate-800 shadow-xs text-[#2D3748] dark:text-slate-100'
@@ -4000,8 +4000,11 @@ export default function RichPostEditor({
           </div>
         </div>
 
-        {/* SIDEBAR METADATA & GEMINI AI (4 COLS) */}
-        <div className="lg:col-span-4 space-y-4">
+        {/* ASSISTANT, METADATA, & REVISIONS SECTIONS STACKED BELOW */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
+          
+          {/* LEFT BOTTOM ROW: AI & METADATA */}
+          <div className="space-y-6">
           
           {/* AI GEMINI ASSISTANT CARD */}
           {userRole !== 'writer' && (
@@ -4186,6 +4189,10 @@ export default function RichPostEditor({
             </div>
 
           </div>
+          </div>
+
+          {/* RIGHT BOTTOM ROW: SEO AUDITOR, AUTHORS & REVISIONS */}
+          <div className="space-y-6">
 
           {/* REAL-TIME AUTO IN-PAGE SEO AUDITOR WIDGET */}
           {userRole !== 'writer' && (
@@ -4359,6 +4366,7 @@ export default function RichPostEditor({
 
         </div>
 
+      </div>
       </div>
 
       {/* BOTTOM ACTION BAR FOR CONVENIENT SAVING / PUBLISHING */}
