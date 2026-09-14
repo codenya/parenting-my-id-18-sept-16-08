@@ -10,7 +10,7 @@ import {
   List, ListOrdered, CheckSquare, Quote, Code, Table, Minus, 
   Link as LinkIcon, Link2, Image as ImageIcon, Upload, Eye, Edit3, Columns, 
   Undo, Redo, Sparkles, CheckCircle2, RefreshCw, X, Copy, Check, FileText,
-  Users, History, RotateCcw, Award, ShieldCheck, Send, AlertTriangle, AlertCircle, ThumbsUp, XCircle, Video, ShoppingBag
+  Users, History, RotateCcw, Award, ShieldCheck, Send, AlertTriangle, AlertCircle, ThumbsUp, XCircle, Video, ShoppingBag, Maximize2, Minimize2
 } from 'lucide-react';
 
 interface RichPostEditorProps {
@@ -74,6 +74,8 @@ interface RichPostEditorProps {
   setDisclaimerType?: (val: 'none' | 'medical_psychology' | 'financial' | 'legal' | 'academic' | 'custom') => void;
   customDisclaimerText?: string;
   setCustomDisclaimerText?: (val: string) => void;
+  isZenMode?: boolean;
+  setIsZenMode?: (val: boolean) => void;
 }
 
 export default function RichPostEditor({
@@ -137,6 +139,8 @@ export default function RichPostEditor({
   setDisclaimerType,
   customDisclaimerText = '',
   setCustomDisclaimerText,
+  isZenMode = false,
+  setIsZenMode,
 }: RichPostEditorProps) {
   // Rejection modal state
   const [showRejectModal, setShowRejectModal] = useState(false);
@@ -598,51 +602,71 @@ export default function RichPostEditor({
           : 'bg-slate-900 text-white border-slate-800 shadow-md'
       }`}>
         
-        {/* VIEW MODE TOGGLE */}
-        <div className={`flex items-center gap-1 p-1 rounded-2xl border ${
-          userRole === 'writer'
-            ? 'bg-slate-100/80 dark:bg-slate-800 border-slate-200 dark:border-slate-700'
-            : 'bg-slate-800 border-slate-700'
-        }`}>
-          <button
-            type="button"
-            onClick={() => setViewMode('write')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
-              viewMode === 'write'
-                ? 'bg-rose-600 text-white shadow-xs'
-                : userRole === 'writer' ? 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700' : 'text-slate-300 hover:text-white hover:bg-slate-700'
-            }`}
-          >
-            <Edit3 className="w-3.5 h-3.5" />
-            <span>Tulis</span>
-          </button>
+        {/* VIEW MODE & ZEN MODE TOGGLE */}
+        <div className="flex items-center gap-2">
+          <div className={`flex items-center gap-1 p-1 rounded-2xl border ${
+            userRole === 'writer'
+              ? 'bg-slate-100/80 dark:bg-slate-800 border-slate-200 dark:border-slate-700'
+              : 'bg-slate-800 border-slate-700'
+          }`}>
+            <button
+              type="button"
+              onClick={() => setViewMode('write')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
+                viewMode === 'write'
+                  ? 'bg-rose-600 text-white shadow-xs'
+                  : userRole === 'writer' ? 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700' : 'text-slate-300 hover:text-white hover:bg-slate-700'
+              }`}
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+              <span>Tulis</span>
+            </button>
 
-          {/* HIDDEN ON MOBILE (SCREEN < MD) TO AVOID UNSUITABLE SPLIT SCREEN */}
-          <button
-            type="button"
-            onClick={() => setViewMode('split')}
-            className={`hidden md:flex px-3 py-1.5 rounded-xl text-xs font-bold transition-colors items-center gap-1.5 ${
-              viewMode === 'split'
-                ? 'bg-rose-600 text-white shadow-xs'
-                : userRole === 'writer' ? 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700' : 'text-slate-300 hover:text-white hover:bg-slate-700'
-            }`}
-          >
-            <Columns className="w-3.5 h-3.5" />
-            <span>Bagi Layar</span>
-          </button>
+            {/* HIDDEN ON MOBILE (SCREEN < MD) TO AVOID UNSUITABLE SPLIT SCREEN */}
+            <button
+              type="button"
+              onClick={() => setViewMode('split')}
+              className={`hidden md:flex px-3 py-1.5 rounded-xl text-xs font-bold transition-colors items-center gap-1.5 ${
+                viewMode === 'split'
+                  ? 'bg-rose-600 text-white shadow-xs'
+                  : userRole === 'writer' ? 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700' : 'text-slate-300 hover:text-white hover:bg-slate-700'
+              }`}
+            >
+              <Columns className="w-3.5 h-3.5" />
+              <span>Bagi Layar</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setViewMode('preview')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
-              viewMode === 'preview'
-                ? 'bg-rose-600 text-white shadow-xs'
-                : userRole === 'writer' ? 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700' : 'text-slate-300 hover:text-white hover:bg-slate-700'
-            }`}
-          >
-            <Eye className="w-3.5 h-3.5" />
-            <span>Pratinjau</span>
-          </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('preview')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
+                viewMode === 'preview'
+                  ? 'bg-rose-600 text-white shadow-xs'
+                  : userRole === 'writer' ? 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700' : 'text-slate-300 hover:text-white hover:bg-slate-700'
+              }`}
+            >
+              <Eye className="w-3.5 h-3.5" />
+              <span>Pratinjau</span>
+            </button>
+          </div>
+
+          {/* ZEN MODE TOGGLER */}
+          {setIsZenMode && (
+            <button
+              type="button"
+              onClick={() => setIsZenMode(!isZenMode)}
+              title={isZenMode ? "Keluar dari Zen Mode (Tampilkan Sidebar)" : "Zen Mode (Sembunyikan Sidebar & Perluas Ruang Ketik)"}
+              className={`p-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center ${
+                isZenMode
+                  ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                  : userRole === 'writer'
+                    ? 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+                    : 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700'
+              }`}
+            >
+              {isZenMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            </button>
+          )}
         </div>
 
         {/* AUTO-SAVE STATUS INDICATOR */}

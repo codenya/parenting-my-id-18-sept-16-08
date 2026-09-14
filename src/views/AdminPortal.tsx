@@ -7,7 +7,8 @@ import {
   Upload, Eye, Sparkles, CheckCircle2, RefreshCw, Bold, Italic, Heading2, 
   Heading3, List, ListOrdered, Quote, Image as ImageIcon, Code, UserCheck, 
   ExternalLink, Search, Zap, AlertCircle, Settings, Key, Copy, Check, 
-  LogOut, Globe, Palette, Layout, MessageSquare, Droplet, Users, Award, History, RotateCcw, X, Menu, LayoutGrid, Database, ShoppingBag, BarChart2
+  LogOut, Globe, Palette, Layout, MessageSquare, Droplet, Users, Award, History, RotateCcw, X, Menu, LayoutGrid, Database, ShoppingBag, BarChart2,
+  ChevronLeft, ChevronRight, Maximize2, Minimize2
 } from 'lucide-react';
 import { generateSlug } from '../lib/autolink';
 import RichPostEditor from '../components/RichPostEditor';
@@ -76,6 +77,10 @@ export default function AdminPortal({
 
   // Admin tabs: 'posts' | 'editor' | 'writers' | 'autolinks' | 'sitemap' | 'config' | 'security' | 'comments' | 'database' | 'products' | 'wa_leads'
   const [activeTab, setActiveTab] = useState<'posts' | 'editor' | 'writers' | 'autolinks' | 'sitemap' | 'config' | 'security' | 'comments' | 'database' | 'products' | 'wa_leads'>('posts');
+
+  // Sidebar controls
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isZenMode, setIsZenMode] = useState(false);
 
   // Comments & Cusdis Webhook State
   const [comments, setComments] = useState<any[]>([]);
@@ -2085,46 +2090,72 @@ export default function AdminPortal({
       {/* TWO-COLUMN LAYOUT: SIDEBAR + MAIN CONTENT */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        {/* LEFT COLUMN: THE GORGEOUS SIDEBAR NAVIGATION (lg:col-span-3) */}
-        <div className="lg:col-span-3 bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 lg:sticky lg:top-8">
-          <div className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800/60 pb-3">
-            <span className="text-[10px] font-black tracking-widest uppercase text-slate-400 dark:text-slate-500">
-              Menu Navigasi CMS
-            </span>
+        {/* LEFT COLUMN: THE GORGEOUS SIDEBAR NAVIGATION */}
+        <div className={`${
+          isZenMode && activeTab === 'editor'
+            ? 'hidden'
+            : isSidebarCollapsed
+              ? 'lg:col-span-1 p-3 text-center'
+              : 'lg:col-span-3 p-5'
+        } bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 lg:sticky lg:top-8 transition-all duration-300`}>
+          
+          <div className={`px-3 py-1.5 border-b border-slate-100 dark:border-slate-800/60 pb-3 flex items-center ${isSidebarCollapsed ? 'justify-center' : 'justify-between'}`}>
+            {!isSidebarCollapsed && (
+              <span className="text-[10px] font-black tracking-widest uppercase text-slate-400 dark:text-slate-500 whitespace-nowrap">
+                Menu Navigasi
+              </span>
+            )}
+            <button
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 transition-colors"
+              title={isSidebarCollapsed ? "Lebarkan Sidebar" : "Sembunyikan Label Sidebar"}
+            >
+              {isSidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            </button>
           </div>
 
           <nav className="space-y-1">
             {/* 1. Daftar Artikel */}
             <button
               onClick={() => setActiveTab('posts')}
-              className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+              title="Daftar Artikel"
+              className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                isSidebarCollapsed ? 'justify-center px-2' : 'px-4'
+              } ${
                 activeTab === 'posts'
                   ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              <FileText className={`w-4 h-4 ${activeTab === 'posts' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
-              <div className="flex-1 text-left flex items-center justify-between">
-                <span>Daftar Artikel</span>
-                <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
-                  activeTab === 'posts' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                }`}>
-                  {userRole === 'writer' ? userPosts.length : posts.length}
-                </span>
-              </div>
+              <FileText className={`w-4 h-4 shrink-0 ${activeTab === 'posts' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+              {!isSidebarCollapsed && (
+                <div className="flex-1 text-left flex items-center justify-between whitespace-nowrap overflow-hidden">
+                  <span>Daftar Artikel</span>
+                  <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
+                    activeTab === 'posts' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                  }`}>
+                    {userRole === 'writer' ? userPosts.length : posts.length}
+                  </span>
+                </div>
+              )}
             </button>
 
             {/* 2. Tulis Artikel */}
             <button
               onClick={() => setActiveTab('editor')}
-              className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+              title="Tulis Artikel"
+              className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                isSidebarCollapsed ? 'justify-center px-2' : 'px-4'
+              } ${
                 activeTab === 'editor'
                   ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              <Edit3 className={`w-4 h-4 ${activeTab === 'editor' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
-              <span className="flex-1 text-left">Tulis Artikel</span>
+              <Edit3 className={`w-4 h-4 shrink-0 ${activeTab === 'editor' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+              {!isSidebarCollapsed && (
+                <span className="flex-1 text-left whitespace-nowrap overflow-hidden">Tulis Artikel</span>
+              )}
             </button>
 
             {currentUser?.role === 'admin' && (
@@ -2132,41 +2163,51 @@ export default function AdminPortal({
                 {/* 3. Penulis & Editor */}
                 <button
                   onClick={() => setActiveTab('writers')}
-                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                  title="Penulis & Editor"
+                  className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                    isSidebarCollapsed ? 'justify-center px-2' : 'px-4'
+                  } ${
                     activeTab === 'writers'
                       ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
                       : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
-                  <Users className={`w-4 h-4 ${activeTab === 'writers' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
-                  <div className="flex-1 text-left flex items-center justify-between">
-                    <span>Penulis & Editor</span>
-                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
-                      activeTab === 'writers' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                    }`}>
-                      {writers.length}
-                    </span>
-                  </div>
+                  <Users className={`w-4 h-4 shrink-0 ${activeTab === 'writers' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+                  {!isSidebarCollapsed && (
+                    <div className="flex-1 text-left flex items-center justify-between whitespace-nowrap overflow-hidden">
+                      <span>Penulis & Editor</span>
+                      <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
+                        activeTab === 'writers' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                      }`}>
+                        {writers.length}
+                      </span>
+                    </div>
+                  )}
                 </button>
 
                 {/* 4. Auto-Linking */}
                 <button
                   onClick={() => setActiveTab('autolinks')}
-                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                  title="Auto-Linking"
+                  className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                    isSidebarCollapsed ? 'justify-center px-2' : 'px-4'
+                  } ${
                     activeTab === 'autolinks'
                       ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
                       : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
-                  <LinkIcon className={`w-4 h-4 ${activeTab === 'autolinks' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
-                  <div className="flex-1 text-left flex items-center justify-between">
-                    <span>Auto-Linking</span>
-                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
-                      activeTab === 'autolinks' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                    }`}>
-                      {autolinks.length}
-                    </span>
-                  </div>
+                  <LinkIcon className={`w-4 h-4 shrink-0 ${activeTab === 'autolinks' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+                  {!isSidebarCollapsed && (
+                    <div className="flex-1 text-left flex items-center justify-between whitespace-nowrap overflow-hidden">
+                      <span>Auto-Linking</span>
+                      <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
+                        activeTab === 'autolinks' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                      }`}>
+                        {autolinks.length}
+                      </span>
+                    </div>
+                  )}
                 </button>
 
                 {/* 5. SEO & AI Agent Discovery */}
@@ -2175,14 +2216,19 @@ export default function AdminPortal({
                     setActiveTab('sitemap');
                     fetchDnsAid(false);
                   }}
-                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                  title="SEO"
+                  className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                    isSidebarCollapsed ? 'justify-center px-2' : 'px-4'
+                  } ${
                     activeTab === 'sitemap'
                       ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
                       : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
-                  <Zap className={`w-4 h-4 ${activeTab === 'sitemap' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
-                  <span className="flex-1 text-left">SEO</span>
+                  <Zap className={`w-4 h-4 shrink-0 ${activeTab === 'sitemap' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+                  {!isSidebarCollapsed && (
+                    <span className="flex-1 text-left whitespace-nowrap overflow-hidden">SEO</span>
+                  )}
                 </button>
 
                 {/* 6. Cusdis Komentar & Webhook */}
@@ -2191,60 +2237,80 @@ export default function AdminPortal({
                     setActiveTab('comments');
                     fetchComments();
                   }}
-                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                  title="Komentar"
+                  className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                    isSidebarCollapsed ? 'justify-center px-2' : 'px-4'
+                  } ${
                     activeTab === 'comments'
                       ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
                       : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
-                  <MessageSquare className={`w-4 h-4 ${activeTab === 'comments' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
-                  <div className="flex-1 text-left flex items-center justify-between">
-                    <span>💬 Komentar</span>
-                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
-                      activeTab === 'comments' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                    }`}>
-                      {comments.length}
-                    </span>
-                  </div>
+                  <MessageSquare className={`w-4 h-4 shrink-0 ${activeTab === 'comments' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+                  {!isSidebarCollapsed && (
+                    <div className="flex-1 text-left flex items-center justify-between whitespace-nowrap overflow-hidden">
+                      <span>💬 Komentar</span>
+                      <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
+                        activeTab === 'comments' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                      }`}>
+                        {comments.length}
+                      </span>
+                    </div>
+                  )}
                 </button>
 
                 {/* 7. Configs Situs */}
                 <button
                   onClick={() => setActiveTab('config')}
-                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                  title="Configs Situs"
+                  className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                    isSidebarCollapsed ? 'justify-center px-2' : 'px-4'
+                  } ${
                     activeTab === 'config'
                       ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
                       : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
-                  <Settings className={`w-4 h-4 ${activeTab === 'config' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
-                  <span className="flex-1 text-left">⚙️ Configs Situs</span>
+                  <Settings className={`w-4 h-4 shrink-0 ${activeTab === 'config' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+                  {!isSidebarCollapsed && (
+                    <span className="flex-1 text-left whitespace-nowrap overflow-hidden">⚙️ Configs Situs</span>
+                  )}
                 </button>
 
                 {/* 8. Database & Schema D1 */}
                 <button
                   onClick={() => setActiveTab('database')}
-                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                  title="Database D1"
+                  className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                    isSidebarCollapsed ? 'justify-center px-2' : 'px-4'
+                  } ${
                     activeTab === 'database'
                       ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
                       : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
-                  <Database className={`w-4 h-4 ${activeTab === 'database' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
-                  <span className="flex-1 text-left">🗄️ Database D1</span>
+                  <Database className={`w-4 h-4 shrink-0 ${activeTab === 'database' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+                  {!isSidebarCollapsed && (
+                    <span className="flex-1 text-left whitespace-nowrap overflow-hidden">🗄️ Database D1</span>
+                  )}
                 </button>
 
                 {/* 9. Kelola Produk Jualan */}
                 <button
                   onClick={() => setActiveTab('products')}
-                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                  title="Produk Jualan"
+                  className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                    isSidebarCollapsed ? 'justify-center px-2' : 'px-4'
+                  } ${
                     activeTab === 'products'
                       ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
                       : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
-                  <ShoppingBag className={`w-4 h-4 ${activeTab === 'products' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
-                  <span className="flex-1 text-left">🎨 Produk Jualan</span>
+                  <ShoppingBag className={`w-4 h-4 shrink-0 ${activeTab === 'products' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+                  {!isSidebarCollapsed && (
+                    <span className="flex-1 text-left whitespace-nowrap overflow-hidden">🎨 Produk Jualan</span>
+                  )}
                 </button>
 
                 {/* 10. Laporan & Leads WA */}
@@ -2254,14 +2320,19 @@ export default function AdminPortal({
                     fetchWaLeads();
                     fetchProductOrders();
                   }}
-                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                  title="Laporan WA"
+                  className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                    isSidebarCollapsed ? 'justify-center px-2' : 'px-4'
+                  } ${
                     activeTab === 'wa_leads'
                       ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
                       : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
-                  <BarChart2 className={`w-4 h-4 ${activeTab === 'wa_leads' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
-                  <span className="flex-1 text-left">📊 Laporan WA</span>
+                  <BarChart2 className={`w-4 h-4 shrink-0 ${activeTab === 'wa_leads' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+                  {!isSidebarCollapsed && (
+                    <span className="flex-1 text-left whitespace-nowrap overflow-hidden">📊 Laporan WA</span>
+                  )}
                 </button>
               </>
             )}
@@ -2270,29 +2341,45 @@ export default function AdminPortal({
             {currentUser?.role !== 'writer' && (
               <button
                 onClick={() => setActiveTab('security')}
-                className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                title="Akun Admin"
+                className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                  isSidebarCollapsed ? 'justify-center px-2' : 'px-4'
+                } ${
                   activeTab === 'security'
                     ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400'
                     : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                <Key className={`w-4 h-4 ${activeTab === 'security' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
-                <span className="flex-1 text-left">🔐 Akun Admin</span>
+                <Key className={`w-4 h-4 shrink-0 ${activeTab === 'security' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`} />
+                {!isSidebarCollapsed && (
+                  <span className="flex-1 text-left whitespace-nowrap overflow-hidden">🔐 Akun Admin</span>
+                )}
               </button>
             )}
 
             <button
               onClick={onLogout}
-              className="w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 text-slate-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/20 dark:hover:text-red-400 border border-transparent hover:border-red-100"
+              title="Safe Logout"
+              className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 text-slate-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/20 dark:hover:text-red-400 border border-transparent hover:border-red-100 ${
+                isSidebarCollapsed ? 'justify-center px-2' : 'px-4'
+              }`}
             >
-              <LogOut className="w-4 h-4 text-slate-400" />
-              <span className="flex-1 text-left">Safe Logout</span>
+              <LogOut className="w-4 h-4 shrink-0 text-slate-400" />
+              {!isSidebarCollapsed && (
+                <span className="flex-1 text-left whitespace-nowrap overflow-hidden">Safe Logout</span>
+              )}
             </button>
           </nav>
         </div>
 
-        {/* RIGHT COLUMN: MAIN CONTENT FOR ACTIVE TAB (lg:col-span-9) */}
-        <div className="lg:col-span-9 space-y-8">
+        {/* RIGHT COLUMN: MAIN CONTENT FOR ACTIVE TAB */}
+        <div className={`${
+          isZenMode && activeTab === 'editor'
+            ? 'lg:col-span-12'
+            : isSidebarCollapsed
+              ? 'lg:col-span-11'
+              : 'lg:col-span-9'
+        } space-y-8 transition-all duration-300`}>
 
       {/* ------------------------------------------------------------- */}
       {/* TAB 1: MANAGE POSTS LIST */}
@@ -2597,6 +2684,8 @@ export default function AdminPortal({
           setDisclaimerType={setEditorDisclaimerType}
           customDisclaimerText={editorCustomDisclaimerText}
           setCustomDisclaimerText={setEditorCustomDisclaimerText}
+          isZenMode={isZenMode}
+          setIsZenMode={setIsZenMode}
         />
       )}
 
