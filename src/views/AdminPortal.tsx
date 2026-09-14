@@ -2437,7 +2437,7 @@ export default function AdminPortal({
               <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                   <h3 className="font-bold text-slate-900 dark:text-white text-sm">
-                    {userRole === 'writer' ? 'Daftar Artikel Draf & Status Pengajuan' : 'Daftar Artikel'}
+                    {userRole === 'writer' ? 'Status Pengajuan' : 'Daftar Artikel'}
                   </h3>
                   <span className="text-xs text-slate-500">
                     Menampilkan {filteredPosts.length} dari total {userPosts.length} artikel
@@ -2489,7 +2489,7 @@ export default function AdminPortal({
                         : 'text-slate-600 dark:text-slate-400 hover:text-emerald-600'
                     }`}
                   >
-                    ✅ Diterbitkan ({publishedCount})
+                    ✅ Terbit ({publishedCount})
                   </button>
                   <button
                     onClick={() => setPostStatusFilter('rejected')}
@@ -2584,7 +2584,7 @@ export default function AdminPortal({
                                 onClick={() => handleEditPost(post)}
                                 className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-rose-50 hover:text-rose-600 text-xs font-bold transition-colors"
                               >
-                                {userRole === 'writer' ? (post.status === 'draft' ? 'Lanjutkan Draf' : 'Daftar Artikel') : 'Daftar Artikel'}
+                                {userRole === 'writer' ? (post.status === 'draft' ? 'Edit / Tulis' : 'Edit') : 'Edit'}
                               </button>
 
                               {(userRole === 'admin' || userRole === 'editor') && post.status === 'pending_approval' && (
