@@ -121,6 +121,7 @@ interface ArticleDetailViewProps {
   onBack: () => void;
   onSelectPost: (slug: string) => void;
   onSelectCategory?: (category: string) => void;
+  onSelectAuthor?: (username: string) => void;
   siteConfig?: SiteConfig;
   isPostsLoading?: boolean;
   onRefreshPosts?: () => Promise<void>;
@@ -133,6 +134,7 @@ export default function ArticleDetailView({
   onBack,
   onSelectPost,
   onSelectCategory,
+  onSelectAuthor,
   siteConfig,
   isPostsLoading = false,
   onRefreshPosts,
@@ -633,7 +635,21 @@ export default function ArticleDetailView({
         <div className="flex flex-wrap items-center justify-between gap-4 pt-4 text-slate-700 dark:text-slate-300 border-t border-slate-200 dark:border-slate-800">
           <div className="flex flex-wrap items-center gap-4">
             {/* Primary Author */}
-            <div className="flex items-center gap-3">
+            <div 
+              onClick={() => {
+                if (onSelectAuthor) {
+                  const authorName = post.authorName || 'Dr. Ratna Sari, M.Psi';
+                  const uName = authorName
+                    .toLowerCase()
+                    .replace(/^(dr\.|dr|prof\.|prof|dra\.|dra|psi\.)\s+/g, '')
+                    .replace(/,\s*[a-z.\s]+$/i, '')
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+                  onSelectAuthor(uName);
+                }
+              }}
+              className="flex items-center gap-3 cursor-pointer hover:opacity-90 transition-opacity"
+            >
               <img
                 src={getOptimizedAvatarUrl(post.authorAvatar, 40, 60)}
                 alt={post.authorName}
@@ -645,7 +661,7 @@ export default function ArticleDetailView({
               />
               <div>
                 <div className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-1.5">
-                  <span>{post.authorName || 'Dr. Ratna Sari, M.Psi'}</span>
+                  <span className="hover:text-rose-600 dark:hover:text-rose-400 underline decoration-dotted decoration-rose-300 transition-colors">{post.authorName || 'Dr. Ratna Sari, M.Psi'}</span>
                 </div>
                 <div className="text-[11px] text-rose-800 dark:text-rose-300 font-bold">
                   {post.authorTitle || 'Penulis & Kontributor Konten'}
@@ -933,19 +949,45 @@ export default function ArticleDetailView({
         <div className="bg-gradient-to-br from-rose-50/80 via-white to-pink-50/50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800/90 rounded-3xl p-6 border border-rose-200/60 dark:border-slate-800 shadow-xs space-y-4">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
             <img
+              onClick={() => {
+                if (onSelectAuthor) {
+                  const authorName = post.authorName || 'Dr. Ratna Sari, M.Psi';
+                  const uName = authorName
+                    .toLowerCase()
+                    .replace(/^(dr\.|dr|prof\.|prof|dra\.|dra|psi\.)\s+/g, '')
+                    .replace(/,\s*[a-z.\s]+$/i, '')
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+                  onSelectAuthor(uName);
+                }
+              }}
               src={getOptimizedAvatarUrl(post.authorAvatar, 80, 60)}
               alt={post.authorName}
               width={80}
               height={80}
               loading="lazy"
               decoding="async"
-              className="w-20 h-20 rounded-2xl object-cover border-2 border-rose-400 shadow-md shrink-0"
+              className="w-20 h-20 rounded-2xl object-cover border-2 border-rose-400 shadow-md shrink-0 cursor-pointer hover:scale-105 transition-transform"
             />
             <div className="space-y-2 text-center sm:text-left flex-1">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                   <div className="flex items-center justify-center sm:justify-start gap-2">
-                    <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+                    <h3 
+                      onClick={() => {
+                        if (onSelectAuthor) {
+                          const authorName = post.authorName || 'Dr. Ratna Sari, M.Psi';
+                          const uName = authorName
+                            .toLowerCase()
+                            .replace(/^(dr\.|dr|prof\.|prof|dra\.|dra|psi\.)\s+/g, '')
+                            .replace(/,\s*[a-z.\s]+$/i, '')
+                            .replace(/[^a-z0-9]+/g, '-')
+                            .replace(/^-+|-+$/g, '');
+                          onSelectAuthor(uName);
+                        }
+                      }}
+                      className="text-base font-extrabold text-slate-900 dark:text-white cursor-pointer hover:text-rose-600 dark:hover:text-rose-400 underline decoration-dotted decoration-rose-300 transition-colors"
+                    >
                       {post.authorName || 'Dr. Ratna Sari, M.Psi'}
                     </h3>
                   </div>

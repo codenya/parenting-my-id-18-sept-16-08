@@ -14,15 +14,18 @@ import CustomScriptsInjector from './components/CustomScriptsInjector';
 const ArticleDetailView = lazy(() => import('./views/ArticleDetailView'));
 const AdminPortal = lazy(() => import('./views/AdminPortal'));
 const StaticPageView = lazy(() => import('./views/StaticPageView'));
+const AuthorView = lazy(() => import('./views/AuthorView'));
 import InteractiveProductSale from './components/InteractiveProductSale';
 import { WhatsAppWidget } from './components/WhatsAppWidget';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'article' | 'admin' | 'privacy' | 'about' | 'contact' | 'disclaimer' | 'terms' | 'jualan'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'article' | 'admin' | 'privacy' | 'about' | 'contact' | 'disclaimer' | 'terms' | 'jualan' | 'author'>('home');
   const [activeSlug, setActiveSlug] = useState<string>('');
   const [activeProductSlug, setActiveProductSlug] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Semua');
   const [selectedTag, setSelectedTag] = useState<string>('');
+  const [users, setUsers] = useState<User[]>(INITIAL_USERS);
+  const [activeAuthorUsername, setActiveAuthorUsername] = useState<string>('');
 
   // Check if server injected SSR initial data
   const initialSsrData = typeof window !== 'undefined' ? (window as any).__INITIAL_DATA__ : undefined;
@@ -57,6 +60,7 @@ export default function App() {
     fetchPosts(!initialSsrData?.post);
     fetchConfig();
     fetchProducts();
+    fetchUsers();
 
     // 2. Non-critical fetch: Autolinks (deferred to prevent critical path network chaining)
     const deferTimer = setTimeout(() => {
@@ -219,6 +223,21 @@ export default function App() {
       }
     } catch (err) {
       console.error('Error fetching products:', err);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch('/api/users');
+      const contentType = res.headers.get('content-type');
+      if (res.ok && contentType && contentType.includes('application/json')) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setUsers(data);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching users:', err);
     }
   };
 
@@ -459,6 +478,11 @@ export default function App() {
         setCurrentView('disclaimer');
       } else if (['/terms', '/terms-of-service', '/syarat-ketentuan'].includes(path)) {
         setCurrentView('terms');
+      } else if (path.startsWith('/author/')) {
+        const username = decodeURIComponent(path.replace('/author/', '').replace(/\/$/, '')).trim();
+        setActiveAuthorUsername(username);
+        setSelectedTag('');
+        setCurrentView('author');
       } else if (path.startsWith('/baca/')) {
         const slug = path.replace('/baca/', '').replace(/\/$/, '');
         if (slug) {
@@ -468,12 +492,16 @@ export default function App() {
           setCurrentView('home');
           setSelectedCategory('Semua');
         }
-      } else if (path.startsWith('/kategori/')) {
-        const catSlug = path.replace('/kategori/', '').replace(/\/$/, '');
+      } else if (path.startsWith('/kategori/') || path.startsWith('/category/')) {
+        const catSlug = path.replace('/kategori/', '').replace('/category/', '').replace(/\/$/, '');
         const availableCats = posts.map((p) => p.category);
         const resolved = slugToCategory(catSlug, availableCats);
         setSelectedCategory(resolved || 'Semua');
         setCurrentView('home');
+        if (resolved) {
+          const cleanCatSlug = categoryToSlug(resolved);
+          window.history.replaceState({}, '', `/kategori/${cleanCatSlug}`);
+        }
       } else if (path.startsWith('/tag/')) {
         const tagName = decodeURIComponent(path.replace('/tag/', '').replace(/\/$/, '')).trim();
         resolvedTag = tagName;
@@ -485,20 +513,28 @@ export default function App() {
         setCurrentView('home');
       } else if (path !== '/' && !path.includes('.')) {
         // Direct route e.g. /balita, /pola-asuh, /tumbuh-kembang
+        // Or old WordPress nested structures like /category/article-slug/ or /category/page-number/
         const rawSlug = path.replace(/^\/|\/$/g, '');
+        const parts = rawSlug.split('/');
+        const lastSegment = parts[parts.length - 1];
         const availableCats = posts.map((p) => p.category);
-        const resolved = slugToCategory(rawSlug, availableCats);
-        if (resolved && resolved !== 'Semua') {
-          setSelectedCategory(resolved);
-          setCurrentView('home');
+
+        // 1. Check if the last segment matches an active article slug
+        const matchedPost = posts.find((p) => p.slug === lastSegment);
+        if (matchedPost) {
+          setActiveSlug(matchedPost.slug);
+          setCurrentView('article');
+          window.history.replaceState({}, '', `/baca/${matchedPost.slug}`);
         } else {
-          // If it matches an actual article slug, show the article view directly instead of defaulting to home
-          const matchedPost = posts.find((p) => p.slug === rawSlug);
-          if (matchedPost) {
-            setActiveSlug(rawSlug);
-            setCurrentView('article');
-            window.history.replaceState({}, '', `/baca/${rawSlug}`);
+          // 2. Check if the first segment or full raw slug matches a category or legacy category
+          const resolved = slugToCategory(parts[0], availableCats) || slugToCategory(rawSlug, availableCats);
+          if (resolved && resolved !== 'Semua') {
+            setSelectedCategory(resolved);
+            setCurrentView('home');
+            const cleanCatSlug = categoryToSlug(resolved);
+            window.history.replaceState({}, '', `/kategori/${cleanCatSlug}`);
           } else {
+            // 3. Fallback to homepage
             setCurrentView('home');
             setSelectedCategory('Semua');
           }
@@ -566,6 +602,11 @@ export default function App() {
         setActiveProductSlug('');
         window.history.pushState({}, '', cleanNavPath);
       }
+    } else if (view === 'author' && param) {
+      setSelectedTag('');
+      setActiveAuthorUsername(param);
+      setCurrentView('author');
+      window.history.pushState({}, '', `/author/${param}`);
     } else if (['privacy', 'about', 'contact', 'disclaimer', 'terms'].includes(view)) {
       setSelectedTag('');
       setCurrentView(view as any);
@@ -715,7 +756,25 @@ export default function App() {
               onBack={() => handleNavigate('home')}
               onSelectPost={(slug) => handleNavigate('article', slug)}
               onSelectCategory={(category) => handleNavigate('category', category)}
+              onSelectAuthor={(username) => handleNavigate('author', username)}
               siteConfig={effectiveConfig}
+            />
+          </Suspense>
+        )}
+
+        {currentView === 'author' && (
+          <Suspense fallback={
+            <div className="py-20 text-center space-y-3">
+              <div className="w-10 h-10 border-4 border-rose-600 border-t-transparent rounded-full animate-spin mx-auto" />
+              <p className="text-sm text-slate-500 font-bold">Memuat Profil Penulis & Kontribusi Akademik...</p>
+            </div>
+          }>
+            <AuthorView
+              username={activeAuthorUsername}
+              users={users}
+              posts={publishedPosts}
+              onSelectPost={(slug) => handleNavigate('article', slug)}
+              onBack={() => handleNavigate('home')}
             />
           </Suspense>
         )}

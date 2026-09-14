@@ -30,12 +30,15 @@ export function slugToCategory(slug: string, availableCategories: string[] = [])
   const found = MAIN_CATEGORIES.find((c) => c.slug === cleanSlug);
   if (found && found.name !== 'Semua') return found.name;
 
-  // Common aliases
+  // Common aliases and legacy WordPress categories
   if (cleanSlug === 'kesehatan' || cleanSlug === 'gizi' || cleanSlug === 'kesehatan-dan-gizi') {
     return 'Kesehatan & Gizi';
   }
-  if (cleanSlug === 'polaasuh') return 'Pola Asuh';
+  if (cleanSlug === 'polaasuh' || cleanSlug === 'pendidikan-anak' || cleanSlug === 'keluarga' || cleanSlug === 'fikh' || cleanSlug === 'wanita' || cleanSlug === 'konsultasi') {
+    return 'Pola Asuh';
+  }
   if (cleanSlug === 'tumbuhkembang') return 'Tumbuh Kembang';
+  if (cleanSlug === 'berita') return 'Semua';
 
   // Check among available post categories
   for (const cat of availableCategories) {
