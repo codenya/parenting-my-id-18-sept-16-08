@@ -4313,6 +4313,259 @@ app.get('/.well-known/oauth-authorization-server', (req, res) => {
   return res.json(asMetadata);
 });
 
+// A2A Agent Card Endpoint (Agent-to-Agent Protocol)
+app.get(['/.well-known/agent-card.json', '/.well-known/a2a.json', '/.well-known/agent.json'], (req, res) => {
+  const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  return res.json({
+    $schema: 'https://a2a-protocol.org/schemas/agent-card-v1.json',
+    name: 'Site AI Publishing & Service Agent',
+    description: 'Niche-agnostic intelligent AI agent providing article discovery, public opinion submissions, and classified ads marketplace capabilities.',
+    version: '1.0.0',
+    url: siteUrl,
+    capabilities: {
+      streaming: true,
+      push: true,
+      stateful: false,
+      search: true,
+      submission: true,
+    },
+    skills_ref: `${siteUrl}/.well-known/skills.json`,
+    mcp_ref: `${siteUrl}/.well-known/mcp-server.json`,
+    bot_auth_ref: `${siteUrl}/.well-known/web-bot-auth.json`,
+    webmcp_ref: `${siteUrl}/.well-known/webmcp.json`,
+    endpoints: {
+      api_catalog: `${siteUrl}/.well-known/api-catalog`,
+      oauth_authorization: `${siteUrl}/.well-known/oauth-authorization-server`,
+      oauth_protected: `${siteUrl}/.well-known/oauth-protected-resource`,
+      posts_api: `${siteUrl}/api/posts`,
+      surat_pembaca_api: `${siteUrl}/api/surat-pembaca`,
+      iklan_baris_api: `${siteUrl}/api/iklan-baris`,
+    },
+  });
+});
+
+// Skills Index Endpoint
+app.get(['/.well-known/skills.json', '/.well-known/agent-skills.json'], (req, res) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  return res.json({
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
+    version: '1.0.0',
+    name: 'Site AI Skills Catalog',
+    description: 'Index of interactive tools and API skills offered by this site to autonomous AI agents.',
+    skills: [
+      {
+        id: 'search_articles',
+        name: 'Search & Query Articles',
+        description: 'Search published articles, news, and posts by keyword, category, or tag',
+        endpoint: '/api/posts',
+        method: 'GET',
+        parameters: {
+          type: 'object',
+          properties: {
+            search: { type: 'string', description: 'Search keyword' },
+            category: { type: 'string', description: 'Category slug' },
+            tag: { type: 'string', description: 'Tag filter' },
+            page: { type: 'integer', default: 1 },
+            limit: { type: 'integer', default: 10 },
+          },
+        },
+      },
+      {
+        id: 'read_surat_pembaca',
+        name: 'Get Surat Pembaca (Reader Letters)',
+        description: 'Retrieve published guest reader letters and public opinion posts',
+        endpoint: '/api/surat-pembaca',
+        method: 'GET',
+        parameters: {
+          type: 'object',
+          properties: {
+            page: { type: 'integer', default: 1 },
+            limit: { type: 'integer', default: 5 },
+          },
+        },
+      },
+      {
+        id: 'submit_surat_pembaca',
+        name: 'Submit Surat Pembaca',
+        description: 'Submit a new guest reader letter or public opinion',
+        endpoint: '/api/surat-pembaca',
+        method: 'POST',
+        parameters: {
+          type: 'object',
+          required: ['nama', 'kota', 'pekerjaan', 'tahunLahir', 'phone', 'judul', 'isi'],
+          properties: {
+            nama: { type: 'string', description: 'Sender full name' },
+            kota: { type: 'string', description: 'City of origin' },
+            pekerjaan: { type: 'string', description: 'Occupation' },
+            tahunLahir: { type: 'integer', description: 'Birth year' },
+            phone: { type: 'string', description: 'Contact phone or WhatsApp' },
+            judul: { type: 'string', description: 'Letter title' },
+            isi: { type: 'string', description: 'Letter body content' },
+          },
+        },
+      },
+      {
+        id: 'read_iklan_baris',
+        name: 'Get Iklan Baris (Classified Ads)',
+        description: 'Fetch active classified ad listings',
+        endpoint: '/api/iklan-baris',
+        method: 'GET',
+        parameters: {
+          type: 'object',
+          properties: {
+            kategori: { type: 'string', description: 'Filter by ad category' },
+            page: { type: 'integer', default: 1 },
+            limit: { type: 'integer', default: 12 },
+          },
+        },
+      },
+      {
+        id: 'submit_iklan_baris',
+        name: 'Submit Iklan Baris',
+        description: 'Place a new classified advertisement',
+        endpoint: '/api/iklan-baris',
+        method: 'POST',
+        parameters: {
+          type: 'object',
+          required: ['nama', 'kota', 'pekerjaan', 'tahunLahir', 'phone', 'kategori', 'keteranganBarang', 'harga'],
+          properties: {
+            nama: { type: 'string' },
+            kota: { type: 'string' },
+            pekerjaan: { type: 'string' },
+            tahunLahir: { type: 'string' },
+            phone: { type: 'string' },
+            kategori: { type: 'string' },
+            keteranganBarang: { type: 'string' },
+            harga: { type: 'string' },
+          },
+        },
+      },
+    ],
+  });
+});
+
+// MCP Server Card Endpoint (Model Context Protocol)
+app.get(['/.well-known/mcp-server.json', '/.well-known/mcp.json'], (req, res) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  return res.json({
+    mcpVersion: '1.0.0',
+    name: 'Site Content & Interaction MCP Server',
+    description: 'Model Context Protocol (MCP) declaration enabling LLM models and external agents to query context and invoke tools.',
+    transport: {
+      type: 'sse',
+      endpoint: '/api/mcp/sse',
+    },
+    capabilities: {
+      tools: { listChanged: true },
+      resources: { subscribe: false, listChanged: true },
+      prompts: { listChanged: true },
+    },
+    tools: [
+      {
+        name: 'query_posts',
+        description: 'Search site articles by keyword or category',
+        inputSchema: {
+          type: 'object',
+          properties: { search: { type: 'string' }, category: { type: 'string' } },
+        },
+      },
+      {
+        name: 'submit_surat_pembaca',
+        description: 'Submit a reader letter or public opinion',
+        inputSchema: {
+          type: 'object',
+          required: ['nama', 'phone', 'judul', 'isi'],
+          properties: {
+            nama: { type: 'string' },
+            phone: { type: 'string' },
+            judul: { type: 'string' },
+            isi: { type: 'string' },
+          },
+        },
+      },
+      {
+        name: 'submit_iklan_baris',
+        description: 'Post a classified ad listing',
+        inputSchema: {
+          type: 'object',
+          required: ['nama', 'phone', 'kategori', 'keteranganBarang', 'harga'],
+          properties: {
+            nama: { type: 'string' },
+            phone: { type: 'string' },
+            kategori: { type: 'string' },
+            keteranganBarang: { type: 'string' },
+            harga: { type: 'string' },
+          },
+        },
+      },
+    ],
+  });
+});
+
+// Web Bot Auth Endpoint
+app.get(['/.well-known/web-bot-auth.json', '/.well-known/bot-auth.json'], (req, res) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  return res.json({
+    version: '1.0.0',
+    auth_types_supported: ['bearer', 'oauth2', 'api_key'],
+    outbound_bots: [
+      {
+        bot_id: 'site-content-sync-bot',
+        name: 'Site Content Indexer & Agent Sync Bot',
+        user_agent: 'SitePublishingAgent/1.0',
+        ip_ranges: ['0.0.0.0/0'],
+        verification_method: 'http-header-signature',
+      },
+    ],
+    verification_method: 'dns-txt-and-http-signature',
+    policy_url: '/auth.md',
+  });
+});
+
+// WebMCP Endpoint
+app.get(['/.well-known/webmcp.json', '/.well-known/mcp-web.json'], (req, res) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  return res.json({
+    version: '1.0.0',
+    name: 'In-Browser WebMCP Execution Manifest',
+    description: 'Allows web-embedded or remote AI agents to execute in-browser tools and form submissions.',
+    enabled: true,
+    tools: [
+      {
+        id: 'search_articles_client',
+        name: 'Client Article Search Engine',
+        description: 'In-browser instant keyword search',
+        type: 'client_script',
+      },
+      {
+        id: 'surat_pembaca_form',
+        name: 'Reader Letter Submission Handler',
+        description: 'Client & API handler for guest reader submissions',
+        type: 'api_proxy',
+        target: '/api/surat-pembaca',
+      },
+      {
+        id: 'iklan_baris_form',
+        name: 'Classified Ads Submission Handler',
+        description: 'Client & API handler for classified ad submissions',
+        type: 'api_proxy',
+        target: '/api/iklan-baris',
+      },
+    ],
+  });
+});
+
 // Auth.md Service Root Markdown Document for Autonomous Agent Registration
 app.get('/auth.md', (req, res) => {
   const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');

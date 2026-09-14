@@ -15,6 +15,26 @@ export const onRequest: PagesFunction<Env> = async () => {
           {
             "href": "/.well-known/oauth-protected-resource",
             "type": "application/json"
+          },
+          {
+            "href": "/.well-known/agent-card.json",
+            "type": "application/json"
+          },
+          {
+            "href": "/.well-known/skills.json",
+            "type": "application/json"
+          },
+          {
+            "href": "/.well-known/mcp-server.json",
+            "type": "application/json"
+          },
+          {
+            "href": "/.well-known/web-bot-auth.json",
+            "type": "application/json"
+          },
+          {
+            "href": "/.well-known/webmcp.json",
+            "type": "application/json"
           }
         ],
         "oauth-authorization-server": [

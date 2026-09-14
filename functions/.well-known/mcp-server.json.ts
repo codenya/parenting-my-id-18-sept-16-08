@@ -1,0 +1,77 @@
+interface Env {
+  [key: string]: any;
+}
+
+export const onRequest: PagesFunction<Env> = async () => {
+  const mcpData = {
+    "mcpVersion": "1.0.0",
+    "name": "Site Content & Interaction MCP Server",
+    "description": "Model Context Protocol (MCP) declaration enabling LLM models and external agents to query context and invoke tools.",
+    "transport": {
+      "type": "sse",
+      "endpoint": "/api/mcp/sse"
+    },
+    "capabilities": {
+      "tools": {
+        "listChanged": true
+      },
+      "resources": {
+        "subscribe": false,
+        "listChanged": true
+      },
+      "prompts": {
+        "listChanged": true
+      }
+    },
+    "tools": [
+      {
+        "name": "query_posts",
+        "description": "Search site articles by keyword or category",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "search": { "type": "string" },
+            "category": { "type": "string" }
+          }
+        }
+      },
+      {
+        "name": "submit_surat_pembaca",
+        "description": "Submit a reader letter or public opinion",
+        "inputSchema": {
+          "type": "object",
+          "required": ["nama", "phone", "judul", "isi"],
+          "properties": {
+            "nama": { "type": "string" },
+            "phone": { "type": "string" },
+            "judul": { "type": "string" },
+            "isi": { "type": "string" }
+          }
+        }
+      },
+      {
+        "name": "submit_iklan_baris",
+        "description": "Post a classified ad listing",
+        "inputSchema": {
+          "type": "object",
+          "required": ["nama", "phone", "kategori", "keteranganBarang", "harga"],
+          "properties": {
+            "nama": { "type": "string" },
+            "phone": { "type": "string" },
+            "kategori": { "type": "string" },
+            "keteranganBarang": { "type": "string" },
+            "harga": { "type": "string" }
+          }
+        }
+      }
+    ]
+  };
+
+  return new Response(JSON.stringify(mcpData, null, 2), {
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'public, max-age=3600',
+      'Access-Control-Allow-Origin': '*',
+    },
+  });
+};

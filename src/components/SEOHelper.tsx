@@ -117,10 +117,9 @@ export default function SEOHelper({
     }
     hreflangEl.setAttribute('href', effectiveCanonicalUrl);
 
-    // In client-side SPA, hero/featured images are rendered directly with fetchPriority="high".
-    // Remove any stale or leftover <link rel="preload" as="image"> in document.head
-    // to prevent Chrome's "preloaded using link preload but not used within a few seconds" DevTools warning.
-    const stalePreloads = document.querySelectorAll('link[rel="preload"][as="image"]');
+    // In client-side SPA, remove any stale or leftover <link rel="preload"> in document.head
+    // (including image and Early Hints style/font preloads) to prevent Chrome DevTools warnings.
+    const stalePreloads = document.querySelectorAll('link[rel="preload"]');
     stalePreloads.forEach((el) => el.remove());
 
     // 6. JSON-LD Structured Data Schema Injection

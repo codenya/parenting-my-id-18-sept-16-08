@@ -97,6 +97,14 @@
     <link rel="describedby" type="text/markdown" href="/auth.md" />
     <link rel="author" type="text/plain" href="/llms.txt" />
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script>
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          var links = document.querySelectorAll('link[rel="preload"]');
+          links.forEach(function(l) { l.remove(); });
+        }, 1500);
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
