@@ -2495,6 +2495,26 @@ app.get('/baca/:slug', (req, res, next) => {
     const datePub = post.createdAt ? new Date(post.createdAt).toISOString() : new Date().toISOString();
     const dateMod = post.updatedAt ? new Date(post.updatedAt).toISOString() : datePub;
 
+    // Resolve author slug dynamically
+    const authorUser = mockUsers.find((u) => u.id === post.authorId || (post.authorName && u.name.toLowerCase().trim() === post.authorName.toLowerCase().trim()));
+    let authorSlug = 'redaksi';
+    if (authorUser) {
+      const cleanName = (authorUser.name || '')
+        .toLowerCase()
+        .replace(/^(dr\.|dr|prof\.|prof|dra\.|dra|psi\.)\s+/g, '') // remove titles
+        .replace(/,\s*[a-z.\s]+$/i, '') // remove degree suffixes like M.Psi, S.Psi, S.Ked, S.Gz
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      authorSlug = cleanName || (authorUser.email || '').split('@')[0];
+    } else if (post.authorName) {
+      authorSlug = post.authorName
+        .toLowerCase()
+        .replace(/^(dr\.|dr|prof\.|prof|dra\.|dra|psi\.)\s+/g, '') // remove titles
+        .replace(/,\s*[a-z.\s]+$/i, '') // remove degree suffixes like M.Psi, S.Psi, S.Ked, S.Gz
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    }
+
     const schemaArticle = {
       '@context': 'https://schema.org',
       '@type': 'BlogPosting',
@@ -2510,7 +2530,7 @@ app.get('/baca/:slug', (req, res, next) => {
       'author': {
         '@type': 'Person',
         'name': post.authorName || 'Tim Redaksi',
-        'url': `${siteUrl}/#penulis`,
+        'url': `${siteUrl}/author/${authorSlug}`,
       },
       'publisher': {
         '@type': 'Organization',
@@ -2680,21 +2700,22 @@ app.get('/author/:username', (req, res, next) => {
       '@type': 'ProfilePage',
       'mainEntity': {
         '@type': 'Person',
+        '@id': `${siteUrl}/author/${username}#author`,
         'name': author.name,
-        'jobTitle': author.title,
-        'description': author.bio,
-        'image': author.avatar,
-        'url': canonicalUrl,
+        'url': `${siteUrl}/author/${username}`,
+        'jobTitle': author.title || 'Penulis / Editor',
+        'description': author.bio || undefined,
+        'image': author.avatar || undefined,
+        'worksFor': {
+          '@type': 'Organization',
+          'name': siteName,
+          'url': siteUrl,
+        },
         'sameAs': [
           author.socialInstagram,
           author.socialLinkedin,
           author.socialWebsite,
         ].filter(Boolean),
-      },
-      'publisher': {
-        '@type': 'Organization',
-        'name': siteName,
-        'url': siteUrl,
       },
     };
 
@@ -2884,6 +2905,166 @@ app.get(['/tag/:tag', '/tag/:tag/'], (req, res, next) => {
     return res.send(htmlTemplate);
   } catch (e) {
     console.error('Error pre-rendering Tag Page HTML:', e);
+    return next();
+  }
+});
+
+// 8.D. SSR / STATIC HTML PRE-RENDERING FOR CATEGORY PAGES (/kategori/:category) FOR GOOGLEBOT & CRAWLERS / AI AGENTS
+app.get(['/kategori/:category', '/kategori/:category/'], (req, res, next) => {
+  let { category } = req.params;
+  if (!category) return next();
+
+  try {
+    // Decode and clean category slug
+    category = decodeURIComponent(category).replace(/\/$/, '').trim();
+    const catSlugLower = category.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+    // Word formatting: e.g., "pola-asuh" -> "Pola Asuh"
+    const displayCatName = category
+      .split('-')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+
+    // Filter posts matching this category
+    const matchedPosts = mockPosts.filter((post) => {
+      if (post.status !== 'published') return false;
+      const postCatLower = (post.category || 'Umum')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-');
+      return postCatLower === catSlugLower;
+    });
+
+    const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    
+    let siteName = 'Parenting';
+    let siteDescription = 'Portal informasi dan panduan pengasuhan anak modern, nutrisi balita, serta kesehatan keluarga Indonesia.';
+    try {
+      const configPath = path.join(process.cwd(), 'public', 'site_config.json');
+      if (fs.existsSync(configPath)) {
+        const fileData = fs.readFileSync(configPath, 'utf-8');
+        const parsed = JSON.parse(fileData);
+        siteName = parsed.site_name || siteName;
+        siteDescription = parsed.site_description || siteDescription;
+      }
+    } catch (e) {
+      console.error('Error loading config for category local SSR:', e);
+    }
+
+    const pageTitle = `Artikel Kategori ${displayCatName} | ${siteName}`;
+    const pageDesc = `Kumpulan artikel, tips pengasuhan anak, dan panduan edukasi bertema ${displayCatName} di ${siteName}. Temukan informasi terpercaya tentang ${displayCatName} di sini.`;
+    const canonicalUrl = `${siteUrl}/kategori/${category}`;
+
+    // Negotiate Content for AI Agents (Markdown for LLMs)
+    const acceptHeader = (req.headers['accept'] as string) || '';
+    if (negotiateContent(acceptHeader) === 'markdown') {
+      const mdLines = [
+        `# Arsip Kategori: ${displayCatName}`,
+        pageDesc,
+        '',
+        `## Daftar Tulisan (${matchedPosts.length} Artikel)`,
+        ...matchedPosts.map((p) => `- [${p.title}](${siteUrl}/baca/${p.slug}) - ${p.excerpt || ''}`),
+        '',
+        '---',
+        `*Kategori dipublikasikan di [${siteName}](${siteUrl})*`,
+      ];
+      const markdownText = mdLines.filter(Boolean).join('\n');
+      const tokenCount = Math.max(1, Math.ceil(markdownText.length / 4));
+
+      res.setHeader('Content-Type', 'text/markdown; charset=utf-8');
+      res.setHeader('x-markdown-tokens', tokenCount.toString());
+      res.setHeader('Vary', 'Accept');
+      res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400');
+      return res.status(200).send(markdownText);
+    }
+
+    // Pre-render full HTML page for Googlebot
+    const catPostsHtml = matchedPosts.map(p => `
+      <div style="margin-bottom: 24px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 16px; background: #ffffff;">
+        <h3 style="font-size: 1.4rem; font-weight: 900; line-height: 1.3; margin: 0 0 8px 0;">
+          <a href="/baca/${p.slug}" style="color: #0f172a; text-decoration: none;">${p.title}</a>
+        </h3>
+        <p style="font-size: 0.95rem; color: #475569; line-height: 1.6; margin: 0 0 16px 0;">${p.excerpt || ''}</p>
+        <div style="font-size: 0.75rem; color: #94a3b8; display: flex; gap: 12px; align-items: center;">
+          <span>Penulis: <strong>${p.authorName || 'Tim Redaksi'}</strong></span>
+          <span>•</span>
+          <span>${p.createdAt ? new Date(p.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : ''}</span>
+        </div>
+      </div>
+    `).join('');
+
+    const preRenderedBody = `
+      <div style="min-height: 100vh; background-color: #f8fafc; color: #0f172a; font-family: system-ui, -apple-system, sans-serif; padding-bottom: 48px;">
+        <header style="background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 16px;">
+          <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+            <a href="/" style="color: #e11d48; font-weight: 900; font-size: 1.3rem; text-decoration: none;">👶 ${siteName}</a>
+          </div>
+        </header>
+        <main style="max-width: 800px; margin: 40px auto; padding: 0 16px;">
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); margin-bottom: 32px; text-align: center;">
+            <span style="display: inline-block; padding: 4px 12px; background: #e11d48; color: #ffffff; font-size: 10px; font-weight: 800; border-radius: 9999px; text-transform: uppercase; margin-bottom: 12px;">Kategori</span>
+            <h1 style="font-size: 2.2rem; font-weight: 900; margin: 0 0 8px 0; color: #0f172a;">${displayCatName}</h1>
+            <p style="color: #475569; font-size: 1rem; line-height: 1.6; max-width: 600px; margin: 0 auto;">
+              Kumpulan artikel dan panduan edukasi terbaik untuk kategori ${displayCatName}.
+            </p>
+          </div>
+          
+          <h2 style="font-size: 1.5rem; font-weight: 900; color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 24px;">
+            Menampilkan ${matchedPosts.length} Artikel
+          </h2>
+          ${matchedPosts.length === 0 ? '<p style="color: #64748b; font-style: italic; text-align: center; padding: 40px 0;">Belum ada tulisan dalam kategori ini.</p>' : catPostsHtml}
+        </main>
+      </div>
+    `;
+
+    const schemaCollection = {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      'name': pageTitle,
+      'description': pageDesc,
+      'url': canonicalUrl,
+      'about': {
+        '@type': 'Thing',
+        'name': displayCatName,
+      },
+      'publisher': {
+        '@type': 'Organization',
+        'name': siteName,
+        'url': siteUrl,
+      },
+      'itemListElement': matchedPosts.map((p, index) => ({
+        '@type': 'ListItem',
+        'position': index + 1,
+        'url': `${siteUrl}/baca/${p.slug}`,
+        'name': p.title,
+      })),
+    };
+
+    const seoTags = `
+      <title>${pageTitle}</title>
+      <meta name="description" content="${pageDesc}" />
+      <link rel="canonical" href="${canonicalUrl}" />
+      <meta property="og:title" content="${pageTitle}" />
+      <meta property="og:description" content="${pageDesc}" />
+      <meta property="og:url" content="${canonicalUrl}" />
+      <meta property="og:type" content="website" />
+      <meta name="twitter:card" content="summary" />
+      <script type="application/ld+json">${JSON.stringify(schemaCollection)}</script>
+    `;
+
+    let htmlFilePath = path.join(process.cwd(), 'dist', 'index.html');
+    if (!fs.existsSync(htmlFilePath)) {
+      htmlFilePath = path.join(process.cwd(), 'index.html');
+    }
+
+    let htmlTemplate = fs.readFileSync(htmlFilePath, 'utf-8');
+    htmlTemplate = htmlTemplate.replace(/<title>.*?<\/title>/i, seoTags);
+    htmlTemplate = htmlTemplate.replace(/<div\s+id="root"><\/div>/i, `<div id="root">${preRenderedBody}</div>`);
+
+    res.header('Content-Type', 'text/html; charset=utf-8');
+    res.header('Vary', 'Accept');
+    return res.send(htmlTemplate);
+  } catch (e) {
+    console.error('Error pre-rendering Category Page HTML:', e);
     return next();
   }
 });
