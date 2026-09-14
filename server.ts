@@ -2767,16 +2767,28 @@ app.get(['/tag/:tag', '/tag/:tag/'], (req, res, next) => {
       .join(' ');
 
     // Filter posts matching this tag
-    const matchedPosts = mockPosts.filter((post) => {
-      if (post.status !== 'published') return false;
-      const postTags = (post.tags || '').toLowerCase().split(',').map((t) => t.trim());
-      return postTags.includes(tagLower) || postTags.some((pt) => pt.includes(tagLower) || tagLower.includes(pt));
+    const tagClean = tagLower.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    let matchedPosts = mockPosts.filter((post) => {
+      if (post.status && post.status !== 'published') return false;
+      const rawTags = (post.tags || '').toLowerCase();
+      const postTags = rawTags.split(',').map((t) => t.trim().replace(/[^a-z0-9]+/g, '-'));
+      return (
+        postTags.includes(tagClean) ||
+        postTags.some((pt) => pt.length > 2 && (pt.includes(tagClean) || tagClean.includes(pt))) ||
+        (post.title || '').toLowerCase().includes(tagClean) ||
+        (post.excerpt || '').toLowerCase().includes(tagClean)
+      );
     });
+
+    // Fallback: If no tag match found, serve top published articles so cards are always pre-rendered
+    if (matchedPosts.length === 0) {
+      matchedPosts = mockPosts.filter((p) => !p.status || p.status === 'published').slice(0, 5);
+    }
 
     const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
     
-    let siteName = 'Blog Engine';
-    let siteDescription = 'Portal berita & informasi terpercaya.';
+    let siteName = 'Parenting';
+    let siteDescription = 'Portal informasi dan panduan pengasuhan anak modern, nutrisi balita, serta kesehatan keluarga Indonesia.';
     try {
       const configPath = path.join(process.cwd(), 'public', 'site_config.json');
       if (fs.existsSync(configPath)) {
@@ -2925,14 +2937,26 @@ app.get(['/kategori/:category', '/kategori/:category/'], (req, res, next) => {
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
 
-    // Filter posts matching this category
-    const matchedPosts = mockPosts.filter((post) => {
-      if (post.status !== 'published') return false;
+    // Filter posts matching this category with flexible matching
+    const catSlugClean = catSlugLower.replace(/^-+|-+$/g, '');
+    let matchedPosts = mockPosts.filter((post) => {
+      if (post.status && post.status !== 'published') return false;
       const postCatLower = (post.category || 'Umum')
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-');
-      return postCatLower === catSlugLower;
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      return (
+        postCatLower === catSlugClean ||
+        postCatLower.replace(/-/g, '') === catSlugClean.replace(/-/g, '') ||
+        (postCatLower.length > 3 && catSlugClean.includes(postCatLower)) ||
+        (catSlugClean.length > 3 && postCatLower.includes(catSlugClean))
+      );
     });
+
+    // Fallback: If no exact category matches, select top published posts so cards are always populated
+    if (matchedPosts.length === 0) {
+      matchedPosts = mockPosts.filter((p) => !p.status || p.status === 'published').slice(0, 5);
+    }
 
     const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
     
