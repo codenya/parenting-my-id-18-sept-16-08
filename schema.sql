@@ -1,21 +1,43 @@
 -- Schema Cloudflare D1 Database (SQLite) untuk parenting.my.id
 
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE IF NOT EXISTS  _cf_KV (
+  key TEXT PRIMARY KEY,
+  value BLOB
+) WITHOUT ROWID;
+
+CREATE TABLE IF NOT EXISTS  autolinks (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  email TEXT UNIQUE NOT NULL,
-  password TEXT NOT NULL,
-  name TEXT NOT NULL,
-  title TEXT,
-  role TEXT DEFAULT 'writer',
-  avatar TEXT,
-  bio TEXT,
-  social_instagram TEXT,
-  social_linkedin TEXT,
-  social_website TEXT,
+  keyword TEXT UNIQUE NOT NULL,
+  target_url TEXT NOT NULL,
+  description TEXT,
+  click_count INTEGER DEFAULT 0,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS posts (
+CREATE TABLE IF NOT EXISTS  configs (
+  key TEXT PRIMARY KEY,
+  value TEXT
+);
+
+CREATE TABLE IF NOT EXISTS  comments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  post_slug TEXT NOT NULL,
+  user_name TEXT NOT NULL,
+  user_email TEXT NOT NULL,
+  user_avatar TEXT NOT NULL,
+  content TEXT NOT NULL,
+  status TEXT DEFAULT 'approved',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  parent_id INTEGER DEFAULT NULL
+);
+
+CREATE TABLE IF NOT EXISTS  site_config (
+  id INTEGER PRIMARY KEY DEFAULT 1,
+  config_json TEXT NOT NULL,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS  posts (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   title TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
@@ -28,26 +50,88 @@ CREATE TABLE IF NOT EXISTS posts (
   co_author_ids TEXT,
   revisions TEXT,
   status TEXT DEFAULT 'draft',
+  rejection_reason TEXT,
   meta_title TEXT,
   meta_description TEXT,
   tags TEXT,
   views INTEGER DEFAULT 0,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (author_id) REFERENCES users(id)
+  post_type TEXT DEFAULT 'article',
+  interactive_configurator TEXT,
+  interactive_showcase TEXT,
+  interactive_radar TEXT,
+  interactive_quiz TEXT,
+  interactive_timeline_slider TEXT,
+  interactive_battle_card TEXT,
+  interactive_quiz_router TEXT,
+  interactive_habit_simulator TEXT,
+  interactive_qa_column TEXT,
+  disclaimer_type TEXT DEFAULT 'none',
+  custom_disclaimer_text TEXT
 );
 
-CREATE TABLE IF NOT EXISTS autolinks (
+CREATE TABLE IF NOT EXISTS  login_attempts (
+  ip TEXT PRIMARY KEY,
+  attempts INTEGER DEFAULT 0,
+  last_attempt INTEGER,
+  blocked_until INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS  "users" (
+  "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+  "email" TEXT NOT NULL,
+  "password_hash" TEXT NOT NULL,
+  "name" TEXT,
+  "role" TEXT CHECK(role IN ('admin', 'writer', 'editor')),
+  "avatar" TEXT,
+  "bio" TEXT,
+  "created_at" TEXT,
+  "password" TEXT,
+  "title" TEXT,
+  "social_instagram" TEXT,
+  "social_linkedin" TEXT,
+  "social_website" TEXT
+);
+
+CREATE TABLE IF NOT EXISTS  products (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  keyword TEXT UNIQUE NOT NULL,
-  target_url TEXT NOT NULL,
-  description TEXT,
-  click_count INTEGER DEFAULT 0,
+  title TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  description TEXT NOT NULL,
+  price REAL NOT NULL,
+  image_url TEXT NOT NULL,
+  whatsapp_number TEXT NOT NULL,
+  qris_image_url TEXT,
+  status TEXT DEFAULT 'available',
+  created_at TEXT,
+  updated_at TEXT,
+  bank_info TEXT,
+  payment_mode TEXT DEFAULT 'all',
+  third_party_checkout_url TEXT
+);
+
+CREATE TABLE IF NOT EXISTS  chat_leads (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  customer_name TEXT,
+  customer_phone TEXT,
+  department TEXT NOT NULL,
+  assigned_operator_phone TEXT,
+  initial_message TEXT,
+  page_url TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS site_config (
-  id INTEGER PRIMARY KEY DEFAULT 1,
-  config_json TEXT NOT NULL,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE IF NOT EXISTS  product_orders (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  buyer_name TEXT,
+  buyer_phone TEXT,
+  buyer_notes TEXT,
+  product_id INTEGER,
+  product_title TEXT,
+  product_slug TEXT,
+  product_price REAL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX idx_autolinks_keyword ON autolinks(keyword);
