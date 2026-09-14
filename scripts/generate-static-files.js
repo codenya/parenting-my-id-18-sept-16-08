@@ -1,27 +1,41 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const __filename = typeof import.meta !== 'undefined' && import.meta.url ? fileURLToPath(import.meta.url) : '';
 const __dirname = typeof import.meta !== 'undefined' && import.meta.url && __filename ? path.dirname(__filename) : process.cwd();
 const rootDir = path.resolve(__dirname, '..');
 
-// Load dynamic configurations if available
-const configPath = path.join(rootDir, 'public', 'site_config.json');
-let siteName = 'Blog Engine';
-let siteDescription = 'Portal berita dan informasi terpercaya di Indonesia.';
-let SITE_URL = process.env.SITE_URL || 'https://blog.my.id';
+export function getSiteConfig() {
+  let siteName = 'Jual.web.id';
+  let siteDescription = 'Portal informasi dan panduan terpercaya.';
+  let SITE_URL = process.env.SITE_URL || 'https://jual.web.id';
 
-try {
-  if (fs.existsSync(configPath)) {
-    const fileData = fs.readFileSync(configPath, 'utf-8');
-    const parsed = JSON.parse(fileData);
-    siteName = parsed.site_name || siteName;
-    siteDescription = parsed.site_description || siteDescription;
-    SITE_URL = parsed.site_url || SITE_URL;
+  try {
+    const configPath = path.join(rootDir, 'public', 'site_config.json');
+    if (fs.existsSync(configPath)) {
+      const fileData = fs.readFileSync(configPath, 'utf-8');
+      const parsed = JSON.parse(fileData);
+      siteName = parsed.site_name || siteName;
+      siteDescription = parsed.site_description || siteDescription;
+      if (parsed.site_url) {
+        SITE_URL = parsed.site_url;
+      } else if (parsed.site_domain) {
+        SITE_URL = `https://${parsed.site_domain}`;
+      }
+    }
+  } catch (err) {
+    console.error('Error loading config in getSiteConfig:', err);
   }
-} catch (err) {
-  console.error('Error loading config in generate-static-files.js:', err);
+
+  return {
+    siteName,
+    siteDescription,
+    SITE_URL: SITE_URL.replace(/\/$/, ''),
+  };
 }
 
 /**
@@ -95,6 +109,7 @@ export function escapeCdata(text) {
  * CRITICAL: Tag <?xml version="1.0" encoding="UTF-8"?> MUST be at index 0 (character 0).
  */
 export function generateFeedXml(posts) {
+  const { siteName, siteDescription, SITE_URL } = getSiteConfig();
   const publishedPosts = (posts || []).filter((p) => p.status === 'published');
 
   const items = publishedPosts
@@ -172,6 +187,7 @@ function sanitizeLlmsText(text) {
  * Generate llms.txt string taken directly from feed.xml items (Summary index format)
  */
 export function generateLlmsTxt(posts, feedXmlContent) {
+  const { siteName, siteDescription, SITE_URL } = getSiteConfig();
   let items = [];
 
   if (feedXmlContent) {
@@ -221,6 +237,7 @@ ${articleLinks}
  * Generate llms-full.txt string containing full markdown content of published posts
  */
 export function generateLlmsFullTxt(posts, customSiteUrl, customSiteName) {
+  const { siteName, SITE_URL } = getSiteConfig();
   const activeSiteUrl = customSiteUrl || SITE_URL;
   const activeSiteName = customSiteName || siteName;
   const publishedPosts = (posts || []).filter((p) => p.status === 'published');
@@ -257,6 +274,7 @@ ${fullArticles}
  * CRITICAL: Tag <?xml version="1.0" encoding="UTF-8"?> MUST be at index 0 (character 0).
  */
 export function generateSitemapXml(posts) {
+  const { SITE_URL } = getSiteConfig();
   const publishedPosts = (posts || []).filter((p) => p.status === 'published');
 
   const urls = publishedPosts

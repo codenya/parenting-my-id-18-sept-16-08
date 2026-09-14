@@ -87,9 +87,11 @@ export default function AuthorView({
         {/* Biography and Academic Details */}
         <div className="flex-1 space-y-4 text-center md:text-left">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 text-[10px] font-bold tracking-wider uppercase">
-              Penulis Akademik Terverifikasi
-            </div>
+            {author.isVerifiedAcademic && (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 text-[10px] font-bold tracking-wider uppercase">
+                {author.verifiedAcademicLabel || 'Penulis Akademik Terverifikasi'}
+              </div>
+            )}
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
               {author.name}
             </h1>
@@ -108,14 +110,18 @@ export default function AuthorView({
 
           {/* Core Info Badges */}
           <div className="flex flex-wrap justify-center md:justify-start gap-3 pt-2 text-xs">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-800 rounded-xl">
-              <GraduationCap size={14} className="text-slate-400" />
-              <span>Gelar Terverifikasi</span>
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-800 rounded-xl">
-              <Award size={14} className="text-slate-400" />
-              <span>Kontributor Terpercaya</span>
-            </div>
+            {author.isVerifiedAcademic && (
+              <>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-800 rounded-xl">
+                  <GraduationCap size={14} className="text-slate-400" />
+                  <span>Gelar Terverifikasi</span>
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-800 rounded-xl">
+                  <Award size={14} className="text-slate-400" />
+                  <span>Kontributor Terpercaya</span>
+                </div>
+              </>
+            )}
             <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-800 rounded-xl">
               <BookOpen size={14} className="text-slate-400" />
               <span>{authorPosts.length} Artikel Terbit</span>
@@ -166,10 +172,10 @@ export default function AuthorView({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 gap-2">
           <div className="space-y-0.5">
             <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
-              Kontribusi Artikel Ilmiah & Edukasi
+              Kontribusi
             </h2>
             <p className="text-slate-500 dark:text-slate-400 text-xs">
-              Kumpulan tulisan yang disusun secara akademis oleh {author.name}
+              Kumpulan tulisan yang disusun oleh {author.name}
             </p>
           </div>
           <span className="self-start sm:self-center px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold font-mono">

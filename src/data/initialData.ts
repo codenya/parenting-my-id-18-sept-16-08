@@ -12,6 +12,8 @@ export const INITIAL_USERS: User[] = [
     socialInstagram: 'https://instagram.com/ratnasari.mpsi',
     socialLinkedin: 'https://linkedin.com/in/ratnasari-mpsi',
     socialWebsite: 'https://domain.com',
+    isVerifiedAcademic: true,
+    verifiedAcademicLabel: 'Penulis Akademik Terverifikasi',
   },
   {
     id: 2,
@@ -23,6 +25,8 @@ export const INITIAL_USERS: User[] = [
     bio: 'Editor konten kesehatan dan pengasuhan anak dengan sertifikasi jurnalistik edukasi keluarga.',
     socialInstagram: 'https://instagram.com/mayaputri.editor',
     socialLinkedin: 'https://linkedin.com/in/maya-putri-editor',
+    isVerifiedAcademic: true,
+    verifiedAcademicLabel: 'Editor Terverifikasi',
   },
   {
     id: 3,
@@ -34,6 +38,8 @@ export const INITIAL_USERS: User[] = [
     bio: 'Pemerhati gizi anak, fasilitator pencegahan stunting nasional, serta edukator kesehatan balita.',
     socialInstagram: 'https://instagram.com/ahmad.zk',
     socialLinkedin: 'https://linkedin.com/in/ahmad-zulkarnain',
+    isVerifiedAcademic: true,
+    verifiedAcademicLabel: 'Praktisi Medis Terverifikasi',
   },
   {
     id: 4,
@@ -45,6 +51,8 @@ export const INITIAL_USERS: User[] = [
     bio: 'Praktisi MPASI sehat, penyusun panduan gizi 1000 HPK, dan konselor laktasi bersertifikasi.',
     socialInstagram: 'https://instagram.com/sitiaminah.sgz',
     socialWebsite: 'https://domain.com',
+    isVerifiedAcademic: true,
+    verifiedAcademicLabel: 'Nutrisionis Terverifikasi',
   },
 ];
 

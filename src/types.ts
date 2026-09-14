@@ -12,6 +12,8 @@ export interface User {
   socialLinkedin?: string;
   socialWebsite?: string;
   socials?: { instagram?: string; linkedin?: string; website?: string };
+  isVerifiedAcademic?: boolean;
+  verifiedAcademicLabel?: string;
   createdAt?: string;
 }
 

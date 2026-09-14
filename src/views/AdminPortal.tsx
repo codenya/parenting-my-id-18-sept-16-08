@@ -231,6 +231,8 @@ export default function AdminPortal({
   const [wInstagram, setWInstagram] = useState('');
   const [wLinkedin, setWLinkedin] = useState('');
   const [wWebsite, setWWebsite] = useState('');
+  const [wIsVerifiedAcademic, setWIsVerifiedAcademic] = useState(false);
+  const [wVerifiedAcademicLabel, setWVerifiedAcademicLabel] = useState('Penulis Akademik Terverifikasi');
   const [writerSuccessMsg, setWriterSuccessMsg] = useState('');
   const [writerErrMsg, setWriterErrMsg] = useState('');
   const [isSavingWriter, setIsSavingWriter] = useState(false);
@@ -1809,6 +1811,8 @@ export default function AdminPortal({
     setWInstagram('');
     setWLinkedin('');
     setWWebsite('');
+    setWIsVerifiedAcademic(false);
+    setWVerifiedAcademicLabel('Penulis Akademik Terverifikasi');
     setWriterSuccessMsg('');
     setWriterErrMsg('');
     setShowWriterModal(true);
@@ -1827,6 +1831,8 @@ export default function AdminPortal({
     setWInstagram(w.socials?.instagram || '');
     setWLinkedin(w.socials?.linkedin || '');
     setWWebsite(w.socials?.website || '');
+    setWIsVerifiedAcademic(!!w.isVerifiedAcademic);
+    setWVerifiedAcademicLabel(w.verifiedAcademicLabel || 'Penulis Akademik Terverifikasi');
     setWriterSuccessMsg('');
     setWriterErrMsg('');
     setShowWriterModal(true);
@@ -1854,6 +1860,8 @@ export default function AdminPortal({
           avatar: wAvatar,
           title: wTitle,
           bio: wBio,
+          isVerifiedAcademic: wIsVerifiedAcademic,
+          verifiedAcademicLabel: wVerifiedAcademicLabel,
           socials: {
             instagram: wInstagram || undefined,
             linkedin: wLinkedin || undefined,
@@ -2753,6 +2761,11 @@ export default function AdminPortal({
                           <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400 block">
                             {w.title || 'Penulis Artikel'}
                           </span>
+                          {w.isVerifiedAcademic && (
+                            <span className="inline-block mt-1 px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-[9px] font-black uppercase text-emerald-600 dark:text-emerald-400 border border-emerald-100/40">
+                              {w.verifiedAcademicLabel || 'Terverifikasi'}
+                            </span>
+                          )}
                         </div>
                       </div>
 
@@ -3003,6 +3016,35 @@ export default function AdminPortal({
                     className="w-full px-3 py-1.5 rounded-xl border text-xs"
                   />
                 </div>
+              </div>
+
+              <div className="p-4 bg-rose-50/50 dark:bg-slate-800/40 rounded-2xl border border-rose-100/60 dark:border-slate-800 space-y-3">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="isVerifiedAcademic"
+                    checked={wIsVerifiedAcademic}
+                    onChange={(e) => setWIsVerifiedAcademic(e.target.checked)}
+                    className="w-4 h-4 rounded text-rose-600 focus:ring-rose-500 border-slate-300 cursor-pointer"
+                  />
+                  <label htmlFor="isVerifiedAcademic" className="text-xs font-bold text-slate-800 dark:text-slate-200 select-none cursor-pointer">
+                    Aktifkan Verifikasi Penulis (Badge Terverifikasi)
+                  </label>
+                </div>
+                {wIsVerifiedAcademic && (
+                  <div className="space-y-1">
+                    <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                      Label Badge Verifikasi Kustom
+                    </label>
+                    <input
+                      type="text"
+                      value={wVerifiedAcademicLabel}
+                      onChange={(e) => setWVerifiedAcademicLabel(e.target.value)}
+                      placeholder="Misal: Penulis Terverifikasi atau Gelar Terverifikasi"
+                      className="w-full px-3 py-1.5 rounded-xl border text-xs font-bold text-rose-600 bg-white dark:bg-slate-900"
+                    />
+                  </div>
+                )}
               </div>
 
               <button
