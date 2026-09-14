@@ -22,6 +22,7 @@ export default function App() {
   const [activeSlug, setActiveSlug] = useState<string>('');
   const [activeProductSlug, setActiveProductSlug] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Semua');
+  const [selectedTag, setSelectedTag] = useState<string>('');
 
   // Check if server injected SSR initial data
   const initialSsrData = typeof window !== 'undefined' ? (window as any).__INITIAL_DATA__ : undefined;
@@ -421,6 +422,7 @@ export default function App() {
       const adminPath = `/admin-${adminSuffix}`;
       const path = window.location.pathname;
       const urlParams = new URLSearchParams(window.location.search);
+      let resolvedTag = '';
 
       if (path === adminPath) {
         if (urlParams.get('logout') === 'true') {
@@ -458,7 +460,7 @@ export default function App() {
       } else if (['/terms', '/terms-of-service', '/syarat-ketentuan'].includes(path)) {
         setCurrentView('terms');
       } else if (path.startsWith('/baca/')) {
-        const slug = path.replace('/baca/', '');
+        const slug = path.replace('/baca/', '').replace(/\/$/, '');
         if (slug) {
           setActiveSlug(slug);
           setCurrentView('article');
@@ -467,28 +469,47 @@ export default function App() {
           setSelectedCategory('Semua');
         }
       } else if (path.startsWith('/kategori/')) {
-        const catSlug = path.replace('/kategori/', '');
+        const catSlug = path.replace('/kategori/', '').replace(/\/$/, '');
         const availableCats = posts.map((p) => p.category);
         const resolved = slugToCategory(catSlug, availableCats);
-        setSelectedCategory(resolved);
+        setSelectedCategory(resolved || 'Semua');
+        setCurrentView('home');
+      } else if (path.startsWith('/tag/')) {
+        const tagName = decodeURIComponent(path.replace('/tag/', '').replace(/\/$/, '')).trim();
+        resolvedTag = tagName;
+        setSelectedCategory('Semua');
+        setCurrentView('home');
+      } else if (path === '/tag' || path === '/tag/') {
+        resolvedTag = 'all-tags';
+        setSelectedCategory('Semua');
         setCurrentView('home');
       } else if (path !== '/' && !path.includes('.')) {
         // Direct route e.g. /balita, /pola-asuh, /tumbuh-kembang
-        const rawSlug = path.replace(/^\//, '');
+        const rawSlug = path.replace(/^\/|\/$/g, '');
         const availableCats = posts.map((p) => p.category);
         const resolved = slugToCategory(rawSlug, availableCats);
         if (resolved && resolved !== 'Semua') {
           setSelectedCategory(resolved);
           setCurrentView('home');
         } else {
-          setCurrentView('home');
-          setSelectedCategory('Semua');
+          // If it matches an actual article slug, show the article view directly instead of defaulting to home
+          const matchedPost = posts.find((p) => p.slug === rawSlug);
+          if (matchedPost) {
+            setActiveSlug(rawSlug);
+            setCurrentView('article');
+            window.history.replaceState({}, '', `/baca/${rawSlug}`);
+          } else {
+            setCurrentView('home');
+            setSelectedCategory('Semua');
+          }
         }
       } else {
         setCurrentView('home');
         setSelectedCategory('Semua');
         setActiveSlug('');
       }
+
+      setSelectedTag(resolvedTag);
     };
 
     syncRouteFromUrl();
@@ -500,24 +521,41 @@ export default function App() {
   const handleNavigate = (view: string, param?: string) => {
     if (view === 'article' && param) {
       setActiveSlug(param);
+      setSelectedTag('');
       setCurrentView('article');
       window.history.pushState({}, '', `/baca/${param}`);
     } else if (view === 'category' && param) {
       if (param === 'Semua') {
         setSelectedCategory('Semua');
+        setSelectedTag('');
         setCurrentView('home');
         window.history.pushState({}, '', '/');
       } else {
         setSelectedCategory(param);
+        setSelectedTag('');
         setCurrentView('home');
         const catSlug = categoryToSlug(param);
         window.history.pushState({}, '', `/kategori/${catSlug}`);
       }
+    } else if (view === 'tag' && param) {
+      if (param === 'all-tags') {
+        setSelectedTag('all-tags');
+        setSelectedCategory('Semua');
+        setCurrentView('home');
+        window.history.pushState({}, '', '/tag');
+      } else {
+        setSelectedTag(param);
+        setSelectedCategory('Semua');
+        setCurrentView('home');
+        window.history.pushState({}, '', `/tag/${param}`);
+      }
     } else if (view === 'admin') {
       const adminSuffix = String(siteConfig?.admin_url_suffix || '9999');
+      setSelectedTag('');
       setCurrentView('admin');
       window.history.pushState({}, '', `/admin-${adminSuffix}`);
     } else if (view === 'jualan' || view === 'produk') {
+      setSelectedTag('');
       setCurrentView('jualan');
       const prodPath = siteConfig?.products_nav_path || '/produk';
       const cleanNavPath = prodPath.startsWith('/') ? prodPath : `/${prodPath}`;
@@ -529,9 +567,11 @@ export default function App() {
         window.history.pushState({}, '', cleanNavPath);
       }
     } else if (['privacy', 'about', 'contact', 'disclaimer', 'terms'].includes(view)) {
+      setSelectedTag('');
       setCurrentView(view as any);
       window.history.pushState({}, '', `/${view}`);
     } else {
+      setSelectedTag('');
       setCurrentView('home');
       setSelectedCategory('Semua');
       setActiveSlug('');
@@ -632,6 +672,8 @@ export default function App() {
             selectedCategory={selectedCategory}
             onSelectCategory={(category) => handleNavigate('category', category)}
             siteConfig={effectiveConfig}
+            selectedTag={selectedTag}
+            onSelectTag={(tag) => handleNavigate('tag', tag)}
           />
         )}
 

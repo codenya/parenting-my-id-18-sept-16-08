@@ -22,7 +22,7 @@ export function categoryToSlug(categoryName: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-export function slugToCategory(slug: string, availableCategories: string[] = []): string {
+export function slugToCategory(slug: string, availableCategories: string[] = []): string | null {
   if (!slug || slug === 'semua') return 'Semua';
   const cleanSlug = slug.toLowerCase().trim();
 
@@ -44,9 +44,6 @@ export function slugToCategory(slug: string, availableCategories: string[] = [])
     }
   }
 
-  // Fallback capitalize words
-  return cleanSlug
-    .split('-')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
+  // Do not fall back to capitalized string for unknown slugs to prevent route hijacking
+  return null;
 }

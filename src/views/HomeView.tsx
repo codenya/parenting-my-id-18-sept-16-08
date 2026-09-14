@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Post, AutoLink, SiteConfig, Product } from '../types';
 import SEOHelper from '../components/SEOHelper';
+import { MAIN_CATEGORIES } from '../lib/categories';
 
 // Import all Layout Modes
 import DefaultHomeLayout from '../components/home_layouts/DefaultHomeLayout';
@@ -23,6 +24,8 @@ interface HomeViewProps {
   selectedCategory?: string;
   onSelectCategory: (category: string) => void;
   siteConfig?: SiteConfig;
+  selectedTag?: string;
+  onSelectTag?: (tag: string) => void;
 }
 
 export default function HomeView({
@@ -34,6 +37,8 @@ export default function HomeView({
   selectedCategory: propSelectedCategory,
   onSelectCategory,
   siteConfig,
+  selectedTag = '',
+  onSelectTag,
 }: HomeViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [internalCategory, setInternalCategory] = useState<string>('Semua');
@@ -48,12 +53,32 @@ export default function HomeView({
   };
 
   const isFilteredCategory = activeCategory !== 'Semua';
-  const metaTitle = isFilteredCategory
-    ? `Artikel Kategori ${activeCategory} - ${siteConfig?.site_name || 'Parenting.my.id'}`
-    : siteConfig?.seo_meta_title || 'Parenting.my.id - Edukasi Pola Asuh & Kesehatan Anak Indonesia';
-  const metaDesc = isFilteredCategory
-    ? `Kumpulan artikel, tips, dan panduan seputar ${activeCategory} untuk orang tua modern.`
-    : siteConfig?.seo_meta_description || 'Portal artikel parenting modern, panduan pola asuh, nutrisi balita, dan pencegahan stunting. Cepat, akurat, dan terpercaya.';
+  const categoryItem = MAIN_CATEGORIES.find(c => c.name.toLowerCase() === activeCategory.toLowerCase());
+  const categorySpecificDesc = categoryItem?.description;
+
+  const isTagPage = !!selectedTag;
+  const isAllTagsPage = selectedTag === 'all-tags';
+  const displayTagName = selectedTag && !isAllTagsPage 
+    ? selectedTag.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+    : '';
+
+  const metaTitle = isTagPage
+    ? (isAllTagsPage 
+        ? `Daftar Semua Tag & Topik Artikel - ${siteConfig?.site_name || 'Parenting.my.id'}`
+        : `Artikel Tag #${displayTagName} - ${siteConfig?.site_name || 'Parenting.my.id'}`)
+    : (isFilteredCategory
+        ? `Artikel Kategori ${activeCategory} - ${siteConfig?.site_name || 'Parenting.my.id'}`
+        : siteConfig?.seo_meta_title || 'Parenting.my.id - Edukasi Pola Asuh & Kesehatan Anak Indonesia');
+
+  const metaDesc = isTagPage
+    ? (isAllTagsPage
+        ? `Temukan seluruh indeks tag topik dan pembahasan lengkap seputar pengasuhan anak, nutrisi, MPASI, stunting, dan balita.`
+        : `Kumpulan artikel edukatif, tips, dan panduan terbaik yang ditandai dengan tag #${displayTagName} untuk orang tua modern Indonesia.`)
+    : (isFilteredCategory
+        ? (categorySpecificDesc 
+            ? `${categorySpecificDesc} Temukan kumpulan artikel, tips, dan panduan ${activeCategory.toLowerCase()} terbaik untuk orang tua modern.`
+            : `Kumpulan artikel edukasi dan panduan seputar ${activeCategory} untuk orang tua modern di Indonesia.`)
+        : siteConfig?.seo_meta_description || 'Portal artikel parenting modern, panduan pola asuh, nutrisi balita, dan pencegahan stunting. Cepat, akurat, dan terpercaya.');
   const ogImage = siteConfig?.seo_default_og_image || 'https://images.unsplash.com/photo-1572044162444-ad60f128bdea?q=15&w=400&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
 
   const publishedPosts = useMemo(() => {
@@ -80,6 +105,29 @@ export default function HomeView({
     const targetCat = activeCategory.trim();
     const targetCatLower = targetCat.toLowerCase();
     const searchLower = searchQuery.toLowerCase().trim();
+
+    // Tag filtering overrides normal list
+    if (selectedTag) {
+      if (selectedTag === 'all-tags') {
+        return {
+          filteredPosts: publishedPosts,
+          isKeywordMatchFallback: false,
+          isLatestFallback: false,
+          fallbackPosts: publishedPosts.slice(0, 4),
+        };
+      }
+      const tagLower = selectedTag.toLowerCase().trim();
+      const tagFiltered = publishedPosts.filter((post) => {
+        const postTags = (post.tags || '').toLowerCase().split(',').map((t) => t.trim());
+        return postTags.includes(tagLower) || postTags.some((pt) => pt.includes(tagLower) || tagLower.includes(pt));
+      });
+      return {
+        filteredPosts: tagFiltered,
+        isKeywordMatchFallback: false,
+        isLatestFallback: false,
+        fallbackPosts: publishedPosts.slice(0, 4),
+      };
+    }
 
     // 1. Direct Category Matching
     let directMatches = publishedPosts;
@@ -274,6 +322,36 @@ export default function HomeView({
         }}
         posts={posts}
       />
+      
+      {selectedTag && (
+        <div className="max-w-7xl mx-auto mb-6 p-6 rounded-3xl bg-gradient-to-r from-rose-500/10 via-pink-500/5 to-transparent border border-rose-200/40 dark:border-rose-950/40 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500 text-white text-[10px] font-black tracking-wider uppercase animate-pulse">
+              Halaman Tag Arsip
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <span>Menampilkan Artikel dengan Tag:</span>
+              <span className="text-rose-600 dark:text-rose-400 font-mono">#{selectedTag === 'all-tags' ? 'Semua Topik' : displayTagName}</span>
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {selectedTag === 'all-tags' 
+                ? 'Menjelajahi indeks kata kunci pengasuhan anak yang dibahas.'
+                : `Temukan tulisan, tips, dan panduan praktis bertema #${displayTagName} untuk mengoptimalkan potensi buah hati.`}
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              if (onSelectCategory) onSelectCategory('Semua');
+              window.history.pushState({}, '', '/');
+              window.dispatchEvent(new Event('popstate'));
+            }}
+            className="self-start sm:self-center px-4 py-2 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs font-bold transition-all shadow-xs hover:shadow-md hover:scale-105 active:scale-95"
+          >
+            Lihat Semua Artikel &rarr;
+          </button>
+        </div>
+      )}
+
       {renderLayout()}
     </div>
   );
