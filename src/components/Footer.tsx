@@ -73,6 +73,12 @@ export default function Footer({ siteConfig, onNavigate }: FooterProps) {
     } else if (url === '/kesehatan-gizi') {
       e.preventDefault();
       onNavigate('category', 'Kesehatan & Gizi');
+    } else if (['/surat-pembaca', '/surat', '/suara-pembaca'].includes(url)) {
+      e.preventDefault();
+      onNavigate('surat-pembaca');
+    } else if (['/iklan-baris', '/iklan', '/iklan-kecil'].includes(url)) {
+      e.preventDefault();
+      onNavigate('iklan-baris');
     }
   };
 

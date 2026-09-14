@@ -65,6 +65,12 @@ export default function Header({ currentView, onNavigate, currentUser, onLogout,
     } else if (url === '/admin' || url.startsWith('/admin')) {
       if (e) e.preventDefault();
       onNavigate('admin');
+    } else if (['/surat-pembaca', '/surat', '/suara-pembaca'].includes(url)) {
+      if (e) e.preventDefault();
+      onNavigate('surat-pembaca');
+    } else if (['/iklan-baris', '/iklan', '/iklan-kecil'].includes(url)) {
+      if (e) e.preventDefault();
+      onNavigate('iklan-baris');
     }
   };
 

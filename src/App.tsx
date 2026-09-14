@@ -15,11 +15,13 @@ const ArticleDetailView = lazy(() => import('./views/ArticleDetailView'));
 const AdminPortal = lazy(() => import('./views/AdminPortal'));
 const StaticPageView = lazy(() => import('./views/StaticPageView'));
 const AuthorView = lazy(() => import('./views/AuthorView'));
+const SuratPembacaPage = lazy(() => import('./views/SuratPembacaPage'));
+const IklanBarisPage = lazy(() => import('./views/IklanBarisPage'));
 import InteractiveProductSale from './components/InteractiveProductSale';
 import { WhatsAppWidget } from './components/WhatsAppWidget';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'article' | 'admin' | 'privacy' | 'about' | 'contact' | 'disclaimer' | 'terms' | 'jualan' | 'author'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'article' | 'admin' | 'privacy' | 'about' | 'contact' | 'disclaimer' | 'terms' | 'jualan' | 'author' | 'surat-pembaca' | 'iklan-baris'>('home');
   const [activeSlug, setActiveSlug] = useState<string>('');
   const [activeProductSlug, setActiveProductSlug] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Semua');
@@ -478,6 +480,10 @@ export default function App() {
         setCurrentView('disclaimer');
       } else if (['/terms', '/terms-of-service', '/syarat-ketentuan'].includes(path)) {
         setCurrentView('terms');
+      } else if (['/surat-pembaca', '/surat', '/suara-pembaca'].includes(path)) {
+        setCurrentView('surat-pembaca');
+      } else if (['/iklan-baris', '/iklan', '/iklan-kecil'].includes(path)) {
+        setCurrentView('iklan-baris');
       } else if (path.startsWith('/author/')) {
         const username = decodeURIComponent(path.replace('/author/', '').replace(/\/$/, '')).trim();
         setActiveAuthorUsername(username);
@@ -611,6 +617,14 @@ export default function App() {
       setSelectedTag('');
       setCurrentView(view as any);
       window.history.pushState({}, '', `/${view}`);
+    } else if (view === 'surat-pembaca') {
+      setSelectedTag('');
+      setCurrentView('surat-pembaca');
+      window.history.pushState({}, '', '/surat-pembaca');
+    } else if (view === 'iklan-baris') {
+      setSelectedTag('');
+      setCurrentView('iklan-baris');
+      window.history.pushState({}, '', '/iklan-baris');
     } else {
       setSelectedTag('');
       setCurrentView('home');
@@ -803,6 +817,28 @@ export default function App() {
               siteConfig={effectiveConfig}
             />
           </div>
+        )}
+
+        {currentView === 'surat-pembaca' && (
+          <Suspense fallback={
+            <div className="py-20 text-center space-y-3">
+              <div className="w-10 h-10 border-4 border-rose-600 border-t-transparent rounded-full animate-spin mx-auto" />
+              <p className="text-sm text-slate-500 font-bold">Memuat Surat Pembaca...</p>
+            </div>
+          }>
+            <SuratPembacaPage siteConfig={effectiveConfig} onNavigate={(v, p) => handleNavigate(v, p)} />
+          </Suspense>
+        )}
+
+        {currentView === 'iklan-baris' && (
+          <Suspense fallback={
+            <div className="py-20 text-center space-y-3">
+              <div className="w-10 h-10 border-4 border-rose-600 border-t-transparent rounded-full animate-spin mx-auto" />
+              <p className="text-sm text-slate-500 font-bold">Memuat Iklan Baris Cetak...</p>
+            </div>
+          }>
+            <IklanBarisPage siteConfig={effectiveConfig} onNavigate={(v, p) => handleNavigate(v, p)} />
+          </Suspense>
         )}
 
         {currentView === 'admin' && (
