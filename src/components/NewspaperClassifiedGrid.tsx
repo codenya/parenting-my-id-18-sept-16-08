@@ -187,43 +187,59 @@ export default function NewspaperClassifiedGrid({
       {/* MULTI-COLUMN DENSE PRINT NEWSPAPER GRID WITH LEFT-TO-RIGHT COLUMN FLOW (column-fill: auto) */}
       <style>{`
         .newspaper-columns-flow {
-          column-gap: 12px;
+          column-gap: 14px;
           column-fill: auto;
         }
 
-        /* 1. SMARTPHONE VERTICAL (PORTRAIT): MAX 2 KOLOM */
+        /* 1. SMARTPHONE VERTICAL (PORTRAIT): STRICTLY 1 KOLOM FOR EASY READING (MATA TUA) */
         @media screen and (max-width: 639px) and (orientation: portrait) {
           .newspaper-columns-flow {
-            column-count: 2 !important;
+            column-count: 1 !important;
             max-height: none !important;
+          }
+          .newspaper-ad-item {
+            font-size: 14.5px !important;
+            line-height: 1.45 !important;
+            padding: 6px 4px !important;
+          }
+          .newspaper-cat-header {
+            font-size: 13.5px !important;
+            padding: 5px 6px !important;
           }
         }
 
-        /* 2. SMARTPHONE HORIZONTAL (LANDSCAPE): MAX 2 KOLOM */
+        /* 2. SMARTPHONE HORIZONTAL (LANDSCAPE): 2 KOLOM */
         @media screen and (max-width: 639px) and (orientation: landscape) {
           .newspaper-columns-flow {
             column-count: 2 !important;
             max-height: 850px;
           }
+          .newspaper-ad-item {
+            font-size: 13px !important;
+            padding: 4px 3px !important;
+          }
         }
 
-        /* 3. TABLET VERTICAL (PORTRAIT): MAX 2 KOLOM */
+        /* 3. TABLET VERTICAL (PORTRAIT): 2 KOLOM */
         @media screen and (min-width: 640px) and (max-width: 1023px) and (orientation: portrait) {
           .newspaper-columns-flow {
             column-count: 2 !important;
-            max-height: 900px;
+            max-height: 950px;
+          }
+          .newspaper-ad-item {
+            font-size: 13.5px !important;
           }
         }
 
-        /* 4. TABLET HORIZONTAL (LANDSCAPE): MAX 4 KOLOM */
+        /* 4. TABLET HORIZONTAL (LANDSCAPE): 3 KOLOM */
         @media screen and (min-width: 640px) and (max-width: 1023px) and (orientation: landscape) {
           .newspaper-columns-flow {
-            column-count: 4 !important;
-            max-height: 720px;
+            column-count: 3 !important;
+            max-height: 780px;
           }
         }
 
-        /* 5. DESKTOP VERTICAL (PORTRAIT DISPLAY): MAX 3 KOLOM */
+        /* 5. DESKTOP VERTICAL: 3 KOLOM */
         @media screen and (min-width: 1024px) and (orientation: portrait) {
           .newspaper-columns-flow {
             column-count: 3 !important;
@@ -231,18 +247,18 @@ export default function NewspaperClassifiedGrid({
           }
         }
 
-        /* 6. DESKTOP HORIZONTAL (LANDSCAPE DISPLAY): MAX 5 KOLOM */
+        /* 6. DESKTOP HORIZONTAL: 4 KOLOM */
         @media screen and (min-width: 1024px) and (orientation: landscape) {
           .newspaper-columns-flow {
-            column-count: 5 !important;
-            max-height: 750px;
+            column-count: 4 !important;
+            max-height: 800px;
           }
         }
 
         /* DEFAULT FALLBACKS */
         @media screen and (max-width: 639px) {
           .newspaper-columns-flow {
-            column-count: 2;
+            column-count: 1;
           }
         }
         @media screen and (min-width: 640px) and (max-width: 1023px) {
@@ -252,14 +268,31 @@ export default function NewspaperClassifiedGrid({
         }
         @media screen and (min-width: 1024px) {
           .newspaper-columns-flow {
-            column-count: 5;
+            column-count: 4;
           }
         }
 
-        /* SMART WORD BREAKING FOR STRINGS WITHOUT SPACES & EASY READABILITY FOR ELDERLY EYES */
-        .newspaper-ad-item, .newspaper-block {
+        /* PREVENT AD ITEMS FROM SPLITTING HALFWAY ACROSS COLUMNS, BUT ALLOW CATEGORIES TO SPLIT SMOOTHLY */
+        .newspaper-block {
+          break-inside: auto !important;
+          page-break-inside: auto !important;
+          -webkit-column-break-inside: auto !important;
+          margin-bottom: 10px;
+        }
+
+        .newspaper-cat-header {
+          break-inside: avoid !important;
+          page-break-inside: avoid !important;
+          -webkit-column-break-inside: avoid !important;
+          break-after: avoid !important;
+        }
+
+        .newspaper-ad-item {
+          break-inside: avoid !important;
+          page-break-inside: avoid !important;
+          -webkit-column-break-inside: avoid !important;
           overflow-wrap: anywhere !important;
-          word-break: break-all !important;
+          word-break: break-word !important;
           word-wrap: break-word !important;
           hyphens: auto !important;
         }
@@ -275,7 +308,7 @@ export default function NewspaperClassifiedGrid({
 
         {/* CATEGORY & AD BLOCKS FLOW */}
         {(Object.entries(currentPageData.categories) as Array<[string, RenderedAdBlock[]]>).map(([catName, blocks]) => (
-          <div key={catName} className="newspaper-block mb-3 break-inside-avoid">
+          <div key={catName} className="newspaper-block mb-3">
             
             {/* CATEGORY HEADER BANNER (SOLID BLACK, INVERTED WHITE TEXT) */}
             <div 
