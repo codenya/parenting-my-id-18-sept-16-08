@@ -26,9 +26,10 @@ export interface IklanBarisItem {
   tahunLahir: number;
   phone: string;
   ipAddress?: string;
-  status: 'pending' | 'published' | 'rejected';
+  status: 'pending' | 'published' | 'rejected' | 'expired';
   createdAt: string;
   updatedAt?: string;
+  expiresAt?: string; // Tanggal iklan harus diturunkan / berakhir (opsional)
 }
 
 export interface User {

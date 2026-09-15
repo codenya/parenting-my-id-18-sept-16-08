@@ -208,6 +208,7 @@ export function initWebMcpTools() {
           kategori: { type: 'string', description: 'Nama kategori iklan' },
           keteranganBarang: { type: 'string', description: 'Deskripsi lengkap barang / jasa' },
           harga: { type: 'string', description: 'Harga atau tarif (contoh: "Rp 150.000")' },
+          expiresAt: { type: 'string', description: 'Tanggal iklan harus diturunkan / berakhir (opsional, format YYYY-MM-DD)' },
         },
         required: ['nama', 'kota', 'phone', 'kategori', 'keteranganBarang', 'harga'],
       },

@@ -1960,6 +1960,15 @@ app.delete('/api/surat-pembaca/:id', requireAuth(['admin', 'editor']), (req, res
 // IKLAN BARIS API ENDPOINTS (GUEST SUBMISSION + KOMPAS PRINT STYLE MODERATION)
 // ============================================================================
 
+// Helper to check if an ad has expired based on optional expiresAt
+function isAdExpired(item: any): boolean {
+  if (item.status === 'expired') return true;
+  if (!item.expiresAt) return false;
+  const expStr = String(item.expiresAt).length === 10 ? `${item.expiresAt}T23:59:59.999Z` : String(item.expiresAt);
+  const expTime = new Date(expStr).getTime();
+  return !isNaN(expTime) && expTime < Date.now();
+}
+
 // 1. GET /api/iklan-baris (Public / Admin)
 app.get('/api/iklan-baris', async (req, res) => {
   try {
@@ -1992,7 +2001,9 @@ app.get('/api/iklan-baris', async (req, res) => {
     let filtered = [...mockIklanBaris];
 
     if (!isStaff) {
-      filtered = filtered.filter(item => item.status === 'published');
+      filtered = filtered.filter(item => item.status === 'published' && !isAdExpired(item));
+    } else if (reqStatus === 'expired') {
+      filtered = filtered.filter(item => isAdExpired(item));
     } else if (reqStatus !== 'all') {
       filtered = filtered.filter(item => item.status === reqStatus);
     }
@@ -2009,16 +2020,18 @@ app.get('/api/iklan-baris', async (req, res) => {
     const items = filtered.slice(startIndex, startIndex + limit);
 
     const sanitizedItems = items.map(item => {
+      const isExp = isAdExpired(item);
+      const computedStatus = isExp ? 'expired' : item.status;
       if (!isStaff) {
         const { ipAddress, ...rest } = item;
-        return rest;
+        return { ...rest, status: computedStatus };
       }
-      return item;
+      return { ...item, status: computedStatus };
     });
 
     const categoryCounts: Record<string, number> = {};
     mockIklanBaris.forEach(item => {
-      if (isStaff || item.status === 'published') {
+      if ((isStaff || item.status === 'published') && !isAdExpired(item)) {
         const k = item.kategori;
         if (k) {
           categoryCounts[k] = (categoryCounts[k] || 0) + 1;
@@ -2043,7 +2056,7 @@ app.get('/api/iklan-baris', async (req, res) => {
 // 2. POST /api/iklan-baris (Guest Submission with Anti-Spam & Anti-XSS)
 app.post('/api/iklan-baris', async (req, res) => {
   try {
-    const { kategori, keteranganBarang, harga, nama, kota, pekerjaan, tahunLahir, phone, turnstileToken, website_url_hp } = req.body || {};
+    const { kategori, keteranganBarang, harga, nama, kota, pekerjaan, tahunLahir, phone, expiresAt, tanggalBerakhir, turnstileToken, website_url_hp } = req.body || {};
 
     // 1. Honeypot Trap Check
     if (website_url_hp) {
@@ -2091,8 +2104,10 @@ app.post('/api/iklan-baris', async (req, res) => {
     const cleanKota = cleanTextAndStripUrls(String(kota));
     const cleanPekerjaan = cleanTextAndStripUrls(String(pekerjaan));
     const cleanPhone = cleanTextAndStripUrls(String(phone));
+    const rawExpires = expiresAt || tanggalBerakhir;
+    const cleanExpiresAt = rawExpires ? cleanTextAndStripUrls(String(rawExpires)) : undefined;
 
-    const newItem = {
+    const newItem: any = {
       id: Date.now(),
       kategori: cleanKategori,
       keteranganBarang: cleanKet,
@@ -2107,6 +2122,10 @@ app.post('/api/iklan-baris', async (req, res) => {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
+
+    if (cleanExpiresAt) {
+      newItem.expiresAt = cleanExpiresAt;
+    }
 
     mockIklanBaris.unshift(newItem);
     saveServerData();
@@ -2130,7 +2149,7 @@ app.put('/api/iklan-baris/:id', requireAuth(['admin', 'editor']), (req, res) => 
       return res.status(404).json({ error: 'Iklan baris tidak ditemukan.' });
     }
 
-    const { kategori, keteranganBarang, harga, nama, kota, pekerjaan, phone, status } = req.body || {};
+    const { kategori, keteranganBarang, harga, nama, kota, pekerjaan, phone, status, expiresAt, tanggalBerakhir } = req.body || {};
 
     if (kategori !== undefined) item.kategori = cleanTextAndStripUrls(String(kategori));
     if (keteranganBarang !== undefined) item.keteranganBarang = cleanTextAndStripUrls(String(keteranganBarang));
@@ -2140,6 +2159,10 @@ app.put('/api/iklan-baris/:id', requireAuth(['admin', 'editor']), (req, res) => 
     if (pekerjaan !== undefined) item.pekerjaan = cleanTextAndStripUrls(String(pekerjaan));
     if (phone !== undefined) item.phone = cleanTextAndStripUrls(String(phone));
     if (status !== undefined) item.status = status;
+    const rawExpires = expiresAt !== undefined ? expiresAt : tanggalBerakhir;
+    if (rawExpires !== undefined) {
+      item.expiresAt = rawExpires ? cleanTextAndStripUrls(String(rawExpires)) : null;
+    }
     item.updatedAt = new Date().toISOString();
 
     saveServerData();

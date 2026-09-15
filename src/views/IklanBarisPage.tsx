@@ -72,6 +72,7 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
   const [kategori, setKategori] = useState('JASA NANNY & BABYSITTER');
   const [keteranganBarang, setKeteranganBarang] = useState('');
   const [harga, setHarga] = useState('');
+  const [expiresAt, setExpiresAt] = useState('');
   const [turnstileToken, setTurnstileToken] = useState('');
   const [turnstileLoadFailed, setTurnstileLoadFailed] = useState(false);
   const [websiteUrlHp, setWebsiteUrlHp] = useState('');
