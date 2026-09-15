@@ -290,6 +290,7 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
           kategori: kategori.trim(),
           keteranganBarang: keteranganBarang.trim(),
           harga: harga.trim(),
+          expiresAt: expiresAt.trim() ? expiresAt.trim() : undefined,
           turnstileToken,
           website_url_hp: websiteUrlHp,
         }),
@@ -307,6 +308,7 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
         setKategori('Otomotif');
         setKeteranganBarang('');
         setHarga('');
+        setExpiresAt('');
         setShowForm(false);
         window.scrollTo({ top: 300, behavior: 'smooth' });
       } else {
@@ -496,6 +498,23 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
                 />
               </div>
 
+              {/* TANGGAL SELESAI TAYANG (OPSIONAL) */}
+              <div>
+                <label className="block font-extrabold uppercase tracking-wider text-slate-800 dark:text-slate-200 mb-1">
+                  Tanggal Selesai Tayang <span className="text-slate-500 font-normal text-xs normal-case">(Opsional)</span>
+                </label>
+                <input
+                  type="date"
+                  min={new Date().toISOString().split('T')[0]}
+                  value={expiresAt}
+                  onChange={(e) => setExpiresAt(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl border-2 border-slate-400 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                />
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                  * Tentukan tanggal kapan iklan harus diturunkan / berakhir masa tayangnya. Kosongkan jika ingin ditayangkan tanpa batas waktu sampai diturunkan manual oleh redaksi.
+                </p>
+              </div>
+
               {/* KETERANGAN BARANG */}
               <div>
                 <label className="block font-extrabold uppercase tracking-wider text-slate-800 dark:text-slate-200 mb-1">
@@ -683,9 +702,16 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
                   <div>
                     {/* CLASSIFIED HEADER: CATEGORY BADGE + PRICE */}
                     <div className="flex items-center justify-between border-b border-slate-300 dark:border-slate-800 pb-2 mb-2.5">
-                      <span className="inline-block px-2.5 py-0.5 rounded bg-slate-900 text-amber-300 dark:bg-amber-400 dark:text-slate-900 text-[10px] font-black uppercase tracking-wider">
-                        [{item.kategori}]
-                      </span>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="inline-block px-2.5 py-0.5 rounded bg-slate-900 text-amber-300 dark:bg-amber-400 dark:text-slate-900 text-[10px] font-black uppercase tracking-wider">
+                          [{item.kategori}]
+                        </span>
+                        {item.expiresAt && (
+                          <span className="inline-block px-2 py-0.5 rounded bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300 text-[10px] font-bold border border-amber-300 dark:border-amber-800">
+                            s/d {item.expiresAt.substring(0, 10)}
+                          </span>
+                        )}
+                      </div>
                       <span className="text-xs font-black text-slate-900 dark:text-amber-400 font-mono">
                         {item.harga}
                       </span>

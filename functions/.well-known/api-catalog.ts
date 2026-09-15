@@ -29,8 +29,20 @@ export const onRequest: PagesFunction<Env> = async () => {
             "type": "application/json"
           },
           {
+            "href": "/.well-known/mcp/server-card.json",
+            "type": "application/json"
+          },
+          {
+            "href": "/.well-known/mcp.json",
+            "type": "application/json"
+          },
+          {
             "href": "/.well-known/mcp-server.json",
             "type": "application/json"
+          },
+          {
+            "href": "/.well-known/http-message-signatures-directory",
+            "type": "application/http-message-signatures-directory+json"
           },
           {
             "href": "/.well-known/web-bot-auth.json",

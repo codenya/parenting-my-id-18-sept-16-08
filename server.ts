@@ -8,7 +8,7 @@ import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
 import { marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
-import { generateStaticFiles, generateSitemapXml, generateFeedXml, generateLlmsTxt, generateLlmsFullTxt, parseFeedXmlItems } from './scripts/generate-static-files.js';
+import { generateStaticFiles, generateSitemapXml, generateFeedXml, generateLlmsTxt, generateLlmsFullTxt, parseFeedXmlItems, getSiteConfig } from './scripts/generate-static-files.js';
 import { signJwtHmacSha256, verifyJwtHmacSha256, extractTokenFromHeaderOrCookie } from './src/lib/jwt.js';
 import { generate360ClassifiedAds } from './src/lib/iklanBarisSeed.js';
 
@@ -32,8 +32,8 @@ function isCloudinaryUrl(url: string | undefined | null): boolean {
 
 function getOptimizedImageUrl(
   url: string | undefined | null,
-  width = 1200,
-  quality = 55,
+  width = 600,
+  quality = 25,
   format = 'webp'
 ): string {
   if (!url) return '';
@@ -152,7 +152,6 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Security First: HTTP Security Headers & Content Security Policy
 app.use((req, res, next) => {
-  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
@@ -167,7 +166,7 @@ app.use((req, res, next) => {
 let mockUsers = [
   {
     id: 1,
-    email: 'admin@parenting.my.id',
+    email: 'admin@domain.com',
     password: 'admin123',
     name: 'Dr. Ratna Sari, M.Psi',
     title: 'Spesialis Psikologi Anak & Praktisi Parenting',
@@ -176,13 +175,13 @@ let mockUsers = [
     bio: 'Psikolog anak & praktisi parenting terkemuka di Indonesia dengan pengalaman klinis 12+ tahun dalam pendampingan tumbuh kembang emosi anak.',
     socialInstagram: 'https://instagram.com/ratnasari.mpsi',
     socialLinkedin: 'https://linkedin.com/in/ratnasari-mpsi',
-    socialWebsite: 'https://parenting.my.id',
+    socialWebsite: '',
     isVerifiedAcademic: true,
     verifiedAcademicLabel: 'Penulis Akademik Terverifikasi',
   },
   {
     id: 2,
-    email: 'editor@parenting.my.id',
+    email: 'editor@domain.com',
     password: 'editor123',
     name: 'Maya Putri, S.Psi',
     title: 'Editor Senior & Moderasi Konten Parenting',
@@ -196,7 +195,7 @@ let mockUsers = [
   },
   {
     id: 3,
-    email: 'penulis@parenting.my.id',
+    email: 'penulis@domain.com',
     password: 'writer123',
     name: 'Ahmad Zulkarnain, S.Ked',
     title: 'Edukator Kesehatan Anak & Spesialis Gizi Balita',
@@ -210,7 +209,7 @@ let mockUsers = [
   },
   {
     id: 4,
-    email: 'siti.aminah@parenting.my.id',
+    email: 'siti.aminah@domain.com',
     password: 'writer123',
     name: 'Siti Aminah, S.Gz',
     title: 'Ahli Gizi Ibu & Anak (Certified Nutritionist)',
@@ -218,7 +217,7 @@ let mockUsers = [
     avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=60&q=60&fm=webp',
     bio: 'Praktisi MPASI sehat, penyusun panduan gizi 1000 HPK, dan konselor laktasi bersertifikasi.',
     socialInstagram: 'https://instagram.com/sitiaminah.sgz',
-    socialWebsite: 'https://parenting.my.id',
+    socialWebsite: '',
     isVerifiedAcademic: true,
     verifiedAcademicLabel: 'Nutrisionis Terverifikasi',
   },
@@ -250,7 +249,7 @@ let mockComments = [
     user_name: 'Budi Santoso',
     user_email: 'budi.s@example.com',
     user_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80',
-    content: 'Penjelasan mengenai 1000 HPK dan ASI eksklusif sangat jelas dan berbasis ilmiah. Terima kasih tim Parenting.my.id!',
+    content: 'Penjelasan mengenai 1000 HPK dan ASI eksklusif sangat jelas dan berbasis ilmiah. Terima kasih tim Redaksi!',
     status: 'approved',
     created_at: new Date(Date.now() - 3600000 * 12).toISOString(),
   }
@@ -1098,7 +1097,7 @@ Untuk kelompok usia **balita**, penerapan komunikasi terbuka sangat efektif jika
     authorAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=60&q=60&fm=webp',
     authorRole: 'admin',
     status: 'published',
-    metaTitle: 'Panduan Lengkap Pola Asuh Demokratis Anak | Parenting.my.id',
+    metaTitle: 'Panduan Lengkap Pola Asuh Demokratis Anak',
     metaDescription: 'Pelajari panduan penerapan pola asuh demokratis untuk membentuk karakter anak yang mandiri, percaya diri, dan berani di era digital.',
     tags: 'pola asuh, psikologi anak, komunikasi keluarga, karakter anak',
     views: 248,
@@ -1148,7 +1147,7 @@ Jika anak sudah menunjukkan tanda-tanda kelelahan, istirahatlah dan pastikan keb
     authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=60&q=60&fm=webp',
     authorRole: 'writer',
     status: 'published',
-    metaTitle: '5 Aktivitas Sensory Play Melatih Motorik Balita | Parenting.my.id',
+    metaTitle: '5 Aktivitas Sensory Play Melatih Motorik Balita',
     metaDescription: 'Panduan praktis 5 permainan sensori (sensory play) hemat untuk meningkatkan stimulasi indera dan kekuatan motorik balita di rumah.',
     tags: 'sensory play, balita, motorik halus, permainan edukasi',
     views: 182,
@@ -1189,7 +1188,7 @@ Ajak juga **balita** aktif bergerak lewat permainan ringan seperti **sensory pla
     authorAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=60&q=60&fm=webp',
     authorRole: 'admin',
     status: 'published',
-    metaTitle: 'Cara Mencegah Stunting pada 1000 HPK Anak | Parenting.my.id',
+    metaTitle: 'Cara Mencegah Stunting pada 1000 HPK Anak',
     metaDescription: 'Edukasi komprehensif pencegahan stunting, manfaat ASI eksklusif, serta pola gizi sehat untuk anak tumbuh optimal.',
     tags: 'stunting, asi eksklusif, gizi anak, MPASI, kesehatan balita',
     views: 310,
@@ -2003,7 +2002,9 @@ app.get('/api/iklan-baris', async (req, res) => {
     if (!isStaff) {
       filtered = filtered.filter(item => item.status === 'published' && !isAdExpired(item));
     } else if (reqStatus === 'expired') {
-      filtered = filtered.filter(item => isAdExpired(item));
+      filtered = filtered.filter(item => item.status === 'expired' || isAdExpired(item));
+    } else if (reqStatus === 'published') {
+      filtered = filtered.filter(item => item.status === 'published' && !isAdExpired(item));
     } else if (reqStatus !== 'all') {
       filtered = filtered.filter(item => item.status === reqStatus);
     }
@@ -2186,11 +2187,12 @@ app.delete('/api/iklan-baris/:id', requireAuth(['admin', 'editor']), (req, res) 
 
 // GET Cusdis Webhook Endpoint (Health Check)
 app.get(['/api/webhooks/cusdis', '/api/cusdis-webhook'], (req, res) => {
+  const { SITE_URL: currentSiteUrl } = getSiteConfig();
   res.json({
     status: 'online',
     success: true,
     message: 'Cusdis Webhook Endpoint server aktif dan siap menerima payload POST dari Cusdis!',
-    endpoint: 'https://parenting.my.id/api/webhooks/cusdis',
+    endpoint: `${currentSiteUrl}/api/webhooks/cusdis`,
   });
 });
 
@@ -2382,8 +2384,8 @@ app.post('/api/users', requireAuth(['admin']), (req, res) => {
     name,
     role: role || 'writer',
     avatar: avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
-    title: title || 'Edukator Parenting & Kesehatan',
-    bio: bio || 'Penulis dan kontributor artikel edukasi parenting.',
+    title: title || 'Penulis & Kontributor Konten',
+    bio: bio || 'Penulis dan kontributor artikel edukasi terpercaya.',
     socialInstagram: socialInstagram || '',
     socialLinkedin: socialLinkedin || '',
     socialWebsite: socialWebsite || '',
@@ -2420,6 +2422,7 @@ app.post('/api/posts', requireAuth(['admin', 'editor', 'writer']), (req, res) =>
   // Prevent slug collisions
   const generatedSlug = slug ? getUniquePostSlug(slug, id) : getUniquePostSlug(title, id);
   const author = mockUsers.find((u) => u.id === (authorId || 1)) || mockUsers[0];
+  const { siteName: currentSiteName } = getSiteConfig();
 
   const effectiveCoAuthorIds = Array.isArray(coAuthorIds) ? coAuthorIds : (Array.isArray(co_writers) ? co_writers : []);
 
@@ -2474,9 +2477,9 @@ app.post('/api/posts', requireAuth(['admin', 'editor', 'writer']), (req, res) =>
         revisions: updatedRevisions,
         status: status || existingPost.status || 'draft',
         rejectionReason: rejectionReason !== undefined ? rejectionReason : existingPost.rejectionReason,
-        metaTitle: metaTitle || `${title} | Parenting.my.id`,
-        metaDescription: metaDescription || excerpt || 'Artikel edukasi parenting Indonesia.',
-        tags: tags || 'parenting, anak',
+        metaTitle: metaTitle || `${title} | ${currentSiteName}`,
+        metaDescription: metaDescription || excerpt || `Artikel publikasi dan informasi terpercaya ${currentSiteName}.`,
+        tags: tags || 'artikel, informasi',
         postType: postType || existingPost.postType || 'article',
         interactiveConfigurator: interactiveConfigurator !== undefined ? interactiveConfigurator : existingPost.interactiveConfigurator,
         interactiveShowcase: interactiveShowcase !== undefined ? interactiveShowcase : existingPost.interactiveShowcase,
@@ -2528,9 +2531,9 @@ app.post('/api/posts', requireAuth(['admin', 'editor', 'writer']), (req, res) =>
     revisions: [],
     status: status || 'draft',
     rejectionReason: rejectionReason || '',
-    metaTitle: metaTitle || `${title} | Parenting.my.id`,
-    metaDescription: metaDescription || excerpt || 'Artikel edukasi parenting Indonesia.',
-    tags: tags || 'parenting, anak',
+    metaTitle: metaTitle || `${title} | ${currentSiteName}`,
+    metaDescription: metaDescription || excerpt || `Artikel publikasi dan informasi terpercaya ${currentSiteName}.`,
+    tags: tags || 'artikel, informasi',
     postType: postType || 'article',
     interactiveConfigurator: interactiveConfigurator || null,
     interactiveShowcase: interactiveShowcase || null,
@@ -2787,6 +2790,7 @@ CREATE TABLE IF NOT EXISTS iklan_baris (
   harga TEXT NOT NULL,
   status TEXT DEFAULT 'pending',
   rejection_reason TEXT,
+  expires_at TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -2964,6 +2968,7 @@ app.post('/api/database/dump', requireAuth(['admin']), (req, res) => {
   harga TEXT NOT NULL,
   status TEXT DEFAULT 'pending',
   rejection_reason TEXT,
+  expires_at TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );`,
@@ -3323,7 +3328,7 @@ app.post('/api/auth/update-credentials', requireAuth(['admin', 'editor', 'writer
 const performGitHubUpload = async (filename: string, base64Content: string) => {
   const token = process.env.GITHUB_TOKEN;
   const owner = process.env.GITHUB_OWNER || 'vswi';
-  const repo = process.env.GITHUB_REPO || 'parenting-my-id';
+  const repo = process.env.GITHUB_REPO || 'blog-cms';
   const branch = process.env.GITHUB_BRANCH || 'main';
 
   const cleanFilename = path.basename(filename).replace(/[^a-zA-Z0-9.-]/g, '_');
@@ -3440,7 +3445,7 @@ const handleCloudinaryUpload = async (req: any, res: any) => {
     const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
     const apiKey = process.env.CLOUDINARY_API_KEY;
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
-    const folder = process.env.CLOUDINARY_FOLDER || 'parenting-my-id';
+    const folder = process.env.CLOUDINARY_FOLDER || 'cms-uploads';
 
     // If Cloudinary keys are not fully provided, trigger GitHub/Local storage fallback
     if (!cloudName || !apiKey || !apiSecret) {
@@ -3637,6 +3642,38 @@ app.get(['/feed.xml', '/rss.xml'], (req, res) => {
   res.status(200).send(rss);
 });
 
+
+// Decoy /admin handler - Security First Policy: returns 404 Not Found without redirect
+app.get(['/admin', '/admin/'], (req, res) => {
+  let siteName = 'Blog Engine';
+  try {
+    const configPath = path.join(process.cwd(), 'public', 'site_config.json');
+    if (fs.existsSync(configPath)) {
+      const parsed = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+      siteName = parsed.site_name || siteName;
+    }
+  } catch (err) {}
+  
+  res.status(404).setHeader('Content-Type', 'text/html; charset=utf-8').setHeader('Cache-Control', 'no-store, max-age=0').send(`<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 Halaman Tidak Ditemukan - ${siteName}</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; text-align: center; padding: 4rem 1rem; background: #f8fafc; color: #334155; }
+    h1 { font-size: 4rem; font-weight: 800; margin: 0 0 0.5rem 0; color: #e11d48; }
+    p { font-size: 1.125rem; color: #64748b; margin-bottom: 1.5rem; }
+    a { display: inline-block; padding: 0.625rem 1.25rem; background: #e11d48; color: #ffffff; text-decoration: none; font-weight: 600; border-radius: 0.75rem; }
+  </style>
+</head>
+<body>
+  <h1>404</h1>
+  <p>Halaman yang Anda cari tidak ditemukan.</p>
+  <a href="/">Kembali ke Beranda</a>
+</body>
+</html>`);
+});
 
 // 7.A. DYNAMIC LLMS.TXT & LLMS-FULL.TXT ENDPOINTS (SYNCHRONIZED WITH FEED.XML ITEMS)
 app.get('/llms.txt', (req, res) => {
@@ -5218,19 +5255,53 @@ app.get([
   });
 });
 
-// MCP Server Card Endpoint (Model Context Protocol)
-app.get(['/.well-known/mcp-server.json', '/.well-known/mcp.json'], (req, res) => {
+// MCP Server Card Endpoint (Model Context Protocol - SEP-1649 & SEP-2127)
+app.get(['/.well-known/mcp/server-card.json', '/.well-known/mcp.json', '/.well-known/mcp-server.json'], (req, res) => {
+  const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+  let siteName = 'Site Content & Interaction MCP Server';
+  let siteDescription = 'Model Context Protocol (MCP) server providing context discovery, article retrieval, and interactive tools for AI agents.';
+
+  try {
+    const configPath = path.join(process.cwd(), 'public', 'site_config.json');
+    if (fs.existsSync(configPath)) {
+      const conf = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+      if (conf.site_name) siteName = `${conf.site_name} MCP Server`;
+      if (conf.site_description) siteDescription = conf.site_description;
+    }
+  } catch {
+    // fallback
+  }
+
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Cache-Control', 'public, max-age=3600');
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Link', `</mcp>; rel="mcp-endpoint", </.well-known/mcp.json>; rel="alternate"`);
+
   return res.json({
-    mcpVersion: '1.0.0',
-    name: 'Site Content & Interaction MCP Server',
-    description: 'Model Context Protocol (MCP) declaration enabling LLM models and external agents to query context and invoke tools.',
-    transport: {
-      type: 'sse',
-      endpoint: '/api/mcp/sse',
+    $schema: 'https://modelcontextprotocol.io/schemas/server-card-v1.json',
+    serverInfo: {
+      name: siteName,
+      version: '1.0.0',
+      description: siteDescription,
     },
+    name: siteName,
+    version: '1.0.0',
+    description: siteDescription,
+    endpoint: '/mcp',
+    transport: {
+      type: 'streamable-http',
+      endpoint: '/mcp',
+    },
+    transports: [
+      {
+        type: 'streamable-http',
+        endpoint: '/mcp',
+      },
+      {
+        type: 'sse',
+        endpoint: '/api/mcp/sse',
+      },
+    ],
     capabilities: {
       tools: { listChanged: true },
       resources: { subscribe: false, listChanged: true },
@@ -5242,20 +5313,35 @@ app.get(['/.well-known/mcp-server.json', '/.well-known/mcp.json'], (req, res) =>
         description: 'Search site articles by keyword or category',
         inputSchema: {
           type: 'object',
-          properties: { search: { type: 'string' }, category: { type: 'string' } },
+          properties: {
+            search: { type: 'string', description: 'Search keyword' },
+            category: { type: 'string', description: 'Category filter' },
+            limit: { type: 'number', description: 'Maximum results' },
+          },
+        },
+      },
+      {
+        name: 'get_post',
+        description: 'Retrieve full article content and metadata by slug identifier',
+        inputSchema: {
+          type: 'object',
+          required: ['slug'],
+          properties: {
+            slug: { type: 'string', description: 'Article slug' },
+          },
         },
       },
       {
         name: 'submit_surat_pembaca',
-        description: 'Submit a reader letter or public opinion',
+        description: 'Submit a reader letter or public opinion piece',
         inputSchema: {
           type: 'object',
           required: ['nama', 'phone', 'judul', 'isi'],
           properties: {
-            nama: { type: 'string' },
-            phone: { type: 'string' },
-            judul: { type: 'string' },
-            isi: { type: 'string' },
+            nama: { type: 'string', description: 'Sender full name' },
+            phone: { type: 'string', description: 'Sender phone number or WhatsApp' },
+            judul: { type: 'string', description: 'Letter headline or subject' },
+            isi: { type: 'string', description: 'Full letter text' },
           },
         },
       },
@@ -5266,15 +5352,317 @@ app.get(['/.well-known/mcp-server.json', '/.well-known/mcp.json'], (req, res) =>
           type: 'object',
           required: ['nama', 'phone', 'kategori', 'keteranganBarang', 'harga'],
           properties: {
-            nama: { type: 'string' },
-            phone: { type: 'string' },
-            kategori: { type: 'string' },
-            keteranganBarang: { type: 'string' },
-            harga: { type: 'string' },
+            nama: { type: 'string', description: 'Advertiser name' },
+            phone: { type: 'string', description: 'Contact phone or WhatsApp' },
+            kategori: { type: 'string', description: 'Category' },
+            keteranganBarang: { type: 'string', description: 'Ad description' },
+            harga: { type: 'string', description: 'Price specification' },
           },
         },
       },
     ],
+    resources: [
+      {
+        uri: `${siteUrl}/llms.txt`,
+        name: 'Site Documentation Summary',
+        mimeType: 'text/plain',
+      },
+      {
+        uri: `${siteUrl}/llms-full.txt`,
+        name: 'Full Site Documentation',
+        mimeType: 'text/plain',
+      },
+      {
+        uri: `${siteUrl}/feed.xml`,
+        name: 'RSS Feed',
+        mimeType: 'application/rss+xml',
+      },
+      {
+        uri: `${siteUrl}/sitemap.xml`,
+        name: 'XML Sitemap',
+        mimeType: 'application/xml',
+      },
+    ],
+    prompts: [
+      {
+        name: 'summarize_latest_posts',
+        description: 'Summarize the latest published articles and updates from the site',
+        arguments: [
+          {
+            name: 'limit',
+            description: 'Number of articles to include (default: 5)',
+            required: false,
+          },
+        ],
+      },
+    ],
+  });
+});
+
+// Web Bot Auth HTTP Message Signatures Directory (IETF WebBotAuth WG & RFC 9421)
+app.get(
+  ['/.well-known/http-message-signatures-directory', '/.well-known/http-message-signatures-directory.json'],
+  (req, res) => {
+    const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    const jwks = {
+      keys: [
+        {
+          kty: 'OKP',
+          crv: 'Ed25519',
+          kid: 'bot-key-ed25519-01',
+          use: 'sig',
+          alg: 'EdDSA',
+          x: '0OlAWjnTRonKtRjt8868NLvuJsc94uyqowcmGhPFp0U',
+        },
+        {
+          kty: 'EC',
+          crv: 'P-256',
+          kid: 'bot-key-ecdsa-01',
+          use: 'sig',
+          alg: 'ES256',
+          x: 'Qw6ZbS3hhwmKq2yVI3JGG6FWMO_3NwDMVDlpCR8Ccek',
+          y: '-Brfbz24cGlwl5CIGVVX42lXQtWy6IXkpvLopW-67JQ',
+        },
+        {
+          kty: 'RSA',
+          kid: 'bot-key-rsa-01',
+          use: 'sig',
+          alg: 'RS256',
+          n: 'v-5IMb7XuAPGaEkGYg61bldgloBvqALykAXlvgX9lok0ZHFxQHm1PNndfxStlVxPuuzlIrX6_DkQXosqgmSCVfK6VFVyGoTSMjDze75p062UaNIyx-m8FpemWF9gHZ8PjCPYoYwjyV1gsZVcblilZRfihDXu1ubCiouvOv7HKJKXpXQQuQ73kvQpTVN3nwjVFD4CCs2fvPsBgUUk7EWsGGE4yTULy0xRu2Qj1oZNKcPzKw57NS1NUsvGkvTtjPjVvHj_6cPpwALmg8cJulN1qEluigkLVb55oM8gAeSYseDBX4I2lVFXbVTDB6w9Gfxu2a1uufbeqGhHyN8FsoBF-w',
+          e: 'AQAB',
+        },
+      ],
+    };
+
+    const accept = req.headers['accept'] || '';
+    const contentType = accept.includes('application/json') && !accept.includes('application/http-message-signatures-directory+json')
+      ? 'application/json; charset=utf-8'
+      : 'application/http-message-signatures-directory+json; charset=utf-8';
+
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Signature-Agent', `<${siteUrl}/.well-known/http-message-signatures-directory>`);
+    res.setHeader(
+      'Link',
+      `<${siteUrl}/.well-known/http-message-signatures-directory>; rel="http-message-signatures-directory", </auth.md>; rel="describedby"; type="text/markdown"`
+    );
+    return res.json(jwks);
+  }
+);
+
+// MCP Streamable HTTP & SSE Transport Endpoints
+app.all(['/mcp', '/api/mcp'], (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, mcp-session-id');
+
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+
+  const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+  let siteName = 'Site Content & Interaction MCP Server';
+  let siteDescription = 'Model Context Protocol (MCP) server providing context discovery, article retrieval, and interactive tools for AI agents.';
+
+  try {
+    const configPath = path.join(process.cwd(), 'public', 'site_config.json');
+    if (fs.existsSync(configPath)) {
+      const conf = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+      if (conf.site_name) siteName = `${conf.site_name} MCP Server`;
+      if (conf.site_description) siteDescription = conf.site_description;
+    }
+  } catch {
+    // fallback
+  }
+
+  const tools = [
+    {
+      name: 'query_posts',
+      description: 'Search site articles by keyword or category',
+      inputSchema: {
+        type: 'object',
+        properties: { search: { type: 'string' }, category: { type: 'string' }, limit: { type: 'number' } },
+      },
+    },
+    {
+      name: 'get_post',
+      description: 'Retrieve full article content and metadata by slug identifier',
+      inputSchema: {
+        type: 'object',
+        required: ['slug'],
+        properties: { slug: { type: 'string' } },
+      },
+    },
+    {
+      name: 'submit_surat_pembaca',
+      description: 'Submit a reader letter or public opinion piece',
+      inputSchema: {
+        type: 'object',
+        required: ['nama', 'phone', 'judul', 'isi'],
+        properties: {
+          nama: { type: 'string' },
+          phone: { type: 'string' },
+          judul: { type: 'string' },
+          isi: { type: 'string' },
+        },
+      },
+    },
+    {
+      name: 'submit_iklan_baris',
+      description: 'Post a classified ad listing',
+      inputSchema: {
+        type: 'object',
+        required: ['nama', 'phone', 'kategori', 'keteranganBarang', 'harga'],
+        properties: {
+          nama: { type: 'string' },
+          phone: { type: 'string' },
+          kategori: { type: 'string' },
+          keteranganBarang: { type: 'string' },
+          harga: { type: 'string' },
+        },
+      },
+    },
+  ];
+
+  const resources = [
+    { uri: `${siteUrl}/llms.txt`, name: 'Site Documentation Summary', mimeType: 'text/plain' },
+    { uri: `${siteUrl}/feed.xml`, name: 'RSS Feed', mimeType: 'application/rss+xml' },
+  ];
+
+  const prompts = [
+    {
+      name: 'summarize_latest_posts',
+      description: 'Summarize latest published articles',
+      arguments: [{ name: 'limit', description: 'Number of articles', required: false }],
+    },
+  ];
+
+  if (req.method === 'GET') {
+    return res.json({
+      protocol: 'mcp-streamable-http',
+      serverInfo: { name: siteName, version: '1.0.0', description: siteDescription },
+      endpoint: `${siteUrl}/mcp`,
+      capabilities: {
+        tools: { listChanged: true },
+        resources: { subscribe: false, listChanged: true },
+        prompts: { listChanged: true },
+      },
+      tools,
+      resources,
+      prompts,
+    });
+  }
+
+  if (req.method === 'POST') {
+    const { id = null, method, params = {} } = req.body || {};
+
+    if (!method) {
+      return res.status(400).json({
+        jsonrpc: '2.0',
+        id,
+        error: { code: -32600, message: 'Invalid Request: missing method' },
+      });
+    }
+
+    if (method === 'initialize') {
+      return res.json({
+        jsonrpc: '2.0',
+        id,
+        result: {
+          protocolVersion: '2024-11-05',
+          serverInfo: { name: siteName, version: '1.0.0' },
+          capabilities: {
+            tools: { listChanged: true },
+            resources: { subscribe: false, listChanged: true },
+            prompts: { listChanged: true },
+          },
+        },
+      });
+    }
+
+    if (method === 'notifications/initialized' || method === 'ping') {
+      return res.json({ jsonrpc: '2.0', id, result: {} });
+    }
+
+    if (method === 'tools/list') {
+      return res.json({ jsonrpc: '2.0', id, result: { tools } });
+    }
+
+    if (method === 'resources/list') {
+      return res.json({ jsonrpc: '2.0', id, result: { resources } });
+    }
+
+    if (method === 'prompts/list') {
+      return res.json({ jsonrpc: '2.0', id, result: { prompts } });
+    }
+
+    if (method === 'tools/call') {
+      const toolName = params.name;
+      const toolArgs = params.arguments || {};
+
+      if (toolName === 'query_posts') {
+        let results = mockPosts || [];
+        if (toolArgs.search) {
+          const q = String(toolArgs.search).toLowerCase();
+          results = results.filter((p: any) => p.title?.toLowerCase().includes(q) || p.excerpt?.toLowerCase().includes(q));
+        }
+        if (toolArgs.category) {
+          results = results.filter((p: any) => p.category?.toLowerCase() === String(toolArgs.category).toLowerCase());
+        }
+        const limit = Number(toolArgs.limit) || 10;
+        return res.json({
+          jsonrpc: '2.0',
+          id,
+          result: {
+            content: [{ type: 'text', text: JSON.stringify({ count: results.length, posts: results.slice(0, limit) }, null, 2) }],
+          },
+        });
+      }
+
+      if (toolName === 'get_post') {
+        const post = mockPosts.find((p: any) => p.slug === toolArgs.slug);
+        return res.json({
+          jsonrpc: '2.0',
+          id,
+          result: {
+            content: [{ type: 'text', text: post ? JSON.stringify(post, null, 2) : `Article '${toolArgs.slug}' not found.` }],
+          },
+        });
+      }
+
+      return res.status(404).json({
+        jsonrpc: '2.0',
+        id,
+        error: { code: -32601, message: `Tool not found: ${toolName}` },
+      });
+    }
+
+    return res.status(404).json({
+      jsonrpc: '2.0',
+      id,
+      error: { code: -32601, message: `Method not implemented: ${method}` },
+    });
+  }
+
+  return res.sendStatus(405);
+});
+
+// SSE Transport for MCP
+app.get('/api/mcp/sse', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+
+  res.write(`event: endpoint\ndata: /mcp\n\n`);
+
+  const keepAlive = setInterval(() => {
+    res.write(': ping\n\n');
+  }, 15000);
+
+  req.on('close', () => {
+    clearInterval(keepAlive);
   });
 });
 
@@ -5364,6 +5752,8 @@ This service implements the open **Auth.md** protocol for autonomous AI agent di
 - **Service Description**: ${siteDescription}
 - **Protected Resource Metadata**: [/.well-known/oauth-protected-resource](${siteUrl}/.well-known/oauth-protected-resource)
 - **Authorization Server Metadata**: [/.well-known/oauth-authorization-server](${siteUrl}/.well-known/oauth-authorization-server)
+- **MCP Server Card (SEP-1649 & SEP-2127)**: [/.well-known/mcp/server-card.json](${siteUrl}/.well-known/mcp/server-card.json)
+- **Web Bot Auth Signatures Directory (IETF WebBotAuth)**: [/.well-known/http-message-signatures-directory](${siteUrl}/.well-known/http-message-signatures-directory)
 - **API Catalog**: [/.well-known/api-catalog](${siteUrl}/.well-known/api-catalog)
 - **Machine Documentation**: [${siteUrl}/llms.txt](${siteUrl}/llms.txt)
 

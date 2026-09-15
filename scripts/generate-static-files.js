@@ -10,9 +10,9 @@ const __dirname = typeof import.meta !== 'undefined' && import.meta.url && __fil
 const rootDir = path.resolve(__dirname, '..');
 
 export function getSiteConfig() {
-  let siteName = 'Parenting';
-  let siteDescription = 'Portal informasi dan panduan terpercaya.';
-  let SITE_URL = process.env.SITE_URL || 'https://parenting.my.id';
+  let siteName = process.env.SITE_NAME || 'Modern Edge Blog';
+  let siteDescription = process.env.SITE_DESCRIPTION || 'Portal informasi dan panduan terpercaya.';
+  let SITE_URL = process.env.SITE_URL || 'https://example.com';
 
   try {
     const configPath = path.join(rootDir, 'public', 'site_config.json');

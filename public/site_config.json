@@ -1,10 +1,10 @@
 {
   "homepage_display_mode": "default",
   "active_theme_preset": "blog-pastel",
-  "site_name": "Parenting.my.id",
+  "site_name": "Modern Edge Blog",
   "mobile_admin_btn_label": "Portal Admin & Editor",
   "mobile_show_logged_username": false,
-  "site_domain": "parenting.my.id",
+  "site_domain": "",
   "default_theme_mode": "auto",
   "font_size_scale": "normal",
   "font_density_scale": "standard",
@@ -89,7 +89,7 @@
   ],
   "enable_search_bar": true,
   "enable_theme_toggle": true,
-  "seo_meta_title": "Parenting.my.id - Edukasi & Pengasuhan Anak Modern",
+  "seo_meta_title": "Modern Edge Blog - Portal Informasi & Konten Digital",
   "seo_meta_description": "Portal informasi dan panduan pengasuhan anak modern, nutrisi balita, serta kesehatan keluarga Indonesia.",
   "seo_default_og_image": "https://images.unsplash.com/photo-1572044162444-ad60f128bdea?q=15&w=400&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   "show_hero_section": true,
@@ -112,11 +112,11 @@
   "popular_posts_count": 5,
   "categories_widget_limit": 8,
   "sidebar_banner_code": "",
-  "footer_about_text": "Parenting.my.id menghadirkan bacaan berkualitas seputar dunia pengasuhan anak, kesehatan keluarga, dan pendidikan anak usia dini.",
-  "footer_copyright_text": "© 2026 Parenting.my.id. Hak Cipta Dilindungi Undang-Undang.",
-  "social_facebook": "https://facebook.com/parentingmyid",
-  "social_instagram": "https://instagram.com/parentingmyid",
-  "social_twitter": "https://x.com/parentingmyid",
+  "footer_about_text": "Menghadirkan bacaan berkualitas seputar dunia informasi modern, panduan praktis, dan edukasi terpercaya.",
+  "footer_copyright_text": "© 2026 Modern Edge Blog. Hak Cipta Dilindungi Undang-Undang.",
+  "social_facebook": "",
+  "social_instagram": "",
+  "social_twitter": "",
   "footer_menu_links": [
     {
       "label": "Kebijakan Privasi",
@@ -153,7 +153,7 @@
       "url": "/balita"
     }
   ],
-  "admin_login_title": "Portal Admin Parenting.my.id",
+  "admin_login_title": "Portal Admin CMS",
   "admin_login_subtitle": "Sistem Otentikasi Cloudflare D1",
   "admin_login_btn_text": "Masuk Portal CMS"
 }

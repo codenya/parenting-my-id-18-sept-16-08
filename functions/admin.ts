@@ -1,9 +1,11 @@
 interface Env {
   DB?: any;
   SITE_URL?: string;
+  SITE_NAME?: string;
 }
 
 export const onRequest: PagesFunction<Env> = async (context) => {
+  const siteName = context.env.SITE_NAME || 'Blog Engine';
   // Security First Policy:
   // Do NOT redirect /admin to /admin-[suffix].
   // Attackers must NEVER know that a secret admin path exists or what suffix is used.
@@ -14,7 +16,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>404 Halaman Tidak Ditemukan - parenting.my.id</title>
+  <title>404 Halaman Tidak Ditemukan - ${siteName}</title>
   <style>
     body { font-family: system-ui, -apple-system, sans-serif; text-align: center; padding: 4rem 1rem; background: #f8fafc; color: #334155; }
     h1 { font-size: 4rem; font-weight: 800; margin: 0 0 0.5rem 0; color: #e11d48; }

@@ -3432,10 +3432,16 @@ Berdasarkan judul artikel: "${title}" dan isi: "${(content || '').slice(0, 500)}
               harga TEXT NOT NULL,
               status TEXT DEFAULT 'pending',
               rejection_reason TEXT,
+              expires_at TEXT,
               created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
               updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
           `).run();
+
+          // Prosedur bootstrap D1: cek/tambahkan kolom expires_at jika belum ada pada tabel lama
+          try {
+            await env.DB.prepare("ALTER TABLE iklan_baris ADD COLUMN expires_at TEXT").run();
+          } catch (_colErr) {}
 
           const countRes: any = await env.DB.prepare("SELECT COUNT(*) as cnt FROM iklan_baris").first();
           if (!countRes || Number(countRes.cnt) === 0) {
@@ -3457,8 +3463,15 @@ Berdasarkan judul artikel: "${title}" dan isi: "${(content || '').slice(0, 500)}
           const bindings: any[] = [];
 
           if (statusParam !== 'all') {
-            whereClauses.push("status = ?");
-            bindings.push(statusParam);
+            if (statusParam === 'expired') {
+              whereClauses.push("(status = 'expired' OR (expires_at IS NOT NULL AND expires_at != '' AND date(expires_at) < date('now')))");
+            } else if (statusParam === 'published') {
+              whereClauses.push("status = 'published'");
+              whereClauses.push("(expires_at IS NULL OR expires_at = '' OR date(expires_at) >= date('now'))");
+            } else {
+              whereClauses.push("status = ?");
+              bindings.push(statusParam);
+            }
           }
 
           if (kategoriParam && kategoriParam !== 'Semua') {
@@ -3474,13 +3487,25 @@ Berdasarkan judul artikel: "${title}" dan isi: "${(content || '').slice(0, 500)}
             : await env.DB.prepare(countQuery).first();
           const total = totalRes ? Number(totalRes.total) : 0;
 
-          const dataQuery = `SELECT id, nama, kota, pekerjaan, tahun_lahir as tahunLahir, phone, kategori, keterangan_barang as keteranganBarang, harga, status, rejection_reason as rejectionReason, created_at as createdAt, updated_at as updatedAt FROM iklan_baris ${whereSql} ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+          const dataQuery = `SELECT id, nama, kota, pekerjaan, tahun_lahir as tahunLahir, phone, kategori, keterangan_barang as keteranganBarang, harga, status, rejection_reason as rejectionReason, expires_at as expiresAt, created_at as createdAt, updated_at as updatedAt FROM iklan_baris ${whereSql} ORDER BY created_at DESC LIMIT ? OFFSET ?`;
           const dataBindings = [...bindings, limit, offset];
           const { results } = await env.DB.prepare(dataQuery).bind(...dataBindings).all();
 
+          const mappedResults = (results || []).map((r: any) => {
+            let isExp = false;
+            if (r.expiresAt) {
+              const expTime = new Date(String(r.expiresAt).length === 10 ? `${r.expiresAt}T23:59:59.999Z` : String(r.expiresAt)).getTime();
+              isExp = !isNaN(expTime) && expTime < Date.now();
+            }
+            return {
+              ...r,
+              status: (r.status === 'expired' || isExp) ? 'expired' : r.status
+            };
+          });
+
           return jsonResponse({
             success: true,
-            items: results || [],
+            items: mappedResults,
             total,
             page,
             limit,
@@ -3496,15 +3521,35 @@ Berdasarkan judul artikel: "${title}" dan isi: "${(content || '').slice(0, 500)}
       const statusParam = url.searchParams.get('status') || 'published';
       const kategoriParam = url.searchParams.get('kategori') || '';
 
-      let filtered = statusParam === 'all' ? cfMockIklanBaris : cfMockIklanBaris.filter(i => i.status === statusParam);
+      const isItemExpired = (i: any) => {
+        if (!i.expiresAt && !i.expires_at) return false;
+        const exp = i.expiresAt || i.expires_at;
+        const expTime = new Date(String(exp).length === 10 ? `${exp}T23:59:59.999Z` : String(exp)).getTime();
+        return !isNaN(expTime) && expTime < Date.now();
+      };
+
+      let filtered = cfMockIklanBaris;
+      if (statusParam === 'expired') {
+        filtered = filtered.filter(i => i.status === 'expired' || isItemExpired(i));
+      } else if (statusParam === 'published') {
+        filtered = filtered.filter(i => i.status === 'published' && !isItemExpired(i));
+      } else if (statusParam !== 'all') {
+        filtered = filtered.filter(i => i.status === statusParam);
+      }
+
       if (kategoriParam && kategoriParam !== 'Semua') {
         filtered = filtered.filter(i => i.kategori === kategoriParam);
       }
 
       const paginated = filtered.slice((page - 1) * limit, page * limit);
+      const mappedPaginated = paginated.map(i => ({
+        ...i,
+        status: (i.status === 'expired' || isItemExpired(i)) ? 'expired' : i.status
+      }));
+
       return jsonResponse({
         success: true,
-        items: paginated,
+        items: mappedPaginated,
         total: filtered.length,
         page,
         limit,
@@ -3516,7 +3561,7 @@ Berdasarkan judul artikel: "${title}" dan isi: "${(content || '').slice(0, 500)}
     if (path === '/api/iklan-baris' && method === 'POST') {
       try {
         const body: any = await request.json().catch(() => ({}));
-        const { nama, kota, pekerjaan, tahunLahir, phone, kategori, keteranganBarang, harga, website_hp } = body;
+        const { nama, kota, pekerjaan, tahunLahir, phone, kategori, keteranganBarang, harga, expiresAt, website_hp } = body;
 
         if (website_hp) {
           return jsonResponse({ error: 'Permintaan ditolak: Spam terdeteksi.' }, 400);
@@ -3533,6 +3578,7 @@ Berdasarkan judul artikel: "${title}" dan isi: "${(content || '').slice(0, 500)}
         const cleanKategori = String(kategori).replace(/<[^>]*>?/gm, '').trim();
         const cleanKeterangan = String(keteranganBarang).replace(/<[^>]*>?/gm, '').trim();
         const cleanHarga = String(harga).replace(/<[^>]*>?/gm, '').trim();
+        const cleanExpiresAt = expiresAt ? String(expiresAt).trim() : null;
 
         if (env.DB) {
           await env.DB.prepare(`
@@ -3549,15 +3595,21 @@ Berdasarkan judul artikel: "${title}" dan isi: "${(content || '').slice(0, 500)}
               harga TEXT NOT NULL,
               status TEXT DEFAULT 'pending',
               rejection_reason TEXT,
+              expires_at TEXT,
               created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
               updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
           `).run();
 
+          // Prosedur bootstrap D1: cek/tambahkan kolom expires_at jika belum ada pada tabel lama
+          try {
+            await env.DB.prepare("ALTER TABLE iklan_baris ADD COLUMN expires_at TEXT").run();
+          } catch (_colErr) {}
+
           const insertRes = await env.DB.prepare(`
-            INSERT INTO iklan_baris (nama, kota, pekerjaan, tahun_lahir, phone, ip_address, kategori, keterangan_barang, harga, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
-          `).bind(cleanNama, cleanKota, cleanPekerjaan, Number(tahunLahir), String(phone), clientIp, cleanKategori, cleanKeterangan, cleanHarga).run();
+            INSERT INTO iklan_baris (nama, kota, pekerjaan, tahun_lahir, phone, ip_address, kategori, keterangan_barang, harga, status, expires_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)
+          `).bind(cleanNama, cleanKota, cleanPekerjaan, Number(tahunLahir), String(phone), clientIp, cleanKategori, cleanKeterangan, cleanHarga, cleanExpiresAt).run();
 
           return jsonResponse({
             success: true,
@@ -3584,19 +3636,49 @@ Berdasarkan judul artikel: "${title}" dan isi: "${(content || '').slice(0, 500)}
       try {
         const id = path.split('/')[3];
         const body: any = await request.json().catch(() => ({}));
-        const { status, rejectionReason, kategori, keteranganBarang, harga } = body;
+        const { status, rejectionReason, kategori, keteranganBarang, harga, expiresAt } = body;
 
         if (env.DB) {
-          await env.DB.prepare(`
-            UPDATE iklan_baris 
-            SET status = COALESCE(?, status), 
-                rejection_reason = COALESCE(?, rejection_reason), 
-                kategori = COALESCE(?, kategori), 
-                keterangan_barang = COALESCE(?, keterangan_barang), 
-                harga = COALESCE(?, harga), 
-                updated_at = CURRENT_TIMESTAMP 
-            WHERE id = ?
-          `).bind(status || null, rejectionReason || null, kategori || null, keteranganBarang || null, harga || null, id).run();
+          try {
+            await env.DB.prepare("ALTER TABLE iklan_baris ADD COLUMN expires_at TEXT").run();
+          } catch (_colErr) {}
+
+          const cleanExpiresAt = expiresAt !== undefined ? (expiresAt ? String(expiresAt).trim() : null) : undefined;
+          if (cleanExpiresAt !== undefined) {
+            await env.DB.prepare(`
+              UPDATE iklan_baris 
+              SET status = COALESCE(?, status), 
+                  rejection_reason = COALESCE(?, rejection_reason), 
+                  kategori = COALESCE(?, kategori), 
+                  keterangan_barang = COALESCE(?, keterangan_barang), 
+                  harga = COALESCE(?, harga), 
+                  expires_at = ?,
+                  updated_at = CURRENT_TIMESTAMP 
+              WHERE id = ?
+            `).bind(status || null, rejectionReason || null, kategori || null, keteranganBarang || null, harga || null, cleanExpiresAt, id).run();
+          } else {
+            await env.DB.prepare(`
+              UPDATE iklan_baris 
+              SET status = COALESCE(?, status), 
+                  rejection_reason = COALESCE(?, rejection_reason), 
+                  kategori = COALESCE(?, kategori), 
+                  keterangan_barang = COALESCE(?, keterangan_barang), 
+                  harga = COALESCE(?, harga), 
+                  updated_at = CURRENT_TIMESTAMP 
+              WHERE id = ?
+            `).bind(status || null, rejectionReason || null, kategori || null, keteranganBarang || null, harga || null, id).run();
+          }
+        } else {
+          const item = (cfMockIklanBaris as any[]).find((x: any) => String(x.id) === String(id));
+          if (item) {
+            if (status !== undefined) item.status = status;
+            if (rejectionReason !== undefined) item.rejectionReason = rejectionReason;
+            if (kategori !== undefined) item.kategori = kategori;
+            if (keteranganBarang !== undefined) item.keteranganBarang = keteranganBarang;
+            if (harga !== undefined) item.harga = harga;
+            if (expiresAt !== undefined) item.expiresAt = expiresAt ? String(expiresAt).trim() : null;
+            item.updatedAt = new Date().toISOString();
+          }
         }
 
         return jsonResponse({ success: true, message: `Iklan Baris #${id} berhasil diperbarui.` });

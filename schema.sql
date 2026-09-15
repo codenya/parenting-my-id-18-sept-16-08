@@ -134,4 +134,42 @@ CREATE TABLE IF NOT EXISTS  product_orders (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_autolinks_keyword ON autolinks(keyword);
+CREATE TABLE IF NOT EXISTS surat_pembaca (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nama TEXT NOT NULL,
+  kota TEXT NOT NULL,
+  pekerjaan TEXT NOT NULL,
+  tahun_lahir INTEGER NOT NULL,
+  phone TEXT NOT NULL,
+  ip_address TEXT,
+  judul TEXT NOT NULL,
+  isi_surat TEXT NOT NULL,
+  kategori TEXT NOT NULL,
+  status TEXT DEFAULT 'pending',
+  rejection_reason TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS iklan_baris (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nama TEXT NOT NULL,
+  kota TEXT NOT NULL,
+  pekerjaan TEXT NOT NULL,
+  tahun_lahir INTEGER NOT NULL,
+  phone TEXT NOT NULL,
+  ip_address TEXT,
+  kategori TEXT NOT NULL,
+  keterangan_barang TEXT NOT NULL,
+  harga TEXT NOT NULL,
+  status TEXT DEFAULT 'pending', -- 'pending' | 'published' | 'rejected' | 'expired'
+  rejection_reason TEXT,
+  expires_at TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_autolinks_keyword ON autolinks(keyword);
+CREATE INDEX IF NOT EXISTS idx_surat_pembaca_status ON surat_pembaca(status);
+CREATE INDEX IF NOT EXISTS idx_iklan_baris_status ON iklan_baris(status);
+CREATE INDEX IF NOT EXISTS idx_iklan_baris_kategori ON iklan_baris(kategori);
