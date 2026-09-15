@@ -98,6 +98,28 @@
     <link rel="author" type="text/plain" href="/llms.txt" />
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <script>
+      (function() {
+        if (!navigator.modelContext) {
+          var toolMap = new Map();
+          navigator.modelContext = {
+            registerTool: function(tool, options) {
+              if (tool && tool.name) {
+                toolMap.set(tool.name, tool);
+                if (options && options.signal) {
+                  options.signal.addEventListener('abort', function() {
+                    toolMap.delete(tool.name);
+                  });
+                }
+              }
+              return function() { toolMap.delete(tool ? tool.name : ''); };
+            },
+            getTools: function() { return Array.from(toolMap.values()); },
+            unregisterTool: function(name) { return toolMap.delete(name); }
+          };
+        }
+        if (!document.modelContext) document.modelContext = navigator.modelContext;
+        if (!window.modelContext) window.modelContext = navigator.modelContext;
+      })();
       window.addEventListener('load', function() {
         setTimeout(function() {
           var links = document.querySelectorAll('link[rel="preload"]');

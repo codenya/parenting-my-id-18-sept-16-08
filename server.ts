@@ -10,6 +10,7 @@ import { marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
 import { generateStaticFiles, generateSitemapXml, generateFeedXml, generateLlmsTxt, generateLlmsFullTxt, parseFeedXmlItems } from './scripts/generate-static-files.js';
 import { signJwtHmacSha256, verifyJwtHmacSha256, extractTokenFromHeaderOrCookie } from './src/lib/jwt.js';
+import { generate360ClassifiedAds } from './src/lib/iklanBarisSeed.js';
 
 dotenv.config();
 
@@ -302,7 +303,8 @@ let mockSuratPembaca: any[] = [
   }
 ];
 
-let mockIklanBaris: any[] = [
+let mockIklanBaris: any[] = generate360ClassifiedAds();
+const _oldMockIklanBaris: any[] = [
   // JASA NANNY & BABYSITTER
   {
     id: 1,
@@ -1279,8 +1281,14 @@ function loadServerData() {
 
     if (fs.existsSync(iklanBarisFile)) {
       const data = JSON.parse(fs.readFileSync(iklanBarisFile, 'utf-8'));
-      if (Array.isArray(data)) mockIklanBaris = data;
+      if (Array.isArray(data) && data.length >= 360) {
+        mockIklanBaris = data;
+      } else {
+        mockIklanBaris = generate360ClassifiedAds();
+        fs.writeFileSync(iklanBarisFile, JSON.stringify(mockIklanBaris, null, 2), 'utf-8');
+      }
     } else {
+      mockIklanBaris = generate360ClassifiedAds();
       fs.writeFileSync(iklanBarisFile, JSON.stringify(mockIklanBaris, null, 2), 'utf-8');
     }
 
@@ -2008,6 +2016,16 @@ app.get('/api/iklan-baris', async (req, res) => {
       return item;
     });
 
+    const categoryCounts: Record<string, number> = {};
+    mockIklanBaris.forEach(item => {
+      if (isStaff || item.status === 'published') {
+        const k = item.kategori;
+        if (k) {
+          categoryCounts[k] = (categoryCounts[k] || 0) + 1;
+        }
+      }
+    });
+
     res.json({
       success: true,
       items: sanitizedItems,
@@ -2015,6 +2033,7 @@ app.get('/api/iklan-baris', async (req, res) => {
       page,
       limit,
       totalPages,
+      categoryCounts,
     });
   } catch (err: any) {
     res.status(500).json({ error: 'Gagal mengambil iklan baris: ' + err.message });

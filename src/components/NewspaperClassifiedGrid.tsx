@@ -10,6 +10,7 @@ interface NewspaperClassifiedGridProps {
   totalPages?: number;
   totalCount?: number;
   selectedKategori?: string;
+  categoryCounts?: Record<string, number>;
   onPageChange?: (newPage: number) => void;
 }
 
@@ -33,6 +34,7 @@ export default function NewspaperClassifiedGrid({
   totalPages = 1,
   totalCount = 0,
   selectedKategori = 'Semua',
+  categoryCounts = {},
   onPageChange,
 }: NewspaperClassifiedGridProps) {
 
@@ -244,12 +246,12 @@ export default function NewspaperClassifiedGrid({
         {(Object.entries(categoryGroups) as Array<[string, RenderedAdBlock[]]>).map(([catName, blocks]) => (
           <div key={catName} className="kategori-block newspaper-block mb-4">
             
-            {/* CLEAN CATEGORY HEADER TITLE WITHOUT AD COUNT NUMBERS */}
+            {/* CATEGORY HEADER TITLE WITH AD COUNT INDICATOR (SEPARATED BY - WITHOUT UNIT) */}
             <h3 
               onClick={() => onSelectCategory && onSelectCategory(catName)}
               className="kategori-title cursor-pointer hover:bg-gray-800 transition-colors block m-0"
             >
-              {catName}
+              {catName} - {categoryCounts[catName] ?? categoryCounts[catName.toUpperCase()] ?? blocks.length}
             </h3>
 
             {/* AD ITEMS LIST IN THIS CATEGORY */}

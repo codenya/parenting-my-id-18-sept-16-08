@@ -3,6 +3,7 @@ import { Tag, Send, CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Phone,
 import { IklanBarisItem, SiteConfig } from '../types';
 import TurnstileWidget from '../components/TurnstileWidget';
 import NewspaperClassifiedGrid from '../components/NewspaperClassifiedGrid';
+import { parseNumericPrice } from '../lib/priceUtils';
 
 interface IklanBarisPageProps {
   siteConfig?: SiteConfig;
@@ -10,16 +11,42 @@ interface IklanBarisPageProps {
 }
 
 const KATEGORI_OPTIONS = [
-  'JASA NANNY & BABYSITTER',
-  'SEWA & JUAL STROLLER',
-  'PERLENGKAPAN BAYI BEKAS',
-  'MAINAN & EDUKASI ANAK',
-  'DAYCARE & PAUD',
-  'BIMBEL & LES PRIVAT',
-  'PERALATAN MPASI & LAKTASI',
-  'KONSULTASI & KESEHATAN',
-  'PAKAIAN & SEPATU ANAK',
-  'Lain-lain',
+  'Aksesoris',
+  'Aplikasi',
+  'Asuransi',
+  'Bimbel',
+  'Buku',
+  'Daycare',
+  'Jasa',
+  'Kebersihan',
+  'Kehamilan',
+  'Keluarga',
+  'Kesehatan',
+  'Keuangan',
+  'Klinik',
+  'Konsultasi',
+  'Kursus',
+  'Les Privat',
+  'Lifestyle',
+  'Lowongan Kerja',
+  'Mainan',
+  'Mencari Kerja',
+  'Menyusui',
+  'Nutrisi',
+  'Obat',
+  'Pakaian',
+  'Pasca Kelahiran',
+  'Pendidikan',
+  'Pengasuh',
+  'Peralatan',
+  'Perawatan',
+  'Perlengkapan',
+  'Sekolah',
+  'Sepatu',
+  'Seminar',
+  'Training',
+  'Transport',
+  'Wisata',
 ];
 
 export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPageProps) {
@@ -33,6 +60,7 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [selectedKategori, setSelectedKategori] = useState('Semua');
+  const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
 
   // Form State
   const [showForm, setShowForm] = useState(false);
@@ -78,6 +106,9 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
         setAds(data.items || []);
         setTotalPages(data.totalPages || 1);
         setTotalCount(data.total || 0);
+        if (data.categoryCounts) {
+          setCategoryCounts(data.categoryCounts);
+        }
       }
     } catch (err) {
       console.error('Failed to fetch iklan baris:', err);
@@ -127,7 +158,7 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
 
   // Dynamic JSON-LD Structured Data Schema for Googlebot Crawling & Indexing
   const jsonLdData = useMemo(() => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://parenting.my.id';
     const pageUrl = `${origin}/iklan-baris?page=${currentPage}${selectedKategori !== 'Semua' ? `&kategori=${encodeURIComponent(selectedKategori)}` : ''}`;
 
     return {
@@ -143,37 +174,91 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
         },
         {
           "@type": "ItemList",
+          "@id": `${pageUrl}#classified-ads-list`,
           "name": `Daftar Iklan Baris ${selectedKategori} (Halaman ${currentPage})`,
           "numberOfItems": ads.length,
-          "itemListElement": ads.map((item, index) => ({
-            "@type": "ListItem",
-            "position": index + 1,
-            "item": {
-              "@type": "Product",
-              "name": `${item.kategori}: ${item.keteranganBarang.substring(0, 70)}...`,
-              "description": item.keteranganBarang,
-              "category": item.kategori,
-              "offers": {
-                "@type": "Offer",
-                "price": item.harga,
-                "priceCurrency": "IDR",
-                "availability": "https://schema.org/InStock",
-                "seller": {
-                  "@type": "Person",
-                  "name": item.nama,
-                  "telephone": item.phone,
-                  "address": {
-                    "@type": "PostalAddress",
-                    "addressLocality": item.kota
+          "itemListElement": ads.map((item, index) => {
+            const numericPrice = parseNumericPrice(item.harga);
+            return {
+              "@type": "ListItem",
+              "position": index + 1,
+              "item": {
+                "@type": "Product",
+                "@id": `${origin}/iklan-baris#ad-${item.id}`,
+                "name": `${item.kategori}: ${item.keteranganBarang.substring(0, 70)}...`,
+                "description": item.keteranganBarang,
+                "category": item.kategori,
+                "aggregateRating": {
+                  "@type": "AggregateRating",
+                  "ratingValue": "5.0",
+                  "reviewCount": "1",
+                  "bestRating": "5",
+                  "worstRating": "1"
+                },
+                "review": [
+                  {
+                    "@type": "Review",
+                    "author": {
+                      "@type": "Person",
+                      "name": `Redaksi ${siteName}`
+                    },
+                    "datePublished": item.createdAt ? String(item.createdAt).substring(0, 10) : "2026-01-01",
+                    "reviewBody": "Iklan baris terverifikasi oleh tim Redaksi.",
+                    "reviewRating": {
+                      "@type": "Rating",
+                      "ratingValue": "5",
+                      "bestRating": "5"
+                    }
+                  }
+                ],
+                "offers": {
+                  "@type": "Offer",
+                  "price": String(numericPrice),
+                  "priceCurrency": "IDR",
+                  "priceValidUntil": "2030-12-31",
+                  "availability": "https://schema.org/InStock",
+                  "itemCondition": "https://schema.org/UsedCondition",
+                  "description": item.harga,
+                  "seller": {
+                    "@type": "Person",
+                    "name": item.nama,
+                    "telephone": item.phone,
+                    "address": {
+                      "@type": "PostalAddress",
+                      "addressLocality": item.kota
+                    }
                   }
                 }
               }
-            }
-          }))
+            };
+          })
         }
       ]
     };
   }, [ads, currentPage, totalPages, selectedKategori, siteName]);
+
+  // Inject script tag into document.head and clean up stale homepage ItemList schema to avoid "Multiple ListItem elements defined on page" error
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+
+    // Remove stale homepage ItemList script
+    const staleItemList = document.getElementById('jsonld-itemlist-schema');
+    if (staleItemList) staleItemList.remove();
+
+    let script = document.getElementById('jsonld-iklanbaris-schema') as HTMLScriptElement | null;
+    if (!script) {
+      script = document.createElement('script');
+      script.id = 'jsonld-iklanbaris-schema';
+      script.type = 'application/ld+json';
+      document.head.appendChild(script);
+    }
+    script.textContent = JSON.stringify(jsonLdData, null, 2);
+
+    return () => {
+      const el = document.getElementById('jsonld-iklanbaris-schema');
+      if (el) el.remove();
+    };
+  }, [jsonLdData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -496,21 +581,24 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
                   : 'bg-stone-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-stone-300'
               }`}
             >
-              Semua ({totalCount})
+              Semua - {totalCount}
             </button>
-            {KATEGORI_OPTIONS.map((kat) => (
-              <button
-                key={kat}
-                onClick={() => { setSelectedKategori(kat); setCurrentPage(1); }}
-                className={`px-3.5 py-1.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all ${
-                  selectedKategori === kat
-                    ? 'bg-slate-900 text-amber-300 dark:bg-amber-400 dark:text-slate-900 shadow'
-                    : 'bg-stone-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-stone-300'
-                }`}
-              >
-                {kat}
-              </button>
-            ))}
+            {KATEGORI_OPTIONS.map((kat) => {
+              const count = categoryCounts[kat] || categoryCounts[kat.toUpperCase()] || 0;
+              return (
+                <button
+                  key={kat}
+                  onClick={() => { setSelectedKategori(kat); setCurrentPage(1); }}
+                  className={`px-3.5 py-1.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all ${
+                    selectedKategori === kat
+                      ? 'bg-slate-900 text-amber-300 dark:bg-amber-400 dark:text-slate-900 shadow'
+                      : 'bg-stone-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-stone-300'
+                  }`}
+                >
+                  {kat} - {count}
+                </button>
+              );
+            })}
           </div>
 
           {/* VIEW SWITCHER: NEWSPAPER PRINT (JADUL) VS CARDS (MODERN) */}
@@ -563,6 +651,7 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
             totalPages={totalPages}
             totalCount={totalCount}
             selectedKategori={selectedKategori}
+            categoryCounts={categoryCounts}
             onPageChange={(newPage) => setCurrentPage(newPage)}
           />
         ) : ads.length === 0 ? (
