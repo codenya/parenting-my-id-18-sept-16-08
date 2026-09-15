@@ -10,11 +10,15 @@ interface IklanBarisPageProps {
 }
 
 const KATEGORI_OPTIONS = [
-  'Otomotif',
-  'Properti',
-  'Elektronik',
-  'Jasa',
-  'Lowongan',
+  'JASA NANNY & BABYSITTER',
+  'SEWA & JUAL STROLLER',
+  'PERLENGKAPAN BAYI BEKAS',
+  'MAINAN & EDUKASI ANAK',
+  'DAYCARE & PAUD',
+  'BIMBEL & LES PRIVAT',
+  'PERALATAN MPASI & LAKTASI',
+  'KONSULTASI & KESEHATAN',
+  'PAKAIAN & SEPATU ANAK',
   'Lain-lain',
 ];
 
@@ -37,7 +41,7 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
   const [pekerjaan, setPekerjaan] = useState('');
   const [tahunLahir, setTahunLahir] = useState<number | ''>('');
   const [phone, setPhone] = useState('');
-  const [kategori, setKategori] = useState('Otomotif');
+  const [kategori, setKategori] = useState('JASA NANNY & BABYSITTER');
   const [keteranganBarang, setKeteranganBarang] = useState('');
   const [harga, setHarga] = useState('');
   const [turnstileToken, setTurnstileToken] = useState('');
