@@ -45,6 +45,8 @@ This service implements the open **Auth.md** protocol for autonomous AI agent di
 - **Service Description**: ${siteDescription}
 - **Protected Resource Metadata**: [/.well-known/oauth-protected-resource](${siteUrl}/.well-known/oauth-protected-resource)
 - **Authorization Server Metadata**: [/.well-known/oauth-authorization-server](${siteUrl}/.well-known/oauth-authorization-server)
+- **MCP Server Card (SEP-1649 & SEP-2127)**: [/.well-known/mcp/server-card.json](${siteUrl}/.well-known/mcp/server-card.json)
+- **Web Bot Auth Signatures Directory (IETF WebBotAuth)**: [/.well-known/http-message-signatures-directory](${siteUrl}/.well-known/http-message-signatures-directory)
 - **API Catalog**: [/.well-known/api-catalog](${siteUrl}/.well-known/api-catalog)
 - **Machine Documentation**: [${siteUrl}/llms.txt](${siteUrl}/llms.txt)
 
