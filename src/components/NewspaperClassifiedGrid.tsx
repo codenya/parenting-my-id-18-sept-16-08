@@ -7,6 +7,11 @@ interface NewspaperClassifiedGridProps {
   onSelectCategory?: (kategori: string) => void;
   onOpenForm?: () => void;
   siteName?: string;
+  currentPage?: number;
+  totalPages?: number;
+  totalCount?: number;
+  selectedKategori?: string;
+  onPageChange?: (newPage: number) => void;
 }
 
 interface RenderedAdBlock {
@@ -31,12 +36,16 @@ export default function NewspaperClassifiedGrid({
   onSelectCategory,
   onOpenForm,
   siteName = 'Parenting',
+  currentPage = 1,
+  totalPages = 1,
+  totalCount = 0,
+  selectedKategori = 'Semua',
+  onPageChange,
 }: NewspaperClassifiedGridProps) {
 
   const [activePageIndex, setActivePageIndex] = useState(0);
-  const MAX_WORDS_PER_PAGE = 2000;
 
-  // 1. Convert Database Items (`dynamicAds`) into Unified Ad Blocks (ONLY real DB ads)
+  // 1. Convert Database Items (`dynamicAds`) into Unified Ad Blocks
   const allBlocks = useMemo(() => {
     const blocks: RenderedAdBlock[] = [];
 
@@ -70,141 +79,95 @@ export default function NewspaperClassifiedGrid({
     return groups;
   }, [allBlocks]);
 
-  // 3. Paginate Categories & Blocks strictly by MAX 2000 Words Per Page
-  const pages = useMemo(() => {
-    const pageList: Array<{
-      pageNumber: number;
-      categories: Record<string, RenderedAdBlock[]>;
-      totalWords: number;
-      totalItems: number;
-    }> = [];
-
-    let currentCategories: Record<string, RenderedAdBlock[]> = {};
-    let currentWords = 0;
-    let currentItemsCount = 0;
-
-    // Header masthead words (~50 words)
-    const mastheadWords = 45;
-    currentWords += mastheadWords;
-
-    const categoriesList = Object.keys(categoryGroups);
-
-    categoriesList.forEach((catName) => {
-      const catBlocks = categoryGroups[catName];
-      const categoryHeaderWords = countWords(catName) + 3;
-
-      catBlocks.forEach((block) => {
-        const itemWords = block.wordCount;
-
-        // Check if adding this block exceeds 2000 words limit for current page
-        if (currentWords + itemWords > MAX_WORDS_PER_PAGE && currentItemsCount > 0) {
-          // Push current page
-          pageList.push({
-            pageNumber: pageList.length + 1,
-            categories: currentCategories,
-            totalWords: currentWords,
-            totalItems: currentItemsCount,
-          });
-
-          // Reset for new page
-          currentCategories = {};
-          currentWords = mastheadWords;
-          currentItemsCount = 0;
-        }
-
-        if (!currentCategories[catName]) {
-          currentCategories[catName] = [];
-          currentWords += categoryHeaderWords;
-        }
-
-        currentCategories[catName].push(block);
-        currentWords += itemWords;
-        currentItemsCount += 1;
-      });
-    });
-
-    if (currentItemsCount > 0) {
-      pageList.push({
-        pageNumber: pageList.length + 1,
-        categories: currentCategories,
-        totalWords: currentWords,
-        totalItems: currentItemsCount,
-      });
+  const handlePrevPage = () => {
+    if (onPageChange && currentPage > 1) {
+      onPageChange(currentPage - 1);
+      window.scrollTo({ top: 350, behavior: 'smooth' });
+    } else if (activePageIndex > 0) {
+      setActivePageIndex((prev) => Math.max(0, prev - 1));
+      window.scrollTo({ top: 350, behavior: 'smooth' });
     }
+  };
 
-    return pageList.length > 0
-      ? pageList
-      : [
-          {
-            pageNumber: 1,
-            categories: {},
-            totalWords: mastheadWords,
-            totalItems: 0,
-          },
-        ];
-  }, [categoryGroups]);
+  const handleNextPage = () => {
+    if (onPageChange && currentPage < totalPages) {
+      onPageChange(currentPage + 1);
+      window.scrollTo({ top: 350, behavior: 'smooth' });
+    } else if (activePageIndex < totalPages - 1) {
+      setActivePageIndex((prev) => prev + 1);
+      window.scrollTo({ top: 350, behavior: 'smooth' });
+    }
+  };
 
-  // Ensure active page is within bounds
-  const currentPageData = pages[activePageIndex] || pages[0];
-  const totalPagesCount = pages.length;
+  const canPrev = onPageChange ? currentPage > 1 : activePageIndex > 0;
+  const canNext = onPageChange ? currentPage < totalPages : activePageIndex < totalPages - 1;
+  const displayPage = onPageChange ? currentPage : activePageIndex + 1;
+  const displayTotalPages = onPageChange ? totalPages : 1;
 
   return (
-    <div className="newspaper-classified-container bg-white text-black p-2 sm:p-5 border-2 border-black rounded-sm font-serif select-text shadow-xl">
+    <div className="newspaper-classified-container bg-white text-black p-3 sm:p-6 border-2 border-black rounded-sm font-serif select-text shadow-xl">
       
-      {/* PAGINATION BANNER */}
-      <div className="bg-gray-100 border border-black p-2 mb-4 font-sans text-xs flex flex-col sm:flex-row items-center justify-between gap-2">
-        <span className="font-bold text-slate-800 text-[11px]">
-          Halaman {currentPageData.pageNumber} dari {totalPagesCount}
-        </span>
+      {/* PAGINATION BANNER TOP */}
+      <div className="bg-gray-100 border border-black p-2.5 mb-4 font-sans text-xs flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <span className="font-extrabold text-slate-900 text-xs sm:text-sm uppercase tracking-tight">
+            KORAN DIGITAL • {selectedKategori.toUpperCase()}
+          </span>
+          <span className="text-[11px] font-mono text-gray-600 font-semibold">
+            (Halaman {displayPage} dari {displayTotalPages} • Max 20 Iklan/Hlm)
+          </span>
+        </div>
 
-        {totalPagesCount > 1 && (
-          <div className="flex items-center gap-1.5 shrink-0">
+        {displayTotalPages > 1 && (
+          <div className="flex items-center gap-2 shrink-0">
             <button
-              disabled={activePageIndex === 0}
-              onClick={() => setActivePageIndex((prev) => Math.max(0, prev - 1))}
-              className="px-2.5 py-1 bg-white border border-black text-black font-black text-xs uppercase disabled:opacity-40 hover:bg-black hover:text-white transition-colors flex items-center gap-1"
+              disabled={!canPrev}
+              onClick={handlePrevPage}
+              aria-label="Halaman Sebelumnya"
+              className="px-3 py-1.5 bg-black text-white font-black text-xs uppercase disabled:opacity-30 hover:bg-gray-800 transition-colors flex items-center gap-1 border border-black rounded-sm"
             >
-              <ChevronLeft className="w-3.5 h-3.5" />
-              Sblmnya
+              <ChevronLeft className="w-4 h-4" />
+              <span>&lt; Sblm</span>
             </button>
-            
-            <span className="font-mono font-bold text-xs px-2">
-              {activePageIndex + 1} / {totalPagesCount}
+
+            <span className="font-mono font-bold text-xs px-2 bg-white border border-gray-400 py-1 rounded-sm">
+              {displayPage} / {displayTotalPages}
             </span>
 
             <button
-              disabled={activePageIndex >= totalPagesCount - 1}
-              onClick={() => setActivePageIndex((prev) => Math.min(totalPagesCount - 1, prev + 1))}
-              className="px-2.5 py-1 bg-white border border-black text-black font-black text-xs uppercase disabled:opacity-40 hover:bg-black hover:text-white transition-colors flex items-center gap-1"
+              disabled={!canNext}
+              onClick={handleNextPage}
+              aria-label="Halaman Selanjutnya"
+              className="px-3 py-1.5 bg-black text-white font-black text-xs uppercase disabled:opacity-30 hover:bg-gray-800 transition-colors flex items-center gap-1 border border-black rounded-sm"
             >
-              Lanjut
-              <ChevronRight className="w-3.5 h-3.5" />
+              <span>Lanjut &gt;</span>
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         )}
       </div>
 
-      {/* MULTI-COLUMN DENSE PRINT NEWSPAPER GRID WITH LEFT-TO-RIGHT COLUMN FLOW (column-fill: auto) */}
+      {/* MULTI-COLUMN DENSE PRINT NEWSPAPER GRID WITH LEFT-TO-RIGHT COLUMN FLOW */}
       <style>{`
         .newspaper-columns-flow {
-          column-gap: 14px;
+          column-gap: 16px;
           column-fill: auto;
         }
 
-        /* 1. SMARTPHONE VERTICAL (PORTRAIT): STRICTLY 1 KOLOM FOR EASY READING (MATA TUA) */
+        /* 1. SMARTPHONE VERTICAL (PORTRAIT): STRICTLY 1 KOLOM WITH ENLARGED READABLE TYPE */
         @media screen and (max-width: 639px) and (orientation: portrait) {
           .newspaper-columns-flow {
             column-count: 1 !important;
             max-height: none !important;
           }
           .newspaper-ad-item {
-            font-size: 14.5px !important;
-            line-height: 1.45 !important;
-            padding: 6px 4px !important;
+            font-size: 15.5px !important;
+            line-height: 1.5 !important;
+            padding: 7px 5px !important;
           }
           .newspaper-cat-header {
-            font-size: 13.5px !important;
-            padding: 5px 6px !important;
+            font-size: 14.5px !important;
+            padding: 6px 8px !important;
           }
         }
 
@@ -212,72 +175,37 @@ export default function NewspaperClassifiedGrid({
         @media screen and (max-width: 639px) and (orientation: landscape) {
           .newspaper-columns-flow {
             column-count: 2 !important;
-            max-height: 850px;
+            max-height: none !important;
           }
           .newspaper-ad-item {
-            font-size: 13px !important;
-            padding: 4px 3px !important;
+            font-size: 14.5px !important;
+            line-height: 1.45 !important;
+            padding: 5px 4px !important;
           }
-        }
-
-        /* 3. TABLET VERTICAL (PORTRAIT): 2 KOLOM */
-        @media screen and (min-width: 640px) and (max-width: 1023px) and (orientation: portrait) {
-          .newspaper-columns-flow {
-            column-count: 2 !important;
-            max-height: 950px;
-          }
-          .newspaper-ad-item {
+          .newspaper-cat-header {
             font-size: 13.5px !important;
           }
         }
 
-        /* 4. TABLET HORIZONTAL (LANDSCAPE): 3 KOLOM */
-        @media screen and (min-width: 640px) and (max-width: 1023px) and (orientation: landscape) {
-          .newspaper-columns-flow {
-            column-count: 3 !important;
-            max-height: 780px;
+        /* 3. TABLET & DESKTOP READABLE TYPE ENLARGEMENT */
+        @media screen and (min-width: 640px) {
+          .newspaper-ad-item {
+            font-size: 15px !important;
+            line-height: 1.5 !important;
+            padding: 5px 4px !important;
+          }
+          .newspaper-cat-header {
+            font-size: 14px !important;
+            padding: 5px 8px !important;
           }
         }
 
-        /* 5. DESKTOP VERTICAL: 3 KOLOM */
-        @media screen and (min-width: 1024px) and (orientation: portrait) {
-          .newspaper-columns-flow {
-            column-count: 3 !important;
-            max-height: 1100px;
-          }
-        }
-
-        /* 6. DESKTOP HORIZONTAL: 4 KOLOM */
-        @media screen and (min-width: 1024px) and (orientation: landscape) {
-          .newspaper-columns-flow {
-            column-count: 4 !important;
-            max-height: 800px;
-          }
-        }
-
-        /* DEFAULT FALLBACKS */
-        @media screen and (max-width: 639px) {
-          .newspaper-columns-flow {
-            column-count: 1;
-          }
-        }
-        @media screen and (min-width: 640px) and (max-width: 1023px) {
-          .newspaper-columns-flow {
-            column-count: 2;
-          }
-        }
-        @media screen and (min-width: 1024px) {
-          .newspaper-columns-flow {
-            column-count: 4;
-          }
-        }
-
-        /* PREVENT AD ITEMS FROM SPLITTING HALFWAY ACROSS COLUMNS, BUT ALLOW CATEGORIES TO SPLIT SMOOTHLY */
+        /* PREVENT AD ITEMS FROM SPLITTING HALFWAY ACROSS COLUMNS */
         .newspaper-block {
           break-inside: auto !important;
           page-break-inside: auto !important;
           -webkit-column-break-inside: auto !important;
-          margin-bottom: 10px;
+          margin-bottom: 12px;
         }
 
         .newspaper-cat-header {
@@ -285,12 +213,20 @@ export default function NewspaperClassifiedGrid({
           page-break-inside: avoid !important;
           -webkit-column-break-inside: avoid !important;
           break-after: avoid !important;
+          background-color: #111111;
+          color: #ffffff;
+          font-weight: 900;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
         }
 
         .newspaper-ad-item {
           break-inside: avoid !important;
           page-break-inside: avoid !important;
           -webkit-column-break-inside: avoid !important;
+          border-bottom: 1px dotted #444444;
+          color: #111111;
+          background-color: #ffffff;
           overflow-wrap: anywhere !important;
           word-break: break-word !important;
           word-wrap: break-word !important;
@@ -300,91 +236,98 @@ export default function NewspaperClassifiedGrid({
 
       <div className="newspaper-columns-flow text-black overflow-hidden py-1">
 
-        {Object.keys(currentPageData.categories).length === 0 && (
+        {Object.keys(categoryGroups).length === 0 && (
           <div className="py-12 text-center text-gray-500 font-sans text-sm font-semibold">
             Belum ada iklan baris di database.
           </div>
         )}
 
         {/* CATEGORY & AD BLOCKS FLOW */}
-        {(Object.entries(currentPageData.categories) as Array<[string, RenderedAdBlock[]]>).map(([catName, blocks]) => (
-          <div key={catName} className="newspaper-block mb-3">
+        {(Object.entries(categoryGroups) as Array<[string, RenderedAdBlock[]]>).map(([catName, blocks]) => (
+          <div key={catName} className="newspaper-block mb-4">
             
-            {/* CATEGORY HEADER BANNER (SOLID BLACK, INVERTED WHITE TEXT) */}
+            {/* CATEGORY HEADER BANNER */}
             <div 
               onClick={() => onSelectCategory && onSelectCategory(catName)}
               className="newspaper-cat-header cursor-pointer hover:bg-gray-800 transition-colors flex items-center justify-between"
             >
               <span>{catName}</span>
-              <span className="text-[9px] font-sans font-normal opacity-80">({blocks.length})</span>
+              <span className="text-xs font-sans font-normal opacity-90 font-mono">({blocks.length} iklan)</span>
             </div>
 
             {/* AD ITEMS IN THIS CATEGORY */}
             {blocks.map((block) => (
-              <div
+              <article
                 key={block.id}
-                className="newspaper-ad-item bg-white text-black border-b border-dashed border-gray-400 py-1 px-1 my-0.5"
+                className="newspaper-ad-item bg-white text-black border-b border-dashed border-gray-400 py-1.5 px-1 my-0.5"
               >
                 <span>{block.text}</span>
-                <span className="newspaper-ref-code text-[9px] text-right font-mono text-gray-500 block mt-0.5">
+                <span className="newspaper-ref-code text-[10px] text-right font-mono text-gray-500 block mt-0.5 font-bold">
                   {block.ref}
                 </span>
-              </div>
+              </article>
             ))}
+
+            {/* PAGINATION PER CATEGORY SECTION AT THE BOTTOM */}
+            {displayTotalPages > 1 && (
+              <div className="mt-2 pt-1 border-t border-gray-300 flex items-center justify-between font-sans text-[11px] font-bold text-gray-700 bg-gray-50 p-1">
+                <span>Paginasi [{catName}]</span>
+                <div className="flex items-center gap-1">
+                  <button
+                    disabled={!canPrev}
+                    onClick={handlePrevPage}
+                    aria-label={`Halaman sebelumnya ${catName}`}
+                    className="px-2 py-0.5 bg-black text-white rounded text-[10px] disabled:opacity-30 hover:bg-gray-700"
+                  >
+                    &lt; Sblm
+                  </button>
+                  <span className="font-mono text-[10px] px-1">{displayPage}/{displayTotalPages}</span>
+                  <button
+                    disabled={!canNext}
+                    onClick={handleNextPage}
+                    aria-label={`Halaman selanjutnya ${catName}`}
+                    className="px-2 py-0.5 bg-black text-white rounded text-[10px] disabled:opacity-30 hover:bg-gray-700"
+                  >
+                    Lanjut &gt;
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ))}
 
       </div>
 
-      {/* BOTTOM PAGINATOR CONTROLS */}
-      {totalPagesCount > 1 && (
-        <div className="border-t-2 border-black pt-3 mt-4 flex flex-col sm:flex-row items-center justify-between gap-3 bg-gray-50 p-2 font-sans">
-          <div className="text-xs font-bold text-gray-800">
-            Halaman {currentPageData.pageNumber} / {totalPagesCount}
+      {/* BOTTOM PAGINATOR CONTROLS (< AND > ARROWS) */}
+      {displayTotalPages > 1 && (
+        <div className="border-t-2 border-black pt-3 mt-4 flex flex-col sm:flex-row items-center justify-between gap-3 bg-gray-50 p-3 font-sans rounded-sm">
+          <div className="text-xs font-extrabold text-gray-900 font-mono">
+            Halaman {displayPage} dari {displayTotalPages} (Total {totalCount || dynamicAds.length} Iklan)
           </div>
 
           <div className="flex items-center gap-2">
             <button
-              disabled={activePageIndex === 0}
-              onClick={() => {
-                setActivePageIndex((prev) => Math.max(0, prev - 1));
-                window.scrollTo({ top: 400, behavior: 'smooth' });
-              }}
-              className="px-3 py-1.5 bg-black text-white font-black text-xs uppercase disabled:opacity-30 hover:bg-gray-800 transition-colors flex items-center gap-1 border border-black"
+              disabled={!canPrev}
+              onClick={handlePrevPage}
+              aria-label="Halaman Sebelumnya"
+              className="px-4 py-2 bg-black text-white font-black text-xs uppercase disabled:opacity-30 hover:bg-gray-800 transition-colors flex items-center gap-1.5 border border-black rounded-sm shadow-sm"
             >
-              <ChevronLeft className="w-3.5 h-3.5" />
-              Halaman Sebelumnya
+              <ChevronLeft className="w-4 h-4" />
+              <span>&lt; Halaman Sebelumnya</span>
             </button>
 
-            <div className="flex items-center gap-1">
-              {pages.map((p, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => {
-                    setActivePageIndex(idx);
-                    window.scrollTo({ top: 400, behavior: 'smooth' });
-                  }}
-                  className={`w-7 h-7 font-mono text-xs font-bold border ${
-                    activePageIndex === idx
-                      ? 'bg-black text-yellow-300 border-black'
-                      : 'bg-white text-black border-gray-400 hover:bg-gray-200'
-                  }`}
-                >
-                  {idx + 1}
-                </button>
-              ))}
-            </div>
+            <span className="font-mono text-xs font-black px-3 py-1.5 bg-white border border-black rounded-sm">
+              {displayPage} / {displayTotalPages}
+            </span>
 
             <button
-              disabled={activePageIndex >= totalPagesCount - 1}
-              onClick={() => {
-                setActivePageIndex((prev) => Math.min(totalPagesCount - 1, prev + 1));
-                window.scrollTo({ top: 400, behavior: 'smooth' });
-              }}
-              className="px-3 py-1.5 bg-black text-white font-black text-xs uppercase disabled:opacity-30 hover:bg-gray-800 transition-colors flex items-center gap-1 border border-black"
+              disabled={!canNext}
+              onClick={handleNextPage}
+              aria-label="Halaman Selanjutnya"
+              className="px-4 py-2 bg-black text-white font-black text-xs uppercase disabled:opacity-30 hover:bg-gray-800 transition-colors flex items-center gap-1.5 border border-black rounded-sm shadow-sm"
             >
-              Halaman Berikutnya
-              <ChevronRight className="w-3.5 h-3.5" />
+              <span>Halaman Selanjutnya &gt;</span>
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </div>

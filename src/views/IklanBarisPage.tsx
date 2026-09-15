@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Tag, Send, CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Phone, MapPin, Briefcase, Filter, ShieldCheck, Newspaper, LayoutGrid, FileText } from 'lucide-react';
 import { IklanBarisItem, SiteConfig } from '../types';
 import TurnstileWidget from '../components/TurnstileWidget';
@@ -23,7 +23,7 @@ const KATEGORI_OPTIONS = [
 ];
 
 export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPageProps) {
-  const siteName = siteConfig?.site_name || 'Parenting';
+  const siteName = siteConfig?.site_name || 'Portal Digital';
   
   // View Mode State: 'newspaper' (Default print newspaper grid) or 'cards' (Modern card list)
   const [viewMode, setViewMode] = useState<'newspaper' | 'cards'>('newspaper');
@@ -52,11 +52,12 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
   const [submitSuccess, setSubmitSuccess] = useState('');
   const [submitError, setSubmitError] = useState('');
 
+  // Fetch Ads with STRICT MAX 20 ADS PER PAGE LIMIT
   const fetchAds = async (page: number, kat: string) => {
     try {
       setLoading(true);
       const queryKat = kat !== 'Semua' ? `&kategori=${encodeURIComponent(kat)}` : '';
-      const res = await fetch(`/api/iklan-baris?page=1&limit=200${queryKat}`);
+      const res = await fetch(`/api/iklan-baris?page=${page}&limit=20${queryKat}`);
       if (res.ok) {
         const data = await res.json();
         setAds(data.items || []);
@@ -73,6 +74,56 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
   useEffect(() => {
     fetchAds(currentPage, selectedKategori);
   }, [currentPage, selectedKategori]);
+
+  // Dynamic JSON-LD Structured Data Schema for Googlebot Crawling & Indexing
+  const jsonLdData = useMemo(() => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const pageUrl = `${origin}/iklan-baris?page=${currentPage}${selectedKategori !== 'Semua' ? `&kategori=${encodeURIComponent(selectedKategori)}` : ''}`;
+
+    return {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebPage",
+          "@id": `${pageUrl}#webpage`,
+          "url": pageUrl,
+          "name": `Iklan Baris Gratis ${selectedKategori !== 'Semua' ? `- Kategori ${selectedKategori}` : ''} - ${siteName}`,
+          "description": `Layanan portal iklan baris cetak & digital ${selectedKategori !== 'Semua' ? `kategori ${selectedKategori}` : 'terlengkap'}. Halaman ${currentPage} dari ${totalPages}.`,
+          "inLanguage": "id-ID"
+        },
+        {
+          "@type": "ItemList",
+          "name": `Daftar Iklan Baris ${selectedKategori} (Halaman ${currentPage})`,
+          "numberOfItems": ads.length,
+          "itemListElement": ads.map((item, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "item": {
+              "@type": "Product",
+              "name": `${item.kategori}: ${item.keteranganBarang.substring(0, 70)}...`,
+              "description": item.keteranganBarang,
+              "category": item.kategori,
+              "offers": {
+                "@type": "Offer",
+                "price": item.harga,
+                "priceCurrency": "IDR",
+                "availability": "https://schema.org/InStock",
+                "seller": {
+                  "@type": "Person",
+                  "name": item.nama,
+                  "telephone": item.phone,
+                  "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": item.kota
+                  }
+                }
+              }
+            }
+          }))
+        }
+      ]
+    };
+  }, [ads, currentPage, totalPages, selectedKategori, siteName]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,6 +192,13 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
 
   return (
     <div className="min-h-screen bg-amber-50/40 dark:bg-slate-950 text-slate-900 dark:text-slate-100 py-10 font-sans">
+      
+      {/* JSON-LD SCHEMA FOR GOOGLEBOT CRAWLING */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }}
+      />
+
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         
         {/* SIMPLIFIED HEADER */}
@@ -451,6 +509,11 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
             }}
             onOpenForm={() => setShowForm(true)}
             siteName={siteName}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalCount={totalCount}
+            selectedKategori={selectedKategori}
+            onPageChange={(newPage) => setCurrentPage(newPage)}
           />
         ) : ads.length === 0 ? (
           <div className="bg-stone-100 dark:bg-slate-900 border-2 border-dashed border-slate-400 dark:border-slate-700 rounded-2xl p-12 text-center">
