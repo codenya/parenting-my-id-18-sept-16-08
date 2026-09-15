@@ -513,7 +513,7 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
             ))}
           </div>
 
-          {/* VIEW SWITCHER: NEWSPAPER PRINT VS CARDS */}
+          {/* VIEW SWITCHER: NEWSPAPER PRINT (JADUL) VS CARDS (MODERN) */}
           <div className="flex items-center gap-1 bg-stone-200 dark:bg-slate-800 p-1 rounded-xl self-end sm:self-auto shrink-0">
             <button
               onClick={() => setViewMode('newspaper')}
@@ -522,10 +522,10 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
                   ? 'bg-black text-white shadow'
                   : 'text-slate-700 dark:text-slate-300 hover:text-black'
               }`}
-              title="Tampilan Format Koran Cetak (Authentic Newspaper Print Grid)"
+              title="Tampilan Format Koran Cetak (JADUL)"
             >
               <FileText className="w-3.5 h-3.5" />
-              <span>Format Koran Cetak</span>
+              <span>JADUL</span>
             </button>
 
             <button
@@ -535,10 +535,10 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
                   ? 'bg-black text-white shadow'
                   : 'text-slate-700 dark:text-slate-300 hover:text-black'
               }`}
-              title="Tampilan Kartu Digital Modern"
+              title="Tampilan Kartu Digital (MODERN)"
             >
               <LayoutGrid className="w-3.5 h-3.5" />
-              <span>Format Kartu</span>
+              <span>MODERN</span>
             </button>
           </div>
         </div>
@@ -625,25 +625,23 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
 
         {/* PAGINATION CONTROLS */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between pt-6 border-t-2 border-slate-900 dark:border-slate-700 mt-8">
+          <div className="flex items-center justify-end gap-2 pt-6 border-t-2 border-slate-900 dark:border-slate-700 mt-8">
             <button
               disabled={currentPage <= 1}
               onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border-2 border-slate-900 dark:border-slate-700 text-xs font-black uppercase tracking-wider disabled:opacity-40 hover:bg-slate-200 dark:hover:bg-slate-800"
+              className="inline-flex items-center justify-center px-4 py-2 rounded-xl border-2 border-slate-900 dark:border-slate-700 text-xs font-black uppercase tracking-wider disabled:opacity-40 hover:bg-slate-200 dark:hover:bg-slate-800"
+              aria-label="Halaman Sebelumnya"
             >
-              <ChevronLeft className="w-4 h-4" /> Sebelumnya
+              &lt;
             </button>
-
-            <div className="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest font-mono">
-              Halaman {currentPage} / {totalPages}
-            </div>
 
             <button
               disabled={currentPage >= totalPages}
               onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border-2 border-slate-900 dark:border-slate-700 text-xs font-black uppercase tracking-wider disabled:opacity-40 hover:bg-slate-200 dark:hover:bg-slate-800"
+              className="inline-flex items-center justify-center px-4 py-2 rounded-xl border-2 border-slate-900 dark:border-slate-700 text-xs font-black uppercase tracking-wider disabled:opacity-40 hover:bg-slate-200 dark:hover:bg-slate-800"
+              aria-label="Halaman Selanjutnya"
             >
-              Selanjutnya <ChevronRight className="w-4 h-4" />
+              &gt;
             </button>
           </div>
         )}

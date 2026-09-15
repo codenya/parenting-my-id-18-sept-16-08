@@ -107,15 +107,9 @@ export default function NewspaperClassifiedGrid({
     <div className="newspaper-classified-container bg-white text-black p-3 sm:p-6 border-2 border-black rounded-sm font-serif select-text shadow-xl">
       
       {/* PAGINATION BANNER TOP */}
-      <div className="bg-gray-100 border border-black p-2.5 mb-4 font-sans text-xs flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <span className="font-extrabold text-slate-900 text-xs sm:text-sm uppercase tracking-tight">
-            KORAN DIGITAL • {selectedKategori.toUpperCase()}
-          </span>
-        </div>
-
-        {displayTotalPages > 1 && (
-          <div className="pagination-simple flex items-center gap-2 shrink-0">
+      {displayTotalPages > 1 && (
+        <div className="flex items-center justify-end mb-3">
+          <div className="pagination-simple flex items-center gap-2">
             <a
               href={buildPageUrl(Math.max(1, displayPage - 1))}
               onClick={(e) => {
@@ -127,10 +121,6 @@ export default function NewspaperClassifiedGrid({
             >
               &lt;
             </a>
-
-            <span className="font-mono font-bold text-xs px-2.5 bg-white border border-gray-400 py-1 rounded-sm">
-              {displayPage} / {displayTotalPages}
-            </span>
 
             <a
               href={buildPageUrl(Math.min(displayTotalPages, displayPage + 1))}
@@ -144,8 +134,8 @@ export default function NewspaperClassifiedGrid({
               &gt;
             </a>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* MULTI-COLUMN DENSE PRINT NEWSPAPER GRID WITH LEFT-TO-RIGHT COLUMN FLOW */}
       <style>{`
@@ -278,34 +268,6 @@ export default function NewspaperClassifiedGrid({
                 </article>
               ))}
             </div>
-
-            {/* RINGKAS CATEGORY PAGINATION (ONLY ARROWS < AND >) */}
-            {displayTotalPages > 1 && (
-              <div className="pagination-simple mt-2 pt-1.5 border-t border-gray-300 flex items-center justify-end gap-1.5 font-sans">
-                <a
-                  href={buildPageUrl(Math.max(1, displayPage - 1), catName)}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handlePrevPage();
-                  }}
-                  aria-label="Halaman Sebelumnya"
-                  className={`btn-nav inline-flex items-center justify-center w-7 h-7 bg-black text-white font-black text-xs rounded border border-black transition-opacity ${!canPrev ? 'opacity-30 pointer-events-none' : 'hover:bg-gray-800'}`}
-                >
-                  &lt;
-                </a>
-                <a
-                  href={buildPageUrl(Math.min(displayTotalPages, displayPage + 1), catName)}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleNextPage();
-                  }}
-                  aria-label="Halaman Selanjutnya"
-                  className={`btn-nav inline-flex items-center justify-center w-7 h-7 bg-black text-white font-black text-xs rounded border border-black transition-opacity ${!canNext ? 'opacity-30 pointer-events-none' : 'hover:bg-gray-800'}`}
-                >
-                  &gt;
-                </a>
-              </div>
-            )}
           </div>
         ))}
 
@@ -313,11 +275,7 @@ export default function NewspaperClassifiedGrid({
 
       {/* BOTTOM PAGINATOR CONTROLS (< AND > ARROWS ONLY) */}
       {displayTotalPages > 1 && (
-        <div className="pagination-simple border-t-2 border-black pt-3 mt-4 flex items-center justify-between gap-3 bg-gray-50 p-3 font-sans rounded-sm">
-          <div className="text-xs font-extrabold text-gray-900 font-mono">
-            Halaman {displayPage} / {displayTotalPages}
-          </div>
-
+        <div className="pagination-simple border-t-2 border-black pt-3 mt-4 flex items-center justify-end gap-2 bg-gray-50 p-3 font-sans rounded-sm">
           <div className="flex items-center gap-2">
             <a
               href={buildPageUrl(Math.max(1, displayPage - 1))}
@@ -330,10 +288,6 @@ export default function NewspaperClassifiedGrid({
             >
               &lt;
             </a>
-
-            <span className="font-mono text-xs font-black px-3 py-1.5 bg-white border border-black rounded-sm">
-              {displayPage} / {displayTotalPages}
-            </span>
 
             <a
               href={buildPageUrl(Math.min(displayTotalPages, displayPage + 1))}
