@@ -52,7 +52,22 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
   const [submitSuccess, setSubmitSuccess] = useState('');
   const [submitError, setSubmitError] = useState('');
 
-  // Fetch Ads with STRICT MAX 20 ADS PER PAGE LIMIT
+  // Read initial URL Search Parameters on mount (e.g., ?kat=nanny&page=2 or ?kategori=nanny&page=2)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const pageParam = parseInt(params.get('page') || '1', 10);
+      const katParam = params.get('kategori') || params.get('kat');
+      if (!isNaN(pageParam) && pageParam > 0) {
+        setCurrentPage(pageParam);
+      }
+      if (katParam) {
+        setSelectedKategori(katParam);
+      }
+    }
+  }, []);
+
+  // Fetch Ads with STRICT MAX 20 ADS PER PAGE LIMIT and update URL parameters
   const fetchAds = async (page: number, kat: string) => {
     try {
       setLoading(true);
@@ -73,7 +88,42 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
 
   useEffect(() => {
     fetchAds(currentPage, selectedKategori);
+
+    // Sync URL parameters for clean crawler navigation
+    if (typeof window !== 'undefined' && window.history) {
+      const params = new URLSearchParams();
+      if (currentPage > 1) params.set('page', String(currentPage));
+      if (selectedKategori && selectedKategori !== 'Semua') {
+        params.set('kategori', selectedKategori);
+      }
+      const newSearch = params.toString() ? `?${params.toString()}` : window.location.pathname;
+      window.history.replaceState(null, '', newSearch);
+    }
   }, [currentPage, selectedKategori]);
+
+  // Inject <link rel="prev"> and <link rel="next"> into document.head for Googlebot SEO crawling
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const origin = window.location.origin;
+    const path = window.location.pathname;
+    const katQuery = selectedKategori !== 'Semua' ? `&kategori=${encodeURIComponent(selectedKategori)}` : '';
+
+    // Clean up existing rel=prev / rel=next
+    document.querySelectorAll('link[rel="prev"], link[rel="next"]').forEach((el) => el.remove());
+
+    if (currentPage > 1) {
+      const prevLink = document.createElement('link');
+      prevLink.rel = 'prev';
+      prevLink.href = `${origin}${path}?page=${currentPage - 1}${katQuery}`;
+      document.head.appendChild(prevLink);
+    }
+    if (currentPage < totalPages) {
+      const nextLink = document.createElement('link');
+      nextLink.rel = 'next';
+      nextLink.href = `${origin}${path}?page=${currentPage + 1}${katQuery}`;
+      document.head.appendChild(nextLink);
+    }
+  }, [currentPage, totalPages, selectedKategori]);
 
   // Dynamic JSON-LD Structured Data Schema for Googlebot Crawling & Indexing
   const jsonLdData = useMemo(() => {
