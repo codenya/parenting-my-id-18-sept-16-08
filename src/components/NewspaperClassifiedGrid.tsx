@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { IklanBarisItem } from '../types';
-import { Building2, Phone, Sparkles, MapPin, Tag } from 'lucide-react';
+import { Building2, Tag, ChevronLeft, ChevronRight, FileText, Database, ShieldCheck, Newspaper } from 'lucide-react';
 
 interface NewspaperClassifiedGridProps {
   dynamicAds?: IklanBarisItem[];
@@ -9,7 +9,7 @@ interface NewspaperClassifiedGridProps {
   siteName?: string;
 }
 
-// Authentic Newspaper Reference Ad Data matching print newspaper layout (Kompas / Kedaulatan Rakyat style)
+// Reference Newspaper Ads Data (Kompas / Kedaulatan Rakyat style print ads)
 const AUTHENTIC_NEWSPAPER_ADS: Record<string, Array<{ text: string; ref: string; isHot?: boolean }>> = {
   'MOBIL DISEWAKAN': [
     { text: 'Kurmia Trans.0816683885/540013/540014 Jakal Km.5,6 Pandega Duta II/3F (Xenia,New Avanza,March,Inova)', ref: '3/05400/0715' },
@@ -123,6 +123,23 @@ const AUTHENTIC_NEWSPAPER_ADS: Record<string, Array<{ text: string; ref: string;
   ],
 };
 
+interface RenderedAdBlock {
+  id: string;
+  category: string;
+  isDbItem?: boolean;
+  dbData?: IklanBarisItem;
+  text: string;
+  ref: string;
+  isHot?: boolean;
+  wordCount: number;
+}
+
+// Utility to count words accurately
+function countWords(str: string): number {
+  if (!str) return 0;
+  return str.trim().split(/\s+/).filter(Boolean).length;
+}
+
 export default function NewspaperClassifiedGrid({
   dynamicAds = [],
   onSelectCategory,
@@ -130,178 +147,445 @@ export default function NewspaperClassifiedGrid({
   siteName = 'Parenting',
 }: NewspaperClassifiedGridProps) {
 
-  // Group dynamic ads by category
-  const groupedDynamicAds: Record<string, IklanBarisItem[]> = dynamicAds.reduce((acc, item) => {
-    const katKey = (item.kategori || 'LAIN-LAIN').toUpperCase();
-    if (!acc[katKey]) acc[katKey] = [];
-    acc[katKey].push(item);
-    return acc;
-  }, {} as Record<string, IklanBarisItem[]>);
+  const [activePageIndex, setActivePageIndex] = useState(0);
+  const MAX_WORDS_PER_PAGE = 2000;
 
-  // Combine categories
-  const allCategoryKeys = Array.from(
-    new Set([...Object.keys(AUTHENTIC_NEWSPAPER_ADS), ...Object.keys(groupedDynamicAds)])
-  );
+  // 1. Convert Database Items (`dynamicAds`) & Reference Items into Unified Ad Blocks
+  const allBlocks = useMemo(() => {
+    const blocks: RenderedAdBlock[] = [];
+
+    // Map Dynamic DB Ads First
+    dynamicAds.forEach((item) => {
+      const kat = (item.kategori || 'LAIN-LAIN').toUpperCase();
+      const text = `${item.keteranganBarang} Hrg: ${item.harga}. Hub: ${item.phone} (${item.nama} • ${item.kota})`;
+      const ref = `DB/${String(item.id).padStart(5, '0')}/${new Date(item.createdAt || Date.now()).getFullYear()}`;
+      
+      blocks.push({
+        id: `db-${item.id}`,
+        category: kat,
+        isDbItem: true,
+        dbData: item,
+        text,
+        ref,
+        isHot: item.status === 'published',
+        wordCount: countWords(text) + 6, // Text words + header/ref metadata words
+      });
+    });
+
+    // Append Authentic Newspaper Print Reference Ads
+    Object.entries(AUTHENTIC_NEWSPAPER_ADS).forEach(([kat, ads]) => {
+      ads.forEach((ad, idx) => {
+        blocks.push({
+          id: `ref-${kat}-${idx}`,
+          category: kat,
+          isDbItem: false,
+          text: ad.text,
+          ref: ad.ref,
+          isHot: ad.isHot,
+          wordCount: countWords(ad.text) + 4,
+        });
+      });
+    });
+
+    return blocks;
+  }, [dynamicAds]);
+
+  // 2. Group Ads by Category
+  const categoryGroups = useMemo(() => {
+    const groups: Record<string, RenderedAdBlock[]> = {};
+    allBlocks.forEach((block) => {
+      if (!groups[block.category]) groups[block.category] = [];
+      groups[block.category].push(block);
+    });
+    return groups;
+  }, [allBlocks]);
+
+  // 3. Paginate Categories & Blocks strictly by MAX 2000 Words Per Page
+  const pages = useMemo(() => {
+    const pageList: Array<{
+      pageNumber: number;
+      categories: Record<string, RenderedAdBlock[]>;
+      totalWords: number;
+      totalItems: number;
+    }> = [];
+
+    let currentCategories: Record<string, RenderedAdBlock[]> = {};
+    let currentWords = 0;
+    let currentItemsCount = 0;
+
+    // Header masthead words (~50 words)
+    const mastheadWords = 45;
+    currentWords += mastheadWords;
+
+    const categoriesList = Object.keys(categoryGroups);
+
+    categoriesList.forEach((catName) => {
+      const catBlocks = categoryGroups[catName];
+      const categoryHeaderWords = countWords(catName) + 3;
+
+      catBlocks.forEach((block) => {
+        const itemWords = block.wordCount;
+
+        // Check if adding this block exceeds 2000 words limit for current page
+        if (currentWords + itemWords > MAX_WORDS_PER_PAGE && currentItemsCount > 0) {
+          // Push current page
+          pageList.push({
+            pageNumber: pageList.length + 1,
+            categories: currentCategories,
+            totalWords: currentWords,
+            totalItems: currentItemsCount,
+          });
+
+          // Reset for new page
+          currentCategories = {};
+          currentWords = mastheadWords;
+          currentItemsCount = 0;
+        }
+
+        if (!currentCategories[catName]) {
+          currentCategories[catName] = [];
+          currentWords += categoryHeaderWords;
+        }
+
+        currentCategories[catName].push(block);
+        currentWords += itemWords;
+        currentItemsCount += 1;
+      });
+    });
+
+    if (currentItemsCount > 0) {
+      pageList.push({
+        pageNumber: pageList.length + 1,
+        categories: currentCategories,
+        totalWords: currentWords,
+        totalItems: currentItemsCount,
+      });
+    }
+
+    return pageList.length > 0
+      ? pageList
+      : [
+          {
+            pageNumber: 1,
+            categories: {},
+            totalWords: mastheadWords,
+            totalItems: 0,
+          },
+        ];
+  }, [categoryGroups]);
+
+  // Ensure active page is within bounds
+  const currentPageData = pages[activePageIndex] || pages[0];
+  const totalPagesCount = pages.length;
 
   return (
-    <div className="newspaper-classified-container bg-white text-black p-2 sm:p-4 border-2 border-black rounded-sm font-serif select-text shadow-xl">
+    <div className="newspaper-classified-container bg-white text-black p-2 sm:p-5 border-2 border-black rounded-sm font-serif select-text shadow-xl">
       
       {/* NEWSPAPER MASTHEAD HEADER */}
       <div className="border-b-4 border-black pb-2 mb-3 text-center">
         <div className="flex flex-wrap items-center justify-between text-[9px] sm:text-[10px] font-sans font-bold uppercase tracking-wider border-b border-black pb-1 mb-1">
-          <span>LEMBARAN IKLAN BARIS & DISPLAY</span>
-          <span>• KORAN CETAK EDISI DIGITAL •</span>
+          <span className="flex items-center gap-1 text-slate-900">
+            <Newspaper className="w-3.5 h-3.5" />
+            EDISI CETAK KORAN DIGITAL
+          </span>
+          <span className="hidden sm:inline">• SIKLUS FLOW: LAJUR KIRI MEMENUHI TERLEBIH DAHULU (MOBILE FIRST) •</span>
           <span>EDISI: {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase()}</span>
         </div>
+        
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2 py-1">
           <div className="text-left">
-            <h2 className="text-xl sm:text-3xl font-black uppercase tracking-tighter leading-none font-serif">
-              IKLAN BARIS {siteName.toUpperCase()}
+            <h2 className="text-xl sm:text-3xl font-black uppercase tracking-tighter leading-none font-serif text-black">
+              IKLAN BARIS CETAK {siteName.toUpperCase()}
             </h2>
             <span className="text-[10px] font-sans font-bold text-gray-700 uppercase tracking-widest block">
-              OTOMOTIF • PROPERTI • LOWONGAN • SALON • SERVIS • PERCETAKAN
+              DATABASE D1 TERKONEKSI • OTOMOTIF • PROPERTI • LOWONGAN • ELEKTRONIK • SERVIS
             </span>
           </div>
 
           {onOpenForm && (
             <button
               onClick={onOpenForm}
-              className="px-3 py-1 bg-black text-white text-[10px] font-sans font-black uppercase tracking-wider hover:bg-gray-800 transition-colors border border-black flex items-center gap-1 shrink-0"
+              className="px-3.5 py-1.5 bg-black text-white text-[11px] font-sans font-black uppercase tracking-wider hover:bg-gray-800 transition-colors border border-black flex items-center gap-1.5 shrink-0 shadow-xs"
             >
-              <Tag className="w-3 h-3 text-yellow-400" />
-              + Pasang Iklan Baris Cetak
+              <Tag className="w-3.5 h-3.5 text-yellow-400" />
+              + Pasang Iklan Baris Database
             </button>
           )}
         </div>
       </div>
 
-      {/* MULTI-COLUMN DENSE PRINT NEWSPAPER GRID */}
-      <div className="newspaper-columns text-black">
-
-        {/* FEATURED DISPLAY BOX AD 1: SUMBER BARU LAND (Top Left Display Ad) */}
-        <div className="newspaper-block border-2 border-black p-1.5 bg-gray-100 text-center mb-2 shadow-sm">
-          <div className="bg-black text-white text-[11px] font-black uppercase tracking-tight py-0.5 px-1 mb-1">
-            SUMBER BARU LAND
-          </div>
-          <p className="text-[9.5px] font-black leading-tight uppercase font-sans">
-            GEDUNG SUMBER AUTO LT.2
-          </p>
-          <p className="text-[9px] leading-tight font-sans">
-            Jl. Magelang Km. 5,8 Yogyakarta
-          </p>
-          <div className="my-1 border-t border-b border-black py-0.5 font-bold text-[10.5px]">
-            TELP. (0274) 587799
-          </div>
-          <div className="bg-white border border-black p-1 mt-1 text-[8.5px] leading-tight text-left">
-            <span className="font-bold block text-[9px] uppercase border-b border-gray-400">SBL SQUARE</span>
-            Jl. Ringroad Utara (Jombor) Depan UTY, Sleman, Yogyakarta<br />
-            <span className="font-bold">Telp. 0274-888838 / 9807000</span>
-          </div>
+      {/* 2000 WORDS MAXIMUM PER PAGE PAGINATION BANNER */}
+      <div className="bg-amber-100/90 border-2 border-black p-2 mb-4 font-sans text-xs flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="px-2 py-0.5 bg-black text-yellow-300 font-black text-[10px] uppercase rounded-xs tracking-wider">
+            ATURAN BUKU KORAN: MAKS. 2.000 KATA / HALAMAN
+          </span>
+          <span className="font-bold text-slate-800 text-[11px]">
+            Halaman {currentPageData.pageNumber} dari {totalPagesCount} • {currentPageData.totalWords} Kata Terhitung • {currentPageData.totalItems} Iklan
+          </span>
+          {dynamicAds.length > 0 && (
+            <span className="inline-flex items-center gap-1 text-[10px] bg-emerald-700 text-white font-bold px-2 py-0.5 rounded-xs">
+              <Database className="w-3 h-3" />
+              {dynamicAds.length} Data Asli DB Active
+            </span>
+          )}
         </div>
 
-        {/* CATEGORY & AD BLOCKS FLOW */}
-        {allCategoryKeys.map((catName) => {
-          const authenticList = AUTHENTIC_NEWSPAPER_ADS[catName] || [];
-          const dynamicList = groupedDynamicAds[catName] || [];
+        {totalPagesCount > 1 && (
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              disabled={activePageIndex === 0}
+              onClick={() => setActivePageIndex((prev) => Math.max(0, prev - 1))}
+              className="px-2.5 py-1 bg-white border border-black text-black font-black text-xs uppercase disabled:opacity-40 hover:bg-black hover:text-white transition-colors flex items-center gap-1"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+              Sblmnya
+            </button>
+            
+            <span className="font-mono font-bold text-xs px-2">
+              {activePageIndex + 1} / {totalPagesCount}
+            </span>
 
-          return (
-            <div key={catName} className="newspaper-block mb-2">
-              {/* CATEGORY HEADER BANNER (SOLID BLACK, INVERTED WHITE TEXT) */}
-              <div 
-                onClick={() => onSelectCategory && onSelectCategory(catName)}
-                className="newspaper-cat-header cursor-pointer hover:bg-gray-900 transition-colors"
-              >
-                {catName}
-              </div>
+            <button
+              disabled={activePageIndex >= totalPagesCount - 1}
+              onClick={() => setActivePageIndex((prev) => Math.min(totalPagesCount - 1, prev + 1))}
+              className="px-2.5 py-1 bg-white border border-black text-black font-black text-xs uppercase disabled:opacity-40 hover:bg-black hover:text-white transition-colors flex items-center gap-1"
+            >
+              Lanjut
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+      </div>
 
-              {/* DYNAMIC API USER ADS (RENDERED FIRST IF AVAILABLE) */}
-              {dynamicList.map((item) => (
-                <div key={item.id} className="newspaper-ad-item bg-amber-50/60 font-sans border-l-2 border-l-black pl-1 my-0.5">
-                  <span className="font-bold text-[9px] uppercase bg-black text-white px-1 py-0.2 mr-1">
-                    [BARU]
-                  </span>
-                  <span className="font-medium">
-                    {item.keteranganBarang} Hrg: <span className="font-bold">{item.harga}</span>. Hub: <span className="font-bold">{item.phone}</span> ({item.nama} • {item.kota})
-                  </span>
-                  <span className="newspaper-ref-code text-[8.5px] text-right font-mono font-bold block text-gray-600 mt-0.5">
-                    1/{String(item.id).padStart(5, '0')}/2026
-                  </span>
-                </div>
-              ))}
+      {/* MULTI-COLUMN DENSE PRINT NEWSPAPER GRID WITH LEFT-TO-RIGHT COLUMN FLOW (column-fill: auto) */}
+      <style>{`
+        .newspaper-columns-flow {
+          column-gap: 12px;
+          column-fill: auto;
+        }
 
-              {/* AUTHENTIC PRINT NEWSPAPER TEXT ADS */}
-              {authenticList.map((ad, idx) => (
-                <div key={idx} className={`newspaper-ad-item ${ad.isHot ? 'bg-yellow-50 font-semibold' : ''}`}>
-                  <span>{ad.text}</span>
-                  <span className="newspaper-ref-code text-[8.5px] text-right font-mono text-gray-600 block mt-0.5">
-                    {ad.ref}
-                  </span>
-                </div>
-              ))}
+        /* 1. SMARTPHONE VERTICAL (PORTRAIT): MAX 1 KOLOM */
+        @media screen and (max-width: 639px) and (orientation: portrait) {
+          .newspaper-columns-flow {
+            column-count: 1 !important;
+            max-height: none !important;
+          }
+        }
 
-              {/* DISPLAY BOX AD EMBEDDED IN PERUMAHAN SECTION */}
-              {catName === 'PERUMAHAN' && (
-                <>
-                  <div className="newspaper-block border-2 border-black p-1 bg-white text-center my-2">
-                    <div className="bg-black text-white font-black text-[10px] uppercase py-0.5">
-                      Pondok Permai GIWANGAN
-                    </div>
-                    {/* SVG House Illustration Placeholder */}
-                    <div className="my-1 border border-black p-1 bg-gray-50 flex items-center justify-center gap-1">
-                      <Building2 className="w-5 h-5 text-black" />
-                      <div className="text-left leading-none">
-                        <span className="text-[10px] font-black block">HUNIAN EKSKLUSIF</span>
-                        <span className="text-[8px] font-bold text-gray-700">DI UTARA KOTA YOGYAKARTA</span>
-                      </div>
-                    </div>
-                    <div className="text-[11px] font-black text-black">
-                      2.5 JT/THN • KPR DP 0%
-                    </div>
-                    <div className="text-[9px] font-bold font-mono border-t border-black mt-0.5 pt-0.5">
-                      HUB: 0274-587799 / 081227018983
-                    </div>
-                  </div>
+        /* 2. SMARTPHONE HORIZONTAL (LANDSCAPE): MAX 2 KOLOM */
+        @media screen and (max-width: 639px) and (orientation: landscape) {
+          .newspaper-columns-flow {
+            column-count: 2 !important;
+            max-height: 850px;
+          }
+        }
 
-                  <div className="newspaper-block border-2 border-black p-1 bg-gray-50 text-center my-2">
-                    <div className="border border-black p-1">
-                      <span className="text-[10px] font-black uppercase tracking-tight block border-b border-black pb-0.5">
-                        Pondok Permai KALIURANG 2
-                      </span>
-                      <p className="text-[8.5px] py-1 font-bold">
-                        Fasilitas Lengkap: Swimming Pool, Club House, One Gate System 24 Jam.
-                      </p>
-                      <div className="bg-black text-white text-[10px] font-black py-0.5">
-                        SUMBER BARU LAND
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
+        /* 3. TABLET VERTICAL (PORTRAIT): MAX 2 KOLOM */
+        @media screen and (min-width: 640px) and (max-width: 1023px) and (orientation: portrait) {
+          .newspaper-columns-flow {
+            column-count: 2 !important;
+            max-height: 900px;
+          }
+        }
 
-              {/* DISPLAY BOX AD EMBEDDED IN RUANG USAHA SECTION */}
-              {catName === 'RUANG USAHA' && (
-                <div className="newspaper-block border-2 border-black p-1.5 bg-yellow-100/70 text-center my-2">
-                  <div className="text-[10px] font-black uppercase border-b-2 border-black pb-0.5">
-                    LAGUNA SPRING JOGJA
-                  </div>
-                  <p className="text-[8.5px] py-1 font-semibold">
-                    Rumah Mewah Modern Tropis + Private Club House. Lokasi Strategis Ringroad Selatan.
-                  </p>
-                  <div className="text-[10px] font-black font-mono">
-                    TELP. 0274-587799
-                  </div>
-                </div>
-              )}
+        /* 4. TABLET HORIZONTAL (LANDSCAPE): MAX 4 KOLOM */
+        @media screen and (min-width: 640px) and (max-width: 1023px) and (orientation: landscape) {
+          .newspaper-columns-flow {
+            column-count: 4 !important;
+            max-height: 720px;
+          }
+        }
+
+        /* 5. DESKTOP VERTICAL (PORTRAIT DISPLAY): MAX 3 KOLOM */
+        @media screen and (min-width: 1024px) and (orientation: portrait) {
+          .newspaper-columns-flow {
+            column-count: 3 !important;
+            max-height: 1100px;
+          }
+        }
+
+        /* 6. DESKTOP HORIZONTAL (LANDSCAPE DISPLAY): MAX 5 KOLOM */
+        @media screen and (min-width: 1024px) and (orientation: landscape) {
+          .newspaper-columns-flow {
+            column-count: 5 !important;
+            max-height: 750px;
+          }
+        }
+
+        /* DEFAULT FALLBACKS */
+        @media screen and (max-width: 639px) {
+          .newspaper-columns-flow {
+            column-count: 1;
+          }
+        }
+        @media screen and (min-width: 640px) and (max-width: 1023px) {
+          .newspaper-columns-flow {
+            column-count: 2;
+          }
+        }
+        @media screen and (min-width: 1024px) {
+          .newspaper-columns-flow {
+            column-count: 5;
+          }
+        }
+
+        /* SMART WORD BREAKING FOR STRINGS WITHOUT SPACES */
+        .newspaper-ad-item, .newspaper-block {
+          overflow-wrap: anywhere !important;
+          word-break: break-all !important;
+          word-wrap: break-word !important;
+          hyphens: auto !important;
+        }
+      `}</style>
+
+      <div className="newspaper-columns-flow text-black overflow-hidden py-1">
+
+        {/* FEATURED DISPLAY BOX AD 1 (Top Left Display Ad on Page 1) */}
+        {activePageIndex === 0 && (
+          <div className="newspaper-block border-2 border-black p-1.5 bg-gray-100 text-center mb-2 shadow-sm break-inside-avoid">
+            <div className="bg-black text-white text-[11px] font-black uppercase tracking-tight py-0.5 px-1 mb-1">
+              SUMBER BARU LAND
             </div>
-          );
-        })}
+            <p className="text-[9.5px] font-black leading-tight uppercase font-sans">
+              GEDUNG SUMBER AUTO LT.2
+            </p>
+            <p className="text-[9px] leading-tight font-sans">
+              Jl. Magelang Km. 5,8 Yogyakarta
+            </p>
+            <div className="my-1 border-t border-b border-black py-0.5 font-bold text-[10.5px]">
+              TELP. (0274) 587799
+            </div>
+            <div className="bg-white border border-black p-1 mt-1 text-[8.5px] leading-tight text-left">
+              <span className="font-bold block text-[9px] uppercase border-b border-gray-400">SBL SQUARE</span>
+              Jl. Ringroad Utara (Jombor) Depan UTY, Sleman, Yogyakarta<br />
+              <span className="font-bold">Telp. 0274-888838 / 9807000</span>
+            </div>
+          </div>
+        )}
+
+        {/* CATEGORY & AD BLOCKS FLOW */}
+        {(Object.entries(currentPageData.categories) as Array<[string, RenderedAdBlock[]]>).map(([catName, blocks]) => (
+          <div key={catName} className="newspaper-block mb-3 break-inside-avoid">
+            
+            {/* CATEGORY HEADER BANNER (SOLID BLACK, INVERTED WHITE TEXT) */}
+            <div 
+              onClick={() => onSelectCategory && onSelectCategory(catName)}
+              className="newspaper-cat-header cursor-pointer hover:bg-gray-900 transition-colors flex items-center justify-between"
+            >
+              <span>{catName}</span>
+              <span className="text-[8.5px] font-sans font-normal opacity-70">({blocks.length})</span>
+            </div>
+
+            {/* AD ITEMS IN THIS CATEGORY */}
+            {blocks.map((block) => (
+              <div
+                key={block.id}
+                className={`newspaper-ad-item ${
+                  block.isDbItem 
+                    ? 'bg-amber-100/90 font-sans border-l-3 border-l-black pl-1.5 my-1' 
+                    : block.isHot 
+                    ? 'bg-yellow-50 font-semibold' 
+                    : ''
+                }`}
+              >
+                {block.isDbItem && (
+                  <span className="font-bold text-[8.5px] uppercase bg-black text-amber-300 px-1 py-0.2 mr-1 inline-flex items-center gap-0.5">
+                    <Database className="w-2.5 h-2.5" />
+                    [DATA DB]
+                  </span>
+                )}
+                <span>{block.text}</span>
+                <span className="newspaper-ref-code text-[8.5px] text-right font-mono font-bold block text-gray-600 mt-0.5">
+                  {block.ref}
+                </span>
+              </div>
+            ))}
+
+            {/* EMBEDDED DISPLAY BOX AD IN PERUMAHAN SECTION */}
+            {catName === 'PERUMAHAN' && (
+              <div className="newspaper-block border-2 border-black p-1 bg-white text-center my-2 break-inside-avoid">
+                <div className="bg-black text-white font-black text-[10px] uppercase py-0.5">
+                  Pondok Permai GIWANGAN
+                </div>
+                <div className="my-1 border border-black p-1 bg-gray-50 flex items-center justify-center gap-1">
+                  <Building2 className="w-5 h-5 text-black" />
+                  <div className="text-left leading-none">
+                    <span className="text-[10px] font-black block">HUNIAN EKSKLUSIF</span>
+                    <span className="text-[8px] font-bold text-gray-700">DI UTARA KOTA YOGYAKARTA</span>
+                  </div>
+                </div>
+                <div className="text-[11px] font-black text-black">
+                  2.5 JT/THN • KPR DP 0%
+                </div>
+                <div className="text-[9px] font-bold font-mono border-t border-black mt-0.5 pt-0.5">
+                  HUB: 0274-587799 / 081227018983
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
 
       </div>
 
+      {/* BOTTOM PAGINATOR CONTROLS */}
+      {totalPagesCount > 1 && (
+        <div className="border-t-2 border-black pt-3 mt-4 flex flex-col sm:flex-row items-center justify-between gap-3 bg-gray-50 p-2 font-sans">
+          <div className="text-xs font-bold text-gray-800">
+            Halaman {currentPageData.pageNumber} / {totalPagesCount} • Batasan 2.000 Kata Terpenuhi Seimbang
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              disabled={activePageIndex === 0}
+              onClick={() => {
+                setActivePageIndex((prev) => Math.max(0, prev - 1));
+                window.scrollTo({ top: 400, behavior: 'smooth' });
+              }}
+              className="px-3 py-1.5 bg-black text-white font-black text-xs uppercase disabled:opacity-30 hover:bg-gray-800 transition-colors flex items-center gap-1 border border-black"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+              Halaman Sebelumnya
+            </button>
+
+            <div className="flex items-center gap-1">
+              {pages.map((p, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    setActivePageIndex(idx);
+                    window.scrollTo({ top: 400, behavior: 'smooth' });
+                  }}
+                  className={`w-7 h-7 font-mono text-xs font-bold border ${
+                    activePageIndex === idx
+                      ? 'bg-black text-yellow-300 border-black'
+                      : 'bg-white text-black border-gray-400 hover:bg-gray-200'
+                  }`}
+                >
+                  {idx + 1}
+                </button>
+              ))}
+            </div>
+
+            <button
+              disabled={activePageIndex >= totalPagesCount - 1}
+              onClick={() => {
+                setActivePageIndex((prev) => Math.min(totalPagesCount - 1, prev + 1));
+                window.scrollTo({ top: 400, behavior: 'smooth' });
+              }}
+              className="px-3 py-1.5 bg-black text-white font-black text-xs uppercase disabled:opacity-30 hover:bg-gray-800 transition-colors flex items-center gap-1 border border-black"
+            >
+              Halaman Berikutnya
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* FOOTER NOTICE */}
-      <div className="border-t-2 border-black pt-2 mt-4 text-[9px] font-sans flex flex-col sm:flex-row items-center justify-between text-gray-700 gap-1">
-        <span>* Seluruh iklan cetak diperiksa tim Editor Redaksi. Tanda rujukan contoh: (3/08025/0715).</span>
-        <span className="font-bold">HARIAN TEKS DIGITAL • HAK CIPTA DILINDUNGI</span>
+      <div className="border-t-2 border-black pt-2 mt-3 text-[9px] font-sans flex flex-col sm:flex-row items-center justify-between text-gray-700 gap-1">
+        <span>* Data iklan terintegrasi otomatis dengan Cloudflare D1 Database Engine. Format koran mengikuti standar Kompas/KR.</span>
+        <span className="font-bold uppercase tracking-wider">TEKS KORAN CETAK DIGITAL • ALL RIGHTS RESERVED</span>
       </div>
     </div>
   );

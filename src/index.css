@@ -239,37 +239,85 @@ div.relative {
   font-family: 'Arial Narrow', 'Nimbus Sans L', 'Helvetica Neue', Arial, 'Times New Roman', Georgia, serif;
 }
 
+.newspaper-columns-flow,
 .newspaper-columns {
-  column-count: 1;
-  column-gap: 8px;
+  column-gap: 10px;
   column-fill: auto;
 }
 
-@media (min-width: 640px) {
+/* 1. SMARTPHONE VERTICAL (PORTRAIT): MAX 1 KOLOM */
+@media screen and (max-width: 639px) and (orientation: portrait) {
+  .newspaper-columns-flow,
+  .newspaper-columns {
+    column-count: 1 !important;
+    max-height: none !important;
+  }
+}
+
+/* 2. SMARTPHONE HORIZONTAL (LANDSCAPE): MAX 2 KOLOM */
+@media screen and (max-width: 639px) and (orientation: landscape) {
+  .newspaper-columns-flow,
+  .newspaper-columns {
+    column-count: 2 !important;
+    max-height: 850px;
+  }
+}
+
+/* 3. TABLET VERTICAL (PORTRAIT): MAX 2 KOLOM */
+@media screen and (min-width: 640px) and (max-width: 1023px) and (orientation: portrait) {
+  .newspaper-columns-flow,
+  .newspaper-columns {
+    column-count: 2 !important;
+    max-height: 900px;
+  }
+}
+
+/* 4. TABLET HORIZONTAL (LANDSCAPE): MAX 4 KOLOM */
+@media screen and (min-width: 640px) and (max-width: 1023px) and (orientation: landscape) {
+  .newspaper-columns-flow,
+  .newspaper-columns {
+    column-count: 4 !important;
+    max-height: 720px;
+  }
+}
+
+/* 5. DESKTOP VERTICAL (PORTRAIT DISPLAY): MAX 3 KOLOM */
+@media screen and (min-width: 1024px) and (orientation: portrait) {
+  .newspaper-columns-flow,
+  .newspaper-columns {
+    column-count: 3 !important;
+    max-height: 1100px;
+  }
+}
+
+/* 6. DESKTOP HORIZONTAL (LANDSCAPE DISPLAY): MAX 5 KOLOM */
+@media screen and (min-width: 1024px) and (orientation: landscape) {
+  .newspaper-columns-flow,
+  .newspaper-columns {
+    column-count: 5 !important;
+    max-height: 750px;
+  }
+}
+
+/* DEFAULT FALLBACKS FOR RESOLUTION BREAKPOINTS */
+@media screen and (max-width: 639px) {
+  .newspaper-columns-flow,
+  .newspaper-columns {
+    column-count: 1;
+  }
+}
+
+@media screen and (min-width: 640px) and (max-width: 1023px) {
+  .newspaper-columns-flow,
   .newspaper-columns {
     column-count: 2;
-    column-gap: 8px;
   }
 }
 
-@media (min-width: 768px) {
-  .newspaper-columns {
-    column-count: 3;
-    column-gap: 10px;
-  }
-}
-
-@media (min-width: 1024px) {
+@media screen and (min-width: 1024px) {
+  .newspaper-columns-flow,
   .newspaper-columns {
     column-count: 5;
-    column-gap: 10px;
-  }
-}
-
-@media (min-width: 1280px) {
-  .newspaper-columns {
-    column-count: 6;
-    column-gap: 10px;
   }
 }
 
@@ -278,6 +326,9 @@ div.relative {
   page-break-inside: avoid;
   -webkit-column-break-inside: avoid;
   margin-bottom: 8px;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  word-wrap: break-word;
 }
 
 .newspaper-ad-item {
@@ -286,6 +337,11 @@ div.relative {
   font-size: 10.5px;
   line-height: 1.15;
   letter-spacing: -0.01em;
+  /* Smart Word Breaking for text without spaces */
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  word-wrap: break-word;
+  hyphens: auto;
 }
 
 .newspaper-cat-header {

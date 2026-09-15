@@ -52,7 +52,7 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
     try {
       setLoading(true);
       const queryKat = kat !== 'Semua' ? `&kategori=${encodeURIComponent(kat)}` : '';
-      const res = await fetch(`/api/iklan-baris?page=${page}&limit=12${queryKat}`);
+      const res = await fetch(`/api/iklan-baris?page=1&limit=200${queryKat}`);
       if (res.ok) {
         const data = await res.json();
         setAds(data.items || []);
