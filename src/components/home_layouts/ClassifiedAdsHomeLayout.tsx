@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Post, SiteConfig } from '../../types';
 import { Search, PlusCircle, CheckCircle2, Newspaper, Tag, Phone, MapPin, Eye } from 'lucide-react';
 import HeroPerformanceBox from '../HeroPerformanceBox';
+import NewspaperClassifiedGrid from '../NewspaperClassifiedGrid';
 
 interface LayoutProps {
   posts: Post[];
@@ -174,43 +175,12 @@ export default function ClassifiedAdsHomeLayout({ posts, onSelectPost, siteConfi
         </button>
       </div>
 
-      {/* CLASSIFIED ADS MULTI-COLUMN GRID */}
+      {/* CLASSIFIED ADS MULTI-COLUMN PRINT GRID */}
       <section className="space-y-4">
-        <div className="text-center font-sans">
-          <span className="text-xs font-black uppercase tracking-widest border-b-2 border-black dark:border-white pb-0.5">
-            DOKUMEN IKLAN BARIS TERVERIFIKASI ({filteredAds.length} IKLAN TAYANG)
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredAds.map((ad) => (
-            <div
-              key={ad.id}
-              className="p-4 bg-white/70 dark:bg-black/25 border-2 border-[#3c362e]/40 dark:border-[#5c5448]/60 rounded-xl space-y-2 hover:bg-white dark:hover:bg-black/40 transition-colors shadow-2xs"
-            >
-              <div className="flex items-center justify-between font-sans text-[10px] font-black uppercase text-rose-800 dark:text-rose-400 border-b border-[#3c362e]/20 dark:border-[#5c5448]/30 pb-1">
-                <span>[{ad.section}]</span>
-                <span className="text-slate-600 dark:text-slate-400">{ad.city}</span>
-              </div>
-
-              <h3 className="font-sans font-black text-xs uppercase tracking-wide text-black dark:text-white leading-snug">
-                {ad.headline}
-              </h3>
-
-              <p className="text-xs leading-relaxed font-serif text-[#2f2a24] dark:text-[#d6cebf]">
-                {ad.text}
-              </p>
-
-              <div className="pt-2 border-t border-dashed border-[#3c362e]/30 dark:border-[#5c5448]/40 flex items-center justify-between font-sans text-[11px] font-bold">
-                <span className="flex items-center gap-1 text-slate-800 dark:text-slate-200">
-                  <Phone className="w-3 h-3 text-rose-700" />
-                  <span>HUB: {ad.phone}</span>
-                </span>
-                <span className="text-[10px] text-slate-500 font-semibold">{ad.date}</span>
-              </div>
-            </div>
-          ))}
-        </div>
+        <NewspaperClassifiedGrid
+          siteName={siteConfig?.site_name || 'Parenting'}
+          onOpenForm={() => setPostAdOpen(true)}
+        />
       </section>
 
       {/* VINTAGE EDITORIAL REPORT & ARTICLES SECTION */}

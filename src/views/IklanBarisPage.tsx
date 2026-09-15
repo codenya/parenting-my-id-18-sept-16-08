@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Tag, Send, CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Phone, MapPin, Briefcase, Filter, ShieldCheck, Newspaper } from 'lucide-react';
+import { Tag, Send, CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Phone, MapPin, Briefcase, Filter, ShieldCheck, Newspaper, LayoutGrid, FileText } from 'lucide-react';
 import { IklanBarisItem, SiteConfig } from '../types';
 import TurnstileWidget from '../components/TurnstileWidget';
+import NewspaperClassifiedGrid from '../components/NewspaperClassifiedGrid';
 
 interface IklanBarisPageProps {
   siteConfig?: SiteConfig;
@@ -20,7 +21,8 @@ const KATEGORI_OPTIONS = [
 export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPageProps) {
   const siteName = siteConfig?.site_name || 'Parenting';
   
-  // Data & Pagination State
+  // View Mode State: 'newspaper' (Default print newspaper grid) or 'cards' (Modern card list)
+  const [viewMode, setViewMode] = useState<'newspaper' | 'cards'>('newspaper');
   const [ads, setAds] = useState<IklanBarisItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -388,39 +390,81 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
           </div>
         )}
 
-        {/* CATEGORY FILTER TABS */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-6 scrollbar-none">
-          <button
-            onClick={() => { setSelectedKategori('Semua'); setCurrentPage(1); }}
-            className={`px-4 py-2 rounded-xl font-black text-xs uppercase tracking-wider transition-all whitespace-nowrap ${
-              selectedKategori === 'Semua'
-                ? 'bg-slate-900 text-amber-300 dark:bg-amber-400 dark:text-slate-900 shadow'
-                : 'bg-stone-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-stone-300'
-            }`}
-          >
-            Semua ({totalCount})
-          </button>
-          {KATEGORI_OPTIONS.map((kat) => (
+        {/* LAYOUT VIEW MODE SWITCHER & CATEGORY FILTER TABS */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pb-2 mb-6 border-b-2 border-slate-300 dark:border-slate-800">
+          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1">
             <button
-              key={kat}
-              onClick={() => { setSelectedKategori(kat); setCurrentPage(1); }}
-              className={`px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap ${
-                selectedKategori === kat
+              onClick={() => { setSelectedKategori('Semua'); setCurrentPage(1); }}
+              className={`px-3 py-1.5 rounded-lg font-black text-xs uppercase tracking-wider transition-all whitespace-nowrap ${
+                selectedKategori === 'Semua'
                   ? 'bg-slate-900 text-amber-300 dark:bg-amber-400 dark:text-slate-900 shadow'
                   : 'bg-stone-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-stone-300'
               }`}
             >
-              {kat}
+              Semua ({totalCount})
             </button>
-          ))}
+            {KATEGORI_OPTIONS.map((kat) => (
+              <button
+                key={kat}
+                onClick={() => { setSelectedKategori(kat); setCurrentPage(1); }}
+                className={`px-3 py-1.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap ${
+                  selectedKategori === kat
+                    ? 'bg-slate-900 text-amber-300 dark:bg-amber-400 dark:text-slate-900 shadow'
+                    : 'bg-stone-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-stone-300'
+                }`}
+              >
+                {kat}
+              </button>
+            ))}
+          </div>
+
+          {/* VIEW SWITCHER: NEWSPAPER PRINT VS CARDS */}
+          <div className="flex items-center gap-1 bg-stone-200 dark:bg-slate-800 p-1 rounded-xl self-end sm:self-auto shrink-0">
+            <button
+              onClick={() => setViewMode('newspaper')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black uppercase transition-all ${
+                viewMode === 'newspaper'
+                  ? 'bg-black text-white shadow'
+                  : 'text-slate-700 dark:text-slate-300 hover:text-black'
+              }`}
+              title="Tampilan Format Koran Cetak (Authentic Newspaper Print Grid)"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>Format Koran Cetak</span>
+            </button>
+
+            <button
+              onClick={() => setViewMode('cards')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black uppercase transition-all ${
+                viewMode === 'cards'
+                  ? 'bg-black text-white shadow'
+                  : 'text-slate-700 dark:text-slate-300 hover:text-black'
+              }`}
+              title="Tampilan Kartu Digital Modern"
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>Format Kartu</span>
+            </button>
+          </div>
         </div>
 
-        {/* PRINT CLASSIFIED ADS GRID (KOMPAS STYLE: 2 COLUMNS ON DESKTOP, MONOSPACE TYPOGRAPHY, NO IMAGES) */}
+        {/* CLASSIFIED ADS CONTENT AREA */}
         {loading ? (
           <div className="py-16 text-center space-y-3">
             <div className="w-8 h-8 border-4 border-slate-900 border-t-transparent rounded-full animate-spin mx-auto" />
             <p className="text-xs font-bold text-slate-600">Memuat lembar iklan baris...</p>
           </div>
+        ) : viewMode === 'newspaper' ? (
+          /* TRADITIONAL PRINT NEWSPAPER CLASSIFIED ADS GRID */
+          <NewspaperClassifiedGrid
+            dynamicAds={ads}
+            onSelectCategory={(kat) => {
+              setSelectedKategori(kat);
+              setCurrentPage(1);
+            }}
+            onOpenForm={() => setShowForm(true)}
+            siteName={siteName}
+          />
         ) : ads.length === 0 ? (
           <div className="bg-stone-100 dark:bg-slate-900 border-2 border-dashed border-slate-400 dark:border-slate-700 rounded-2xl p-12 text-center">
             <Newspaper className="w-12 h-12 text-slate-400 mx-auto mb-3 opacity-60" />
