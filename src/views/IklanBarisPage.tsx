@@ -139,39 +139,23 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
     <div className="min-h-screen bg-amber-50/40 dark:bg-slate-950 text-slate-900 dark:text-slate-100 py-10 font-sans">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         
-        {/* HARIAN KOMPAS STYLE NEWSPAPER CLASSIFIED ADS HEADER */}
-        <div className="bg-stone-100 dark:bg-slate-900 border-4 border-slate-900 dark:border-slate-700 rounded-2xl p-6 sm:p-8 shadow-md mb-8 relative">
-          <div className="flex flex-col sm:flex-row items-center justify-between border-b-2 border-slate-900 dark:border-slate-700 pb-4 mb-4 gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-slate-900 text-amber-400 dark:bg-amber-400 dark:text-slate-900 flex items-center justify-center font-black text-xl tracking-tighter shadow">
-                IK
-              </div>
-              <div>
-                <span className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                  HARIAN KORAN TEKS • EDISI DIGITAL
-                </span>
-                <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white uppercase font-serif">
-                  IKLAN BARIS {siteName}
-                </h1>
-              </div>
-            </div>
+        {/* SIMPLIFIED HEADER */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 border-b-2 border-slate-900 dark:border-slate-700 pb-4">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase font-serif tracking-tight">
+            IKLAN BARIS GRATIS
+          </h1>
 
-            <button
-              onClick={() => {
-                setShowForm(!showForm);
-                setSubmitSuccess('');
-                setSubmitError('');
-              }}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 dark:bg-amber-400 dark:hover:bg-amber-300 dark:text-slate-900 font-bold text-xs uppercase tracking-wider shadow transition-transform transform hover:scale-105"
-            >
-              <Send className="w-4 h-4" />
-              {showForm ? 'Tutup Form Iklan' : '+ Pasang Iklan Baris'}
-            </button>
-          </div>
-
-          <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-serif max-w-3xl">
-            Layanan iklan baris cetak &amp; digital tanpa gambar. Seluruh kiriman iklan masyarakat akan diperiksa &amp; diedit oleh tim Editor sebelum diterbitkan secara publik. Tautan URL otomatis dikonversi menjadi teks biasa demi kenyamanan pembaca.
-          </p>
+          <button
+            onClick={() => {
+              setShowForm(!showForm);
+              setSubmitSuccess('');
+              setSubmitError('');
+            }}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 dark:bg-amber-400 dark:hover:bg-amber-300 dark:text-slate-900 font-bold text-xs uppercase tracking-wider shadow transition-transform transform hover:scale-105"
+          >
+            <Send className="w-4 h-4" />
+            {showForm ? 'Tutup Form Iklan' : '+ Pasang Iklan Baris'}
+          </button>
         </div>
 
         {/* NOTIFICATION BANNERS */}
@@ -192,7 +176,6 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
               <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2 font-serif">
                 <Tag className="w-5 h-5 text-amber-600 dark:text-amber-400" /> Formulir Kiriman Iklan Baris Pembaca
               </h3>
-              <span className="text-xs font-bold text-slate-500 uppercase">Akses Guest (Tanpa Login)</span>
             </div>
 
             {submitError && (
@@ -391,11 +374,11 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
         )}
 
         {/* LAYOUT VIEW MODE SWITCHER & CATEGORY FILTER TABS */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pb-2 mb-6 border-b-2 border-slate-300 dark:border-slate-800">
-          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-3 mb-6 border-b-2 border-slate-300 dark:border-slate-800">
+          <div className="flex flex-wrap items-center gap-2 py-1">
             <button
               onClick={() => { setSelectedKategori('Semua'); setCurrentPage(1); }}
-              className={`px-3 py-1.5 rounded-lg font-black text-xs uppercase tracking-wider transition-all whitespace-nowrap ${
+              className={`px-3.5 py-1.5 rounded-lg font-black text-xs uppercase tracking-wider transition-all ${
                 selectedKategori === 'Semua'
                   ? 'bg-slate-900 text-amber-300 dark:bg-amber-400 dark:text-slate-900 shadow'
                   : 'bg-stone-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-stone-300'
@@ -407,7 +390,7 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
               <button
                 key={kat}
                 onClick={() => { setSelectedKategori(kat); setCurrentPage(1); }}
-                className={`px-3 py-1.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap ${
+                className={`px-3.5 py-1.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all ${
                   selectedKategori === kat
                     ? 'bg-slate-900 text-amber-300 dark:bg-amber-400 dark:text-slate-900 shadow'
                     : 'bg-stone-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-stone-300'
