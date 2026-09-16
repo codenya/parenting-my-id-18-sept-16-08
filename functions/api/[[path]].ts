@@ -3741,7 +3741,6 @@ Berdasarkan judul artikel: "${title}" dan isi: "${(content || '').slice(0, 500)}
             cleanAdminAd !== undefined ? cleanAdminAd : null,
             id
           ).run();
-        }
         } else {
           const item = (cfMockIklanBaris as any[]).find((x: any) => String(x.id) === String(id));
           if (item) {
