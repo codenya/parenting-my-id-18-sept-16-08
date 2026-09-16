@@ -8,7 +8,7 @@ import {
   Heading3, List, ListOrdered, Quote, Image as ImageIcon, Code, UserCheck, 
   ExternalLink, Search, Zap, AlertCircle, Settings, Key, Copy, Check, 
   LogOut, Globe, Palette, Layout, MessageSquare, Droplet, Users, Award, History, RotateCcw, X, Menu, LayoutGrid, Database, ShoppingBag, BarChart2,
-  ChevronLeft, ChevronRight, Maximize2, Minimize2, Mail, Tag
+  ChevronLeft, ChevronRight, ChevronDown, Maximize2, Minimize2, Mail, Tag
 } from 'lucide-react';
 import { generateSlug } from '../lib/autolink';
 import RichPostEditor from '../components/RichPostEditor';
@@ -83,6 +83,7 @@ export default function AdminPortal({
   // Sidebar controls
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isZenMode, setIsZenMode] = useState(false);
+  const [isMobileNavExpanded, setIsMobileNavExpanded] = useState(false);
 
   // Auto-collapse sidebar when on the editor tab
   useEffect(() => {
@@ -2226,10 +2227,290 @@ export default function AdminPortal({
       </div>
 
       {/* TWO-COLUMN LAYOUT: SIDEBAR + MAIN CONTENT */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
         
-        {/* LEFT COLUMN: THE GORGEOUS SIDEBAR NAVIGATION */}
-        <div className={`${
+        {/* MOBILE NAVIGATION BAR (< LG): SEBARIS KALIMAT MENU NAVIGASI DENGAN DROPDOWN PENUH SAAT DIKLIK */}
+        {!isZenMode && (
+          <div className="lg:hidden col-span-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden mb-2">
+            <button
+              type="button"
+              id="mobile-nav-toggle-btn"
+              onClick={() => setIsMobileNavExpanded(!isMobileNavExpanded)}
+              className="w-full px-4 py-3 flex items-center justify-between text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="p-1.5 rounded-lg bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400 shrink-0">
+                  {activeTab === 'posts' && <FileText className="w-4 h-4" />}
+                  {activeTab === 'editor' && <Edit3 className="w-4 h-4" />}
+                  {activeTab === 'writers' && <Users className="w-4 h-4" />}
+                  {activeTab === 'autolinks' && <LinkIcon className="w-4 h-4" />}
+                  {activeTab === 'sitemap' && <Zap className="w-4 h-4" />}
+                  {activeTab === 'comments' && <MessageSquare className="w-4 h-4" />}
+                  {activeTab === 'config' && <Settings className="w-4 h-4" />}
+                  {activeTab === 'database' && <Database className="w-4 h-4" />}
+                  {activeTab === 'products' && <ShoppingBag className="w-4 h-4" />}
+                  {activeTab === 'wa_leads' && <BarChart2 className="w-4 h-4" />}
+                  {activeTab === 'surat_pembaca' && <Mail className="w-4 h-4" />}
+                  {activeTab === 'iklan_baris' && <Tag className="w-4 h-4" />}
+                  {activeTab === 'security' && <Key className="w-4 h-4" />}
+                </span>
+                <div className="truncate">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 block leading-tight">
+                    Menu Navigasi
+                  </span>
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate block">
+                    {activeTab === 'posts' && 'Daftar Artikel'}
+                    {activeTab === 'editor' && 'Tulis Artikel'}
+                    {activeTab === 'writers' && 'Penulis & Editor'}
+                    {activeTab === 'autolinks' && 'Auto-Linking'}
+                    {activeTab === 'sitemap' && 'SEO & AI Agent Discovery'}
+                    {activeTab === 'comments' && '💬 Moderasi Komentar'}
+                    {activeTab === 'config' && '⚙️ Configs Situs'}
+                    {activeTab === 'database' && '🗄️ Database D1'}
+                    {activeTab === 'products' && '🎨 Produk Jualan'}
+                    {activeTab === 'wa_leads' && '📊 Laporan WA'}
+                    {activeTab === 'surat_pembaca' && '✉️ Surat Pembaca'}
+                    {activeTab === 'iklan_baris' && '📢 Iklan Baris'}
+                    {activeTab === 'security' && '🔐 Akun Admin'}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2 shrink-0 ml-2">
+                <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 px-2 py-0.5 rounded-full border border-rose-200 dark:border-rose-900">
+                  {isMobileNavExpanded ? 'Tutup Menu' : 'Pilih Menu'}
+                </span>
+                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isMobileNavExpanded ? 'rotate-180' : ''}`} />
+              </div>
+            </button>
+
+            {/* MENGEMBANG MENJADI KATA-KATA MENU FULL KETIKA DIKLIK */}
+            {isMobileNavExpanded && (
+              <nav className="p-3 border-t border-slate-100 dark:border-slate-800/80 space-y-1 bg-slate-50/50 dark:bg-slate-900/50 animate-in fade-in slide-in-from-top-2 duration-150">
+                {/* 1. Daftar Artikel */}
+                <button
+                  type="button"
+                  onClick={() => { setActiveTab('posts'); setIsMobileNavExpanded(false); }}
+                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between gap-2.5 ${
+                    activeTab === 'posts'
+                      ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <FileText className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
+                    <span>Daftar Artikel</span>
+                  </div>
+                  <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
+                    activeTab === 'posts' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                  }`}>
+                    {userRole === 'writer' ? userPosts.length : posts.length}
+                  </span>
+                </button>
+
+                {/* 2. Tulis Artikel */}
+                <button
+                  type="button"
+                  onClick={() => { setActiveTab('editor'); setIsMobileNavExpanded(false); }}
+                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                    activeTab === 'editor'
+                      ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                  }`}
+                >
+                  <Edit3 className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
+                  <span>Tulis Artikel</span>
+                </button>
+
+                {currentUser?.role === 'admin' && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => { setActiveTab('writers'); setIsMobileNavExpanded(false); }}
+                      className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between gap-2.5 ${
+                        activeTab === 'writers'
+                          ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400'
+                          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Users className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
+                        <span>Penulis & Editor</span>
+                      </div>
+                      <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
+                        activeTab === 'writers' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                      }`}>
+                        {writers.length}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => { setActiveTab('autolinks'); setIsMobileNavExpanded(false); }}
+                      className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between gap-2.5 ${
+                        activeTab === 'autolinks'
+                          ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400'
+                          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <LinkIcon className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
+                        <span>Auto-Linking</span>
+                      </div>
+                      <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
+                        activeTab === 'autolinks' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                      }`}>
+                        {autolinks.length}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => { setActiveTab('sitemap'); fetchDnsAid(false); setIsMobileNavExpanded(false); }}
+                      className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                        activeTab === 'sitemap'
+                          ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400'
+                          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                      }`}
+                    >
+                      <Zap className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
+                      <span>SEO & AI Agent Discovery</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => { setActiveTab('comments'); fetchComments(); setIsMobileNavExpanded(false); }}
+                      className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between gap-2.5 ${
+                        activeTab === 'comments'
+                          ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400'
+                          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <MessageSquare className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
+                        <span>💬 Moderasi Komentar</span>
+                      </div>
+                      <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
+                        activeTab === 'comments' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                      }`}>
+                        {comments.length}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => { setActiveTab('config'); setIsMobileNavExpanded(false); }}
+                      className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                        activeTab === 'config'
+                          ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400'
+                          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                      }`}
+                    >
+                      <Settings className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
+                      <span>⚙️ Configs Situs</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => { setActiveTab('database'); setIsMobileNavExpanded(false); }}
+                      className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                        activeTab === 'database'
+                          ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400'
+                          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                      }`}
+                    >
+                      <Database className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
+                      <span>🗄️ Database D1</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => { setActiveTab('products'); setIsMobileNavExpanded(false); }}
+                      className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                        activeTab === 'products'
+                          ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400'
+                          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                      }`}
+                    >
+                      <ShoppingBag className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
+                      <span>🎨 Produk Jualan</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => { setActiveTab('wa_leads'); fetchWaLeads(); fetchProductOrders(); setIsMobileNavExpanded(false); }}
+                      className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                        activeTab === 'wa_leads'
+                          ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400'
+                          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                      }`}
+                    >
+                      <BarChart2 className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
+                      <span>📊 Laporan WA</span>
+                    </button>
+                  </>
+                )}
+
+                {currentUser?.role !== 'writer' && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => { setActiveTab('surat_pembaca'); setIsMobileNavExpanded(false); }}
+                      className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                        activeTab === 'surat_pembaca'
+                          ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400'
+                          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                      }`}
+                    >
+                      <Mail className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
+                      <span>✉️ Surat Pembaca</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => { setActiveTab('iklan_baris'); setIsMobileNavExpanded(false); }}
+                      className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                        activeTab === 'iklan_baris'
+                          ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400'
+                          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                      }`}
+                    >
+                      <Tag className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
+                      <span>📢 Iklan Baris</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => { setActiveTab('security'); setIsMobileNavExpanded(false); }}
+                      className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 ${
+                        activeTab === 'security'
+                          ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400'
+                          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                      }`}
+                    >
+                      <Key className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
+                      <span>🔐 Akun Admin</span>
+                    </button>
+                  </>
+                )}
+
+                {onLogout && (
+                  <button
+                    type="button"
+                    onClick={onLogout}
+                    className="w-full px-4 py-2.5 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all flex items-center gap-2.5 pt-2 border-t border-slate-200 dark:border-slate-800"
+                  >
+                    <LogOut className="w-4 h-4 shrink-0" />
+                    <span>Keluar Akun</span>
+                  </button>
+                )}
+              </nav>
+            )}
+          </div>
+        )}
+
+        {/* LEFT COLUMN: THE GORGEOUS SIDEBAR NAVIGATION (DESKTOP >= LG) */}
+        <div className={`hidden lg:block ${
           isZenMode && activeTab === 'editor'
             ? 'hidden'
             : isSidebarCollapsed
