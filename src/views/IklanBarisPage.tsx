@@ -10,6 +10,9 @@ interface IklanBarisPageProps {
   onNavigate?: (view: string, param?: string) => void;
 }
 
+export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPageProps) {
+  const siteName = siteConfig?.site_name || 'Portal Digital';
+
   const KATEGORI_OPTIONS = useMemo(() => {
     if (siteConfig?.classified_categories) {
       return siteConfig.classified_categories.split(',').map(s => s.trim()).filter(Boolean);
@@ -58,11 +61,8 @@ interface IklanBarisPageProps {
       'Umum',
     ];
   }, [siteConfig?.classified_categories]);
-
-  export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPageProps) {
-    const siteName = siteConfig?.site_name || 'Portal Digital';
     
-    // View Mode State: 'newspaper' (Default print newspaper grid) or 'cards' (Modern card list)
+  // View Mode State: 'newspaper' (Default print newspaper grid) or 'cards' (Modern card list)
     const [viewMode, setViewMode] = useState<'newspaper' | 'cards'>('newspaper');
     const [ads, setAds] = useState<IklanBarisItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -216,7 +216,7 @@ interface IklanBarisPageProps {
 
   // Dynamic JSON-LD Structured Data Schema for Googlebot Crawling & Indexing
   const jsonLdData = useMemo(() => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://parenting.my.id';
+    const origin = typeof window !== 'undefined' ? window.location.origin : (siteConfig?.site_url || 'https://example.com');
     const pageUrl = `${origin}/iklan-baris?page=${currentPage}${selectedKategori !== 'Semua' ? `&kategori=${encodeURIComponent(selectedKategori)}` : ''}`;
 
     return {
