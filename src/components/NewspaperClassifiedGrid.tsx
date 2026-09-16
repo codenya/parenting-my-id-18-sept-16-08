@@ -311,6 +311,7 @@ export default function NewspaperClassifiedGrid({
               {blocks.map((block) => (
                 <article
                   key={block.id}
+                  id={block.dbData?.id ? `ad-${block.dbData.id}` : (block.id ? `ad-${block.id}` : undefined)}
                   className="iklan-item newspaper-ad-item bg-white text-black border-b border-dashed border-gray-400 py-1.5 px-1 my-0.5"
                 >
                   {block.dbData?.imageUrl && (
