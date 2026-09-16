@@ -84,14 +84,31 @@ export default function NewspaperClassifiedGrid({
 
     dynamicAds.forEach((item) => {
       const kat = (item.kategori || 'LAIN-LAIN').toUpperCase();
-      const text = `${item.keteranganBarang} Hrg: ${item.harga}. Hub: ${item.phone} (${item.nama} • ${item.kota})`;
+      
+      let imageUrl = item.imageUrl;
+      let cleanDesc = item.keteranganBarang || '';
+
+      // Auto-extract image URL if embedded in text or susercontent/webp/jpg/png
+      const imgMatch = cleanDesc.match(/(https?:\/\/[^\s]+?\.(webp|jpg|jpeg|png|gif)|https?:\/\/[^\s]+?susercontent[^\s]+)/i);
+      if (!imageUrl && imgMatch) {
+        imageUrl = imgMatch[0];
+        cleanDesc = cleanDesc.replace(imageUrl, '').trim();
+      }
+
+      const enhancedItem = {
+        ...item,
+        imageUrl: imageUrl || item.imageUrl,
+        keteranganBarang: cleanDesc,
+      };
+
+      const text = `${cleanDesc} Hrg: ${item.harga}. Hub: ${item.phone} (${item.nama} • ${item.kota})`;
       const ref = `DB/${String(item.id).padStart(5, '0')}/${new Date(item.createdAt || Date.now()).getFullYear()}`;
       
       blocks.push({
         id: `db-${item.id}`,
         category: kat,
         isDbItem: true,
-        dbData: item,
+        dbData: enhancedItem,
         text,
         ref,
         isHot: item.status === 'published',
