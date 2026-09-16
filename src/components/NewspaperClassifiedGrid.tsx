@@ -55,7 +55,30 @@ export default function NewspaperClassifiedGrid({
     return fallback;
   };
 
-  // 1. Convert Database Items (`dynamicAds`) into Unified Ad Blocks
+  const renderAutoLinkedText = (text: string) => {
+    const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\/[^\s]*)/gi;
+    const parts = text.split(urlRegex);
+    return parts.map((part, i) => {
+      if (!part) return null;
+      const isUrl = part.includes('http://') || part.includes('https://') || part.includes('www.') || part.includes('/');
+      if (isUrl && (part.match(/^https?:\/\//i) || part.match(/^www\./i) || part.match(/\//))) {
+        const href = part.startsWith('www.') ? `https://${part}` : (!part.startsWith('http://') && !part.startsWith('https://') ? `https://${part}` : part);
+        return (
+          <a
+            key={i}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-700 underline font-bold hover:text-blue-900 break-all inline-block"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {part}
+          </a>
+        );
+      }
+      return <span key={i}>{part}</span>;
+    });
+  };
   const allBlocks = useMemo(() => {
     const blocks: RenderedAdBlock[] = [];
 
@@ -276,8 +299,19 @@ export default function NewspaperClassifiedGrid({
                   key={block.id}
                   className="iklan-item newspaper-ad-item bg-white text-black border-b border-dashed border-gray-400 py-1.5 px-1 my-0.5"
                 >
+                  {block.dbData?.imageUrl && (
+                    <div className="my-1">
+                      <img
+                        src={block.dbData.imageUrl}
+                        alt="Ilustrasi Iklan"
+                        className="max-w-[120px] max-h-[90px] w-auto h-auto object-cover grayscale rounded-sm border border-gray-300 block my-1"
+                        loading="lazy"
+                        style={{ filter: 'grayscale(100%)' }}
+                      />
+                    </div>
+                  )}
                   <p className="iklan-teks m-0">
-                    <span>{block.text}</span>
+                    <span>{renderAutoLinkedText(block.text)}</span>
                     <span className="kode-db block text-right mt-0.5 font-bold">
                       {block.ref}
                     </span>

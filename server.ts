@@ -2069,7 +2069,28 @@ app.get('/api/iklan-baris', async (req, res) => {
 // 2. POST /api/iklan-baris (Guest Submission with Anti-Spam & Anti-XSS)
 app.post('/api/iklan-baris', async (req, res) => {
   try {
-    const { kategori, keteranganBarang, harga, nama, kota, pekerjaan, tahunLahir, phone, expiresAt, tanggalBerakhir, turnstileToken, website_url_hp } = req.body || {};
+    let isAdmin = false;
+    const authHeader = req.headers.authorization || (req.headers['x-session-token'] as string);
+    const cookieHeader = req.headers.cookie;
+    const token = extractTokenFromHeaderOrCookie(authHeader, cookieHeader);
+    if (token) {
+      const jwtSecret = process.env.JWT_SECRET || 'edge-unified-jwt-secret-key-2026-secure';
+      if (token.includes('.') && token.split('.').length === 3) {
+        const jwtResult = await verifyJwtHmacSha256(token, jwtSecret);
+        if (jwtResult.valid && jwtResult.payload && (jwtResult.payload.role === 'admin' || jwtResult.payload.role === 'editor')) {
+          isAdmin = true;
+        }
+      } else {
+        const parts = token.split('_');
+        if (parts.length >= 3 && parts[0] === 'session') {
+          const userId = Number(parts[1]);
+          const role = parts.length >= 4 && isNaN(Number(parts[2])) ? parts[2] : (mockUsers.find(u => u.id === userId)?.role || 'admin');
+          if (role === 'admin' || role === 'editor') isAdmin = true;
+        }
+      }
+    }
+
+    const { kategori, keteranganBarang, harga, nama, kota, pekerjaan, tahunLahir, phone, expiresAt, tanggalBerakhir, imageUrl, turnstileToken, website_url_hp } = req.body || {};
 
     // 1. Honeypot Trap Check
     if (website_url_hp) {
@@ -2109,7 +2130,16 @@ app.post('/api/iklan-baris', async (req, res) => {
       return res.status(400).json({ error: 'Seluruh kolom isian formulir iklan baris wajib diisi.' });
     }
 
-    // 5. Anti-XSS & URL to Plain Text Sanitization
+    const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\/[^\s]*)/i;
+    const hasUrlInDesc = urlRegex.test(String(keteranganBarang || ''));
+
+    if (!isAdmin) {
+      if (imageUrl || hasUrlInDesc) {
+        return res.status(400).json({ error: 'Hanya admin situs yang boleh menyertakan gambar atau tautan URL pada iklan baris.' });
+      }
+    }
+
+    // 5. Anti-XSS & Sanitization
     const cleanKategori = cleanTextAndStripUrls(String(kategori));
     let allowedCategories = ['Aksesoris', 'Aplikasi', 'Asuransi', 'Bimbel', 'Buku', 'Daycare', 'Jasa', 'Kebersihan', 'Kehamilan', 'Keluarga', 'Kesehatan', 'Keuangan', 'Klinik', 'Konsultasi', 'Kursus', 'Les Privat', 'Lifestyle', 'Lowongan Kerja', 'Mainan', 'Mencari Kerja', 'Menyusui', 'Nutrisi Gizi', 'Obat', 'Pakaian', 'Pasca Kelahiran', 'Pendidikan', 'Pengasuh', 'Peralatan', 'Perawatan', 'Perlengkapan', 'Sekolah', 'Sepatu', 'Seminar', 'Training', 'Transport', 'Wisata', 'Pola Asuh', 'Balita', 'Psikologi Ibu', 'Tumbuh Kembang', 'Umum'];
     try {
@@ -2126,7 +2156,7 @@ app.post('/api/iklan-baris', async (req, res) => {
       return res.status(400).json({ error: `Kategori iklan baris tidak valid. Harap pilih kategori resmi yang ditentukan admin: ${allowedCategories.join(', ')}` });
     }
 
-    const cleanKet = cleanTextAndStripUrls(String(keteranganBarang));
+    const cleanKet = isAdmin ? String(keteranganBarang).trim() : cleanTextAndStripUrls(String(keteranganBarang));
     const cleanHarga = cleanTextAndStripUrls(String(harga));
     const cleanNama = cleanTextAndStripUrls(String(nama));
     const cleanKota = cleanTextAndStripUrls(String(kota));
@@ -2134,6 +2164,7 @@ app.post('/api/iklan-baris', async (req, res) => {
     const cleanPhone = cleanTextAndStripUrls(String(phone));
     const rawExpires = expiresAt || tanggalBerakhir;
     const cleanExpiresAt = rawExpires ? cleanTextAndStripUrls(String(rawExpires)) : undefined;
+    const cleanImageUrl = imageUrl ? String(imageUrl).trim() : undefined;
 
     const newItem: any = {
       id: Date.now(),
@@ -2146,9 +2177,11 @@ app.post('/api/iklan-baris', async (req, res) => {
       tahunLahir: Number(tahunLahir),
       phone: cleanPhone,
       ipAddress: clientIp,
-      status: 'pending',
+      status: isAdmin ? 'published' : 'pending',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      imageUrl: cleanImageUrl || undefined,
+      isAdminAd: isAdmin ? 1 : 0,
     };
 
     if (cleanExpiresAt) {
@@ -2160,7 +2193,7 @@ app.post('/api/iklan-baris', async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Iklan baris Anda berhasil dikirim! Iklan akan diperiksa dan diedit oleh tim Editor sebelum ditayangkan.',
+      message: isAdmin ? 'Iklan baris admin berhasil diposting.' : 'Iklan baris Anda berhasil dikirim! Iklan akan diperiksa dan diedit oleh tim Editor sebelum ditayangkan.',
       item: newItem,
     });
   } catch (err: any) {
@@ -2177,16 +2210,18 @@ app.put('/api/iklan-baris/:id', requireAuth(['admin', 'editor']), (req, res) => 
       return res.status(404).json({ error: 'Iklan baris tidak ditemukan.' });
     }
 
-    const { kategori, keteranganBarang, harga, nama, kota, pekerjaan, phone, status, expiresAt, tanggalBerakhir } = req.body || {};
+    const { kategori, keteranganBarang, harga, nama, kota, pekerjaan, phone, status, expiresAt, tanggalBerakhir, imageUrl, isAdminAd } = req.body || {};
 
     if (kategori !== undefined) item.kategori = cleanTextAndStripUrls(String(kategori));
-    if (keteranganBarang !== undefined) item.keteranganBarang = cleanTextAndStripUrls(String(keteranganBarang));
+    if (keteranganBarang !== undefined) item.keteranganBarang = String(keteranganBarang);
     if (harga !== undefined) item.harga = cleanTextAndStripUrls(String(harga));
     if (nama !== undefined) item.nama = cleanTextAndStripUrls(String(nama));
     if (kota !== undefined) item.kota = cleanTextAndStripUrls(String(kota));
     if (pekerjaan !== undefined) item.pekerjaan = cleanTextAndStripUrls(String(pekerjaan));
     if (phone !== undefined) item.phone = cleanTextAndStripUrls(String(phone));
     if (status !== undefined) item.status = status;
+    if (imageUrl !== undefined) item.imageUrl = imageUrl ? String(imageUrl).trim() : null;
+    if (isAdminAd !== undefined) item.isAdminAd = Number(isAdminAd) ? 1 : 0;
     const rawExpires = expiresAt !== undefined ? expiresAt : tanggalBerakhir;
     if (rawExpires !== undefined) {
       item.expiresAt = rawExpires ? cleanTextAndStripUrls(String(rawExpires)) : null;

@@ -30,6 +30,8 @@ export interface IklanBarisItem {
   createdAt: string;
   updatedAt?: string;
   expiresAt?: string; // Tanggal iklan harus diturunkan / berakhir (opsional)
+  imageUrl?: string;
+  isAdminAd?: number;
 }
 
 export interface User {

@@ -3601,7 +3601,7 @@ Berdasarkan judul artikel: "${title}" dan isi: "${(content || '').slice(0, 500)}
     if (path === '/api/iklan-baris' && method === 'POST') {
       try {
         const body: any = await request.json().catch(() => ({}));
-        const { nama, kota, pekerjaan, tahunLahir, phone, kategori, keteranganBarang, harga, expiresAt, website_hp } = body;
+        const { nama, kota, pekerjaan, tahunLahir, phone, kategori, keteranganBarang, harga, expiresAt, imageUrl, website_hp } = body;
 
         if (website_hp) {
           return jsonResponse({ error: 'Permintaan ditolak: Spam terdeteksi.' }, 400);
@@ -3611,14 +3611,32 @@ Berdasarkan judul artikel: "${title}" dan isi: "${(content || '').slice(0, 500)}
           return jsonResponse({ error: 'Semua kolom formulir Iklan Baris wajib diisi.' }, 400);
         }
 
+        let isAdmin = false;
+        const authCheck = await authenticateRequest(['admin', 'editor']);
+        if (!authCheck.errorResponse && authCheck.user) {
+          isAdmin = true;
+        }
+
+        const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\/[^\s]*)/i;
+        const hasUrlInDesc = urlRegex.test(String(keteranganBarang || ''));
+
+        if (!isAdmin) {
+          if (imageUrl || hasUrlInDesc) {
+            return jsonResponse({ error: 'Hanya admin situs yang boleh menyertakan gambar atau tautan URL pada iklan baris.' }, 400);
+          }
+        }
+
         const clientIp = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || '127.0.0.1';
         const cleanNama = String(nama).replace(/<[^>]*>?/gm, '').trim();
         const cleanKota = String(kota).replace(/<[^>]*>?/gm, '').trim();
         const cleanPekerjaan = String(pekerjaan).replace(/<[^>]*>?/gm, '').trim();
         const cleanKategori = String(kategori).replace(/<[^>]*>?/gm, '').trim();
-        const cleanKeterangan = String(keteranganBarang).replace(/<[^>]*>?/gm, '').trim();
+        const cleanKeterangan = isAdmin ? String(keteranganBarang).trim() : String(keteranganBarang).replace(/<[^>]*>?/gm, '').trim();
         const cleanHarga = String(harga).replace(/<[^>]*>?/gm, '').trim();
         const cleanExpiresAt = expiresAt ? String(expiresAt).trim() : null;
+        const cleanImageUrl = imageUrl ? String(imageUrl).trim() : null;
+        const adStatus = isAdmin ? 'published' : 'pending';
+        const adminAdFlag = isAdmin ? 1 : 0;
 
         if (env.DB) {
           await env.DB.prepare(`
@@ -3636,25 +3654,32 @@ Berdasarkan judul artikel: "${title}" dan isi: "${(content || '').slice(0, 500)}
               status TEXT DEFAULT 'pending',
               rejection_reason TEXT,
               expires_at TEXT,
+              image_url TEXT,
+              is_admin_ad INTEGER DEFAULT 0,
               created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
               updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
           `).run();
 
-          // Prosedur bootstrap D1: cek/tambahkan kolom expires_at jika belum ada pada tabel lama
           try {
             await env.DB.prepare("ALTER TABLE iklan_baris ADD COLUMN expires_at TEXT").run();
           } catch (_colErr) {}
+          try {
+            await env.DB.prepare("ALTER TABLE iklan_baris ADD COLUMN image_url TEXT").run();
+          } catch (_colErr) {}
+          try {
+            await env.DB.prepare("ALTER TABLE iklan_baris ADD COLUMN is_admin_ad INTEGER DEFAULT 0").run();
+          } catch (_colErr) {}
 
           const insertRes = await env.DB.prepare(`
-            INSERT INTO iklan_baris (nama, kota, pekerjaan, tahun_lahir, phone, ip_address, kategori, keterangan_barang, harga, status, expires_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)
-          `).bind(cleanNama, cleanKota, cleanPekerjaan, Number(tahunLahir), String(phone), clientIp, cleanKategori, cleanKeterangan, cleanHarga, cleanExpiresAt).run();
+            INSERT INTO iklan_baris (nama, kota, pekerjaan, tahun_lahir, phone, ip_address, kategori, keterangan_barang, harga, status, expires_at, image_url, is_admin_ad)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `).bind(cleanNama, cleanKota, cleanPekerjaan, Number(tahunLahir), String(phone), clientIp, cleanKategori, cleanKeterangan, cleanHarga, adStatus, cleanExpiresAt, cleanImageUrl, adminAdFlag).run();
 
           return jsonResponse({
             success: true,
             id: insertRes?.meta?.last_row_id || Date.now(),
-            message: 'Pemasangan Iklan Baris Anda telah berhasil dan sedang menunggu moderasi redaksi.'
+            message: isAdmin ? 'Iklan baris admin berhasil diposting.' : 'Pemasangan Iklan Baris Anda telah berhasil dan sedang menunggu moderasi redaksi.'
           });
         }
 
@@ -3676,38 +3701,47 @@ Berdasarkan judul artikel: "${title}" dan isi: "${(content || '').slice(0, 500)}
       try {
         const id = path.split('/')[3];
         const body: any = await request.json().catch(() => ({}));
-        const { status, rejectionReason, kategori, keteranganBarang, harga, expiresAt } = body;
+        const { status, rejectionReason, kategori, keteranganBarang, harga, expiresAt, imageUrl, isAdminAd } = body;
 
         if (env.DB) {
           try {
             await env.DB.prepare("ALTER TABLE iklan_baris ADD COLUMN expires_at TEXT").run();
           } catch (_colErr) {}
+          try {
+            await env.DB.prepare("ALTER TABLE iklan_baris ADD COLUMN image_url TEXT").run();
+          } catch (_colErr) {}
+          try {
+            await env.DB.prepare("ALTER TABLE iklan_baris ADD COLUMN is_admin_ad INTEGER DEFAULT 0").run();
+          } catch (_colErr) {}
 
           const cleanExpiresAt = expiresAt !== undefined ? (expiresAt ? String(expiresAt).trim() : null) : undefined;
-          if (cleanExpiresAt !== undefined) {
-            await env.DB.prepare(`
-              UPDATE iklan_baris 
-              SET status = COALESCE(?, status), 
-                  rejection_reason = COALESCE(?, rejection_reason), 
-                  kategori = COALESCE(?, kategori), 
-                  keterangan_barang = COALESCE(?, keterangan_barang), 
-                  harga = COALESCE(?, harga), 
-                  expires_at = ?,
-                  updated_at = CURRENT_TIMESTAMP 
-              WHERE id = ?
-            `).bind(status || null, rejectionReason || null, kategori || null, keteranganBarang || null, harga || null, cleanExpiresAt, id).run();
-          } else {
-            await env.DB.prepare(`
-              UPDATE iklan_baris 
-              SET status = COALESCE(?, status), 
-                  rejection_reason = COALESCE(?, rejection_reason), 
-                  kategori = COALESCE(?, kategori), 
-                  keterangan_barang = COALESCE(?, keterangan_barang), 
-                  harga = COALESCE(?, harga), 
-                  updated_at = CURRENT_TIMESTAMP 
-              WHERE id = ?
-            `).bind(status || null, rejectionReason || null, kategori || null, keteranganBarang || null, harga || null, id).run();
-          }
+          const cleanImageUrl = imageUrl !== undefined ? (imageUrl ? String(imageUrl).trim() : null) : undefined;
+          const cleanAdminAd = isAdminAd !== undefined ? (Number(isAdminAd) ? 1 : 0) : undefined;
+
+          await env.DB.prepare(`
+            UPDATE iklan_baris 
+            SET status = COALESCE(?, status), 
+                rejection_reason = COALESCE(?, rejection_reason), 
+                kategori = COALESCE(?, kategori), 
+                keterangan_barang = COALESCE(?, keterangan_barang), 
+                harga = COALESCE(?, harga), 
+                expires_at = COALESCE(?, expires_at),
+                image_url = COALESCE(?, image_url),
+                is_admin_ad = COALESCE(?, is_admin_ad),
+                updated_at = CURRENT_TIMESTAMP 
+            WHERE id = ?
+          `).bind(
+            status || null,
+            rejectionReason || null,
+            kategori || null,
+            keteranganBarang !== undefined ? String(keteranganBarang) : null,
+            harga || null,
+            cleanExpiresAt !== undefined ? cleanExpiresAt : null,
+            cleanImageUrl !== undefined ? cleanImageUrl : null,
+            cleanAdminAd !== undefined ? cleanAdminAd : null,
+            id
+          ).run();
+        }
         } else {
           const item = (cfMockIklanBaris as any[]).find((x: any) => String(x.id) === String(id));
           if (item) {

@@ -58,6 +58,7 @@ export default function AdminIklanBarisManager() {
   const [editPhone, setEditPhone] = useState('');
   const [editStatus, setEditStatus] = useState<'pending' | 'published' | 'rejected' | 'expired'>('published');
   const [editExpiresAt, setEditExpiresAt] = useState('');
+  const [editImageUrl, setEditImageUrl] = useState('');
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
 
@@ -93,6 +94,7 @@ export default function AdminIklanBarisManager() {
     setEditPhone(item.phone);
     setEditStatus(item.status);
     setEditExpiresAt(item.expiresAt ? (item.expiresAt.length >= 10 ? item.expiresAt.substring(0, 10) : item.expiresAt) : '');
+    setEditImageUrl(item.imageUrl || '');
     setMsg('');
   };
 
@@ -113,6 +115,8 @@ export default function AdminIklanBarisManager() {
           phone: editPhone,
           status: editStatus,
           expiresAt: editExpiresAt ? editExpiresAt : null,
+          imageUrl: editImageUrl ? editImageUrl.trim() : null,
+          isAdminAd: 1,
         }),
       });
 
@@ -279,6 +283,17 @@ export default function AdminIklanBarisManager() {
                 value={editKeteranganBarang}
                 onChange={(e) => setEditKeteranganBarang(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono leading-snug"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold mb-1">URL Gambar Eksternal (Khusus Admin - Otomatis Grayscale &amp; Diperkecil)</label>
+              <input
+                type="url"
+                placeholder="https://example.com/image.jpg"
+                value={editImageUrl}
+                onChange={(e) => setEditImageUrl(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs"
               />
             </div>
 
