@@ -268,41 +268,42 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
     const origin = typeof window !== 'undefined' ? window.location.origin : (siteConfig?.site_url || 'https://example.com');
     const pageUrl = `${origin}/iklan-baris?page=${currentPage}${selectedKategori !== 'Semua' ? `&kategori=${encodeURIComponent(selectedKategori)}` : ''}`;
 
+    // Ensure ads are deduplicated by id to strictly avoid duplicate ItemList entries in Google validator
+    const uniqueAds = Array.from(new Map<number, IklanBarisItem>(ads.map((item) => [item.id, item])).values());
+
     return {
       "@context": "https://schema.org",
-      "@graph": [
-        {
-          "@type": "WebPage",
-          "@id": `${pageUrl}#webpage`,
-          "url": pageUrl,
-          "name": `Iklan Baris Gratis ${selectedKategori !== 'Semua' ? `- Kategori ${selectedKategori}` : ''} - ${siteName}`,
-          "description": `Layanan portal iklan baris cetak & digital ${selectedKategori !== 'Semua' ? `kategori ${selectedKategori}` : 'terlengkap'}. Halaman ${currentPage} dari ${totalPages}.`,
-          "inLanguage": "id-ID"
-        },
-        {
-          "@type": "ItemList",
-          "@id": `${pageUrl}#classified-ads-list`,
-          "name": `Daftar Iklan Baris ${selectedKategori} (Halaman ${currentPage})`,
-          "numberOfItems": ads.length,
-          "itemListElement": ads.map((item, index) => {
-            return {
-              "@type": "ListItem",
-              "position": index + 1,
-              "name": `${item.kategori} - ${item.nama} (#${item.id}): ${item.keteranganBarang.substring(0, 60)}...`,
-              "description": item.keteranganBarang,
-              "url": `${pageUrl}#ad-${item.id}`
-            };
-          })
-        }
-      ]
+      "@type": "ItemList",
+      "@id": `${pageUrl}#classified-ads-list`,
+      "name": `Daftar Iklan Baris ${selectedKategori} (Halaman ${currentPage})`,
+      "numberOfItems": uniqueAds.length,
+      "itemListElement": uniqueAds.map((item, index) => {
+        const cleanDesc = (item.keteranganBarang || '').trim();
+        return {
+          "@type": "ListItem",
+          "position": index + 1,
+          "name": `${item.kategori} - ${item.nama} (#${item.id})`,
+          "url": `${pageUrl}#ad-${item.id}`,
+          "description": cleanDesc
+        };
+      })
     };
-  }, [ads, currentPage, totalPages, selectedKategori, siteName]);
+  }, [ads, currentPage, selectedKategori, siteConfig]);
 
-  // Inject script tag into document.head and clean up stale homepage ItemList schema to avoid "Multiple ListItem elements defined on page" error
+  // Clean up JSON-LD on unmount
+  useEffect(() => {
+    return () => {
+      const el = document.getElementById('jsonld-iklanbaris-schema');
+      if (el) el.remove();
+    };
+  }, []);
+
+  // Stable single script tag injection: update textContent in-place to prevent multiple node extractions by Googlebot
   useEffect(() => {
     if (typeof document === 'undefined') return;
+    if (ads.length === 0) return; // Wait until classified ads data has been fetched
 
-    // Remove stale homepage ItemList script
+    // Remove any stale homepage ItemList script
     const staleItemList = document.getElementById('jsonld-itemlist-schema');
     if (staleItemList) staleItemList.remove();
 
@@ -314,12 +315,7 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
       document.head.appendChild(script);
     }
     script.textContent = JSON.stringify(jsonLdData, null, 2);
-
-    return () => {
-      const el = document.getElementById('jsonld-iklanbaris-schema');
-      if (el) el.remove();
-    };
-  }, [jsonLdData]);
+  }, [jsonLdData, ads.length]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -764,6 +760,7 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
               return (
                 <div
                   key={item.id}
+                  id={`ad-${item.id}`}
                   className="bg-stone-100 dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 rounded-xl p-4 shadow-sm hover:border-amber-500 transition-colors flex flex-col justify-between"
                 >
                   <div>
