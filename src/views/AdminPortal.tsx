@@ -625,7 +625,7 @@ export default function AdminPortal({
   const [cfgClassifiedEdition, setCfgClassifiedEdition] = useState(siteConfig?.classified_edition || '1988/2026');
   const [cfgClassifiedPriceTag, setCfgClassifiedPriceTag] = useState(siteConfig?.classified_price_tag || 'HARGA ECERAN RP 500,-');
   const [cfgClassifiedPhone, setCfgClassifiedPhone] = useState(siteConfig?.classified_phone || '(021) 7654321');
-  const [cfgClassifiedCategories, setCfgClassifiedCategories] = useState(siteConfig?.classified_categories || 'Pola Asuh, Tumbuh Kembang, Kesehatan & Gizi, Balita, Psikologi Ibu, Umum');
+  const [cfgClassifiedCategories, setCfgClassifiedCategories] = useState(siteConfig?.classified_categories || 'Aksesoris, Aplikasi, Asuransi, Bimbel, Buku, Daycare, Jasa, Kebersihan, Kehamilan, Keluarga, Kesehatan, Keuangan, Klinik, Konsultasi, Kursus, Les Privat, Lifestyle, Lowongan Kerja, Mainan, Mencari Kerja, Menyusui, Nutrisi Gizi, Obat, Pakaian, Pasca Kelahiran, Pendidikan, Pengasuh, Peralatan, Perawatan, Perlengkapan, Sekolah, Sepatu, Seminar, Training, Transport, Wisata, Pola Asuh, Balita, Psikologi Ibu, Tumbuh Kembang, Umum');
 
   // 9. Knowledge Base Model States
   const [cfgKbBadgeText, setCfgKbBadgeText] = useState(siteConfig?.kb_badge_text || 'Ensiklopedia & Pusat Bantuan');
@@ -899,7 +899,7 @@ export default function AdminPortal({
       setCfgClassifiedEdition(siteConfig.classified_edition || '1988/2026');
       setCfgClassifiedPriceTag(siteConfig.classified_price_tag || 'HARGA ECERAN RP 500,-');
       setCfgClassifiedPhone(siteConfig.classified_phone || '(021) 7654321');
-      setCfgClassifiedCategories(siteConfig.classified_categories || 'Pola Asuh, Tumbuh Kembang, Kesehatan & Gizi, Balita, Psikologi Ibu, Umum');
+      setCfgClassifiedCategories(siteConfig.classified_categories || 'Aksesoris, Aplikasi, Asuransi, Bimbel, Buku, Daycare, Jasa, Kebersihan, Kehamilan, Keluarga, Kesehatan, Keuangan, Klinik, Konsultasi, Kursus, Les Privat, Lifestyle, Lowongan Kerja, Mainan, Mencari Kerja, Menyusui, Nutrisi Gizi, Obat, Pakaian, Pasca Kelahiran, Pendidikan, Pengasuh, Peralatan, Perawatan, Perlengkapan, Sekolah, Sepatu, Seminar, Training, Transport, Wisata, Pola Asuh, Balita, Psikologi Ibu, Tumbuh Kembang, Umum');
 
       setCfgKbBadgeText(siteConfig.kb_badge_text || 'Ensiklopedia & Pusat Bantuan');
       setCfgKbTitle(siteConfig.kb_title || 'Bagaimana Kami Bisa Membantu Pengasuhan Anda?');

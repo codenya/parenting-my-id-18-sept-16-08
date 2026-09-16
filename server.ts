@@ -2108,7 +2108,7 @@ app.post('/api/iklan-baris', async (req, res) => {
 
     // 5. Anti-XSS & URL to Plain Text Sanitization
     const cleanKategori = cleanTextAndStripUrls(String(kategori));
-    let allowedCategories = ['Pola Asuh', 'Tumbuh Kembang', 'Kesehatan & Gizi', 'Balita', 'Psikologi Ibu', 'Umum'];
+    let allowedCategories = ['Aksesoris', 'Aplikasi', 'Asuransi', 'Bimbel', 'Buku', 'Daycare', 'Jasa', 'Kebersihan', 'Kehamilan', 'Keluarga', 'Kesehatan', 'Keuangan', 'Klinik', 'Konsultasi', 'Kursus', 'Les Privat', 'Lifestyle', 'Lowongan Kerja', 'Mainan', 'Mencari Kerja', 'Menyusui', 'Nutrisi Gizi', 'Obat', 'Pakaian', 'Pasca Kelahiran', 'Pendidikan', 'Pengasuh', 'Peralatan', 'Perawatan', 'Perlengkapan', 'Sekolah', 'Sepatu', 'Seminar', 'Training', 'Transport', 'Wisata', 'Pola Asuh', 'Balita', 'Psikologi Ibu', 'Tumbuh Kembang', 'Umum'];
     try {
       const configPath = path.join(process.cwd(), 'public', 'site_config.json');
       if (fs.existsSync(configPath)) {
