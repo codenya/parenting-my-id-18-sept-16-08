@@ -40,6 +40,21 @@ export default function NewspaperClassifiedGrid({
 
   const [activePageIndex, setActivePageIndex] = useState(0);
 
+  const formatCount = (count: number): string => {
+    if (count > 999) return '> 1000';
+    return String(count);
+  };
+
+  const getCategoryCount = (name: string, fallback: number): number => {
+    if (categoryCounts[name] !== undefined) return categoryCounts[name];
+    if (categoryCounts[name.toUpperCase()] !== undefined) return categoryCounts[name.toUpperCase()];
+    const clean = name.trim().toLowerCase();
+    for (const [key, val] of Object.entries(categoryCounts)) {
+      if (key.trim().toLowerCase() === clean) return val;
+    }
+    return fallback;
+  };
+
   // 1. Convert Database Items (`dynamicAds`) into Unified Ad Blocks
   const allBlocks = useMemo(() => {
     const blocks: RenderedAdBlock[] = [];
@@ -246,12 +261,12 @@ export default function NewspaperClassifiedGrid({
         {(Object.entries(categoryGroups) as Array<[string, RenderedAdBlock[]]>).map(([catName, blocks]) => (
           <div key={catName} className="kategori-block newspaper-block mb-4">
             
-            {/* CATEGORY HEADER TITLE WITH AD COUNT INDICATOR (SEPARATED BY - WITHOUT UNIT) */}
+            {/* CATEGORY HEADER TITLE WITH AD COUNT INDICATOR (SEPARATED BY : WITHOUT UNIT) */}
             <h3 
               onClick={() => onSelectCategory && onSelectCategory(catName)}
               className="kategori-title cursor-pointer hover:bg-gray-800 transition-colors block m-0"
             >
-              {catName} - {categoryCounts[catName] ?? categoryCounts[catName.toUpperCase()] ?? blocks.length}
+              {catName} : {formatCount(getCategoryCount(catName, blocks.length))}
             </h3>
 
             {/* AD ITEMS LIST IN THIS CATEGORY */}
