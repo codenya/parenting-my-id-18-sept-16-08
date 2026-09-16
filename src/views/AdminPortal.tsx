@@ -439,6 +439,34 @@ export default function AdminPortal({
   const [cfgAdBannerArticleEndEnable, setCfgAdBannerArticleEndEnable] = useState<boolean>(siteConfig?.ad_banner_article_end_enable ?? false);
   const [cfgAdBannerArticleEndCode, setCfgAdBannerArticleEndCode] = useState<string>(siteConfig?.ad_banner_article_end_code || DEFAULT_SITE_CONFIG.ad_banner_article_end_code || '');
 
+  // 8 GUI Manageable Component States
+  const [cfgEnableTopAnnouncement, setCfgEnableTopAnnouncement] = useState<boolean>(siteConfig?.enable_top_announcement ?? false);
+  const [cfgTopAnnouncementText, setCfgTopAnnouncementText] = useState<string>(siteConfig?.top_announcement_text || DEFAULT_SITE_CONFIG.top_announcement_text || '');
+  const [cfgTopAnnouncementBg, setCfgTopAnnouncementBg] = useState<string>(siteConfig?.top_announcement_bg || 'bg-rose-600');
+  const [cfgTopAnnouncementTextColor, setCfgTopAnnouncementTextColor] = useState<string>(siteConfig?.top_announcement_text_color || 'text-white');
+
+  const [cfgEnableWhatsappWidget, setCfgEnableWhatsappWidget] = useState<boolean>(siteConfig?.enable_whatsapp_widget ?? siteConfig?.wa_widget_enabled ?? true);
+  const [cfgWhatsappNumber, setCfgWhatsappNumber] = useState<string>(siteConfig?.whatsapp_number || '6281234567890');
+  const [cfgWhatsappDefaultMessage, setCfgWhatsappDefaultMessage] = useState<string>(siteConfig?.whatsapp_default_message || 'Halo Redaksi, saya ingin bertanya seputar...');
+  const [cfgWhatsappPosition, setCfgWhatsappPosition] = useState<'bottom-right' | 'bottom-left' | 'bottom-center'>(siteConfig?.whatsapp_position || siteConfig?.wa_position || 'bottom-right');
+
+  const [cfgEnableCustomAdSlots, setCfgEnableCustomAdSlots] = useState<boolean>(siteConfig?.enable_custom_ad_slots ?? false);
+  const [cfgCustomAdLeaderboardHtml, setCfgCustomAdLeaderboardHtml] = useState<string>(siteConfig?.custom_ad_leaderboard_html || '');
+  const [cfgCustomAdRectangleHtml, setCfgCustomAdRectangleHtml] = useState<string>(siteConfig?.custom_ad_rectangle_html || '');
+  const [cfgCustomAdSlotSize, setCfgCustomAdSlotSize] = useState<'728x90' | '300x250' | 'fluid'>(siteConfig?.custom_ad_slot_size || '728x90');
+
+  const [cfgEnableHabitSimulator, setCfgEnableHabitSimulator] = useState<boolean>(siteConfig?.enable_habit_simulator ?? true);
+  const [cfgHabitSimulatorTitle, setCfgHabitSimulatorTitle] = useState<string>(siteConfig?.habit_simulator_title || 'Simulasi Kebiasaan Positif');
+  const [cfgHabitSimulatorSubtitle, setCfgHabitSimulatorSubtitle] = useState<string>(siteConfig?.habit_simulator_subtitle || 'Ukur kebiasaan pengasuhan anak sehari-hari');
+
+  const [cfgEnableInteractiveQuiz, setCfgEnableInteractiveQuiz] = useState<boolean>(siteConfig?.enable_interactive_quiz ?? true);
+  const [cfgQuizBuilderTitle, setCfgQuizBuilderTitle] = useState<string>(siteConfig?.quiz_builder_title || 'Kuis Edukasi & Psikologi Anak');
+
+  const [cfgEnableInteractiveTimeline, setCfgEnableInteractiveTimeline] = useState<boolean>(siteConfig?.enable_interactive_timeline ?? true);
+
+  const [cfgCusdisAppId, setCfgCusdisAppId] = useState<string>(siteConfig?.cusdis_app_id || '');
+  const [cfgCusdisHost, setCfgCusdisHost] = useState<string>(siteConfig?.cusdis_host || 'https://cusdis.com');
+
   const [cfgSiteTagline, setCfgSiteTagline] = useState(siteConfig?.site_tagline || 'Edukasi & Pengasuhan Anak Modern');
   const [cfgSiteDescription, setCfgSiteDescription] = useState(siteConfig?.site_description || 'Portal informasi dan panduan pengasuhan anak modern.');
   const [cfgSiteLogoUrl, setCfgSiteLogoUrl] = useState(siteConfig?.site_logo_url || '');
@@ -727,6 +755,33 @@ export default function AdminPortal({
       setCfgAdsenseArticleBottom(siteConfig.adsense_article_bottom || '');
       setCfgAdsenseSidebar(siteConfig.adsense_sidebar || '');
       setCfgAdsenseStickyFooter(siteConfig.adsense_sticky_footer || '');
+
+      setCfgEnableTopAnnouncement(siteConfig.enable_top_announcement ?? false);
+      setCfgTopAnnouncementText(siteConfig.top_announcement_text ?? DEFAULT_SITE_CONFIG.top_announcement_text ?? '');
+      setCfgTopAnnouncementBg(siteConfig.top_announcement_bg || 'bg-rose-600');
+      setCfgTopAnnouncementTextColor(siteConfig.top_announcement_text_color || 'text-white');
+
+      setCfgEnableWhatsappWidget(siteConfig.enable_whatsapp_widget ?? siteConfig.wa_widget_enabled ?? true);
+      setCfgWhatsappNumber(siteConfig.whatsapp_number || '6281234567890');
+      setCfgWhatsappDefaultMessage(siteConfig.whatsapp_default_message || 'Halo Redaksi, saya ingin bertanya seputar...');
+      setCfgWhatsappPosition(siteConfig.whatsapp_position || siteConfig.wa_position || 'bottom-right');
+
+      setCfgEnableCustomAdSlots(siteConfig.enable_custom_ad_slots ?? false);
+      setCfgCustomAdLeaderboardHtml(siteConfig.custom_ad_leaderboard_html || '');
+      setCfgCustomAdRectangleHtml(siteConfig.custom_ad_rectangle_html || '');
+      setCfgCustomAdSlotSize(siteConfig.custom_ad_slot_size || '728x90');
+
+      setCfgEnableHabitSimulator(siteConfig.enable_habit_simulator ?? true);
+      setCfgHabitSimulatorTitle(siteConfig.habit_simulator_title || 'Simulasi Kebiasaan Positif');
+      setCfgHabitSimulatorSubtitle(siteConfig.habit_simulator_subtitle || 'Ukur kebiasaan pengasuhan anak sehari-hari');
+
+      setCfgEnableInteractiveQuiz(siteConfig.enable_interactive_quiz ?? true);
+      setCfgQuizBuilderTitle(siteConfig.quiz_builder_title || 'Kuis Edukasi & Psikologi Anak');
+
+      setCfgEnableInteractiveTimeline(siteConfig.enable_interactive_timeline ?? true);
+
+      setCfgCusdisAppId(siteConfig.cusdis_app_id || '');
+      setCfgCusdisHost(siteConfig.cusdis_host || 'https://cusdis.com');
 
       setCfgSeoMetaTitle(siteConfig.seo_meta_title ?? DEFAULT_SITE_CONFIG.seo_meta_title ?? '');
       setCfgSeoMetaDesc(siteConfig.seo_meta_description ?? DEFAULT_SITE_CONFIG.seo_meta_description ?? '');
@@ -1056,6 +1111,33 @@ export default function AdminPortal({
         ad_banner_article_end_enable: cfgAdBannerArticleEndEnable,
         ad_banner_article_end_code: cfgAdBannerArticleEndCode,
 
+        enable_top_announcement: cfgEnableTopAnnouncement,
+        top_announcement_text: cfgTopAnnouncementText,
+        top_announcement_bg: cfgTopAnnouncementBg,
+        top_announcement_text_color: cfgTopAnnouncementTextColor,
+
+        enable_whatsapp_widget: cfgEnableWhatsappWidget,
+        whatsapp_number: cfgWhatsappNumber,
+        whatsapp_default_message: cfgWhatsappDefaultMessage,
+        whatsapp_position: cfgWhatsappPosition,
+
+        enable_custom_ad_slots: cfgEnableCustomAdSlots,
+        custom_ad_leaderboard_html: cfgCustomAdLeaderboardHtml,
+        custom_ad_rectangle_html: cfgCustomAdRectangleHtml,
+        custom_ad_slot_size: cfgCustomAdSlotSize,
+
+        enable_habit_simulator: cfgEnableHabitSimulator,
+        habit_simulator_title: cfgHabitSimulatorTitle,
+        habit_simulator_subtitle: cfgHabitSimulatorSubtitle,
+
+        enable_interactive_quiz: cfgEnableInteractiveQuiz,
+        quiz_builder_title: cfgQuizBuilderTitle,
+
+        enable_interactive_timeline: cfgEnableInteractiveTimeline,
+
+        cusdis_app_id: cfgCusdisAppId,
+        cusdis_host: cfgCusdisHost,
+
         // 10 Model Display Values
         event_badge_text: cfgEventBadgeText,
         event_date_location: cfgEventDateLocation,
@@ -1298,6 +1380,33 @@ export default function AdminPortal({
         ad_banner_article_start_code: cfgAdBannerArticleStartCode,
         ad_banner_article_end_enable: cfgAdBannerArticleEndEnable,
         ad_banner_article_end_code: cfgAdBannerArticleEndCode,
+
+        enable_top_announcement: cfgEnableTopAnnouncement,
+        top_announcement_text: cfgTopAnnouncementText,
+        top_announcement_bg: cfgTopAnnouncementBg,
+        top_announcement_text_color: cfgTopAnnouncementTextColor,
+
+        enable_whatsapp_widget: cfgEnableWhatsappWidget,
+        whatsapp_number: cfgWhatsappNumber,
+        whatsapp_default_message: cfgWhatsappDefaultMessage,
+        whatsapp_position: cfgWhatsappPosition,
+
+        enable_custom_ad_slots: cfgEnableCustomAdSlots,
+        custom_ad_leaderboard_html: cfgCustomAdLeaderboardHtml,
+        custom_ad_rectangle_html: cfgCustomAdRectangleHtml,
+        custom_ad_slot_size: cfgCustomAdSlotSize,
+
+        enable_habit_simulator: cfgEnableHabitSimulator,
+        habit_simulator_title: cfgHabitSimulatorTitle,
+        habit_simulator_subtitle: cfgHabitSimulatorSubtitle,
+
+        enable_interactive_quiz: cfgEnableInteractiveQuiz,
+        quiz_builder_title: cfgQuizBuilderTitle,
+
+        enable_interactive_timeline: cfgEnableInteractiveTimeline,
+
+        cusdis_app_id: cfgCusdisAppId,
+        cusdis_host: cfgCusdisHost,
 
         turnstile_site_key: cfgTurnstileSiteKey,
 

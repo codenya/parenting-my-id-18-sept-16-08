@@ -153,6 +153,34 @@ export interface SiteConfig {
   turnstile_site_key?: string;
   enable_comment_turnstile?: boolean;
 
+  // 8 GUI Manageable Component Configs
+  enable_top_announcement?: boolean;
+  top_announcement_text?: string;
+  top_announcement_bg?: string;
+  top_announcement_text_color?: string;
+
+  enable_whatsapp_widget?: boolean;
+  whatsapp_number?: string;
+  whatsapp_default_message?: string;
+  whatsapp_position?: 'bottom-right' | 'bottom-left' | 'bottom-center';
+
+  enable_custom_ad_slots?: boolean;
+  custom_ad_leaderboard_html?: string;
+  custom_ad_rectangle_html?: string;
+  custom_ad_slot_size?: '728x90' | '300x250' | 'fluid';
+
+  enable_habit_simulator?: boolean;
+  habit_simulator_title?: string;
+  habit_simulator_subtitle?: string;
+
+  enable_interactive_quiz?: boolean;
+  quiz_builder_title?: string;
+
+  enable_interactive_timeline?: boolean;
+
+  cusdis_app_id?: string;
+  cusdis_host?: string;
+
   // Performance Metric Box (Customizable by Admin)
   show_performance_box?: boolean;
   show_tech_badges?: boolean;
