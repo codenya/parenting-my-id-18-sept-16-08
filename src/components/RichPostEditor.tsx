@@ -1385,12 +1385,12 @@ export default function RichPostEditor({
         </div>
 
         {/* SAVE & PUBLISH ROLE-BASED ACTION BUTTONS */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
           {/* Simpan Draf (Soft Slate/Gray) */}
           <button
             type="button"
             onClick={() => onPublishSubmit('draft')}
-            className="px-3.5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-200 text-xs font-bold transition-colors border border-slate-300/80 dark:border-slate-600 flex items-center gap-1.5 shrink-0"
+            className="w-full sm:w-auto justify-center px-3.5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-200 text-xs font-bold transition-colors border border-slate-300/80 dark:border-slate-600 flex items-center gap-1.5"
           >
             <FileText className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
             <span>Simpan Draf</span>
@@ -1401,7 +1401,7 @@ export default function RichPostEditor({
             <button
               type="button"
               onClick={() => onPublishSubmit('pending_approval')}
-              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5 shrink-0"
+              className="w-full sm:w-auto justify-center px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5"
             >
               <Send className="w-3.5 h-3.5" />
               <span>Kirim untuk Ditinjau 🚀</span>
@@ -1414,7 +1414,7 @@ export default function RichPostEditor({
               <button
                 type="button"
                 onClick={() => setShowRejectModal(true)}
-                className="px-3.5 py-2 rounded-xl bg-rose-950/40 text-rose-300 hover:bg-rose-900/60 text-xs font-bold transition-colors border border-rose-800/60 flex items-center gap-1.5 shrink-0"
+                className="w-full sm:w-auto justify-center px-3.5 py-2 rounded-xl bg-rose-950/40 text-rose-300 hover:bg-rose-900/60 text-xs font-bold transition-colors border border-rose-800/60 flex items-center gap-1.5"
               >
                 <XCircle className="w-3.5 h-3.5" />
                 <span>Tolak / Minta Revisi</span>
@@ -1422,7 +1422,7 @@ export default function RichPostEditor({
               <button
                 type="button"
                 onClick={() => onPublishSubmit('published')}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold hover:from-emerald-500 hover:to-teal-500 shadow-md transition-colors flex items-center gap-1.5 shrink-0"
+                className="w-full sm:w-auto justify-center px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold hover:from-emerald-500 hover:to-teal-500 shadow-md transition-colors flex items-center gap-1.5"
               >
                 <ThumbsUp className="w-3.5 h-3.5" />
                 <span>Setujui & Terbitkan ✅</span>
@@ -5100,8 +5100,8 @@ export default function RichPostEditor({
       </div>
 
       {/* BOTTOM ACTION BAR FOR CONVENIENT SAVING / PUBLISHING */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg">
+        <div className="flex items-center justify-between sm:justify-start gap-2">
           <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
             Status Artikel:
           </span>
@@ -5117,12 +5117,12 @@ export default function RichPostEditor({
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
           {/* Simpan Draf */}
           <button
             type="button"
             onClick={() => onPublishSubmit('draft')}
-            className="px-4 py-2.5 rounded-2xl bg-slate-200 hover:bg-slate-300 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-100 text-xs font-bold transition-colors flex items-center gap-2"
+            className="w-full sm:w-auto justify-center px-4 py-2.5 rounded-2xl bg-slate-200 hover:bg-slate-300 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-100 text-xs font-bold transition-colors flex items-center gap-2"
           >
             <FileText className="w-4 h-4 text-slate-500" />
             <span>Simpan Draf</span>
@@ -5133,7 +5133,7 @@ export default function RichPostEditor({
             <button
               type="button"
               onClick={() => onPublishSubmit('pending_approval')}
-              className="px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition-colors flex items-center gap-2"
+              className="w-full sm:w-auto justify-center px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition-colors flex items-center gap-2"
             >
               <Send className="w-4 h-4" />
               <span>Kirim untuk Ditinjau 🚀</span>
@@ -5146,7 +5146,7 @@ export default function RichPostEditor({
               <button
                 type="button"
                 onClick={() => setShowRejectModal(true)}
-                className="px-4 py-2.5 rounded-2xl bg-rose-950/40 text-rose-300 hover:bg-rose-900/60 text-xs font-bold border border-rose-800/60 flex items-center gap-2"
+                className="w-full sm:w-auto justify-center px-4 py-2.5 rounded-2xl bg-rose-950/40 text-rose-300 hover:bg-rose-900/60 text-xs font-bold border border-rose-800/60 flex items-center gap-2"
               >
                 <XCircle className="w-4 h-4" />
                 <span>Tolak / Minta Revisi</span>
@@ -5155,7 +5155,7 @@ export default function RichPostEditor({
               <button
                 type="button"
                 onClick={() => onPublishSubmit('published')}
-                className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-extrabold shadow-lg transition-colors flex items-center gap-2"
+                className="w-full sm:w-auto justify-center px-5 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-extrabold shadow-lg transition-colors flex items-center gap-2"
               >
                 <ThumbsUp className="w-4 h-4" />
                 <span>Setujui & Terbitkan ✅</span>
