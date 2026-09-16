@@ -57,7 +57,7 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
       'Balita',
       'Psikologi Ibu',
       'Tumbuh Kembang',
-      'Umum',
+      'Umum'
     ];
   }, [siteConfig?.classified_categories]);
     
