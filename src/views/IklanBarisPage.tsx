@@ -3,7 +3,6 @@ import { Tag, Send, CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Phone,
 import { IklanBarisItem, SiteConfig } from '../types';
 import TurnstileWidget from '../components/TurnstileWidget';
 import NewspaperClassifiedGrid from '../components/NewspaperClassifiedGrid';
-import { parseNumericPrice } from '../lib/priceUtils';
 
 interface IklanBarisPageProps {
   siteConfig?: SiteConfig;
@@ -286,58 +285,12 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
           "name": `Daftar Iklan Baris ${selectedKategori} (Halaman ${currentPage})`,
           "numberOfItems": ads.length,
           "itemListElement": ads.map((item, index) => {
-            const numericPrice = parseNumericPrice(item.harga);
             return {
               "@type": "ListItem",
               "position": index + 1,
-              "item": {
-                "@type": "Product",
-                "@id": `${origin}/iklan-baris#ad-${item.id}`,
-                "name": `${item.kategori}: ${item.keteranganBarang.substring(0, 70)}...`,
-                "description": item.keteranganBarang,
-                "category": item.kategori,
-                "aggregateRating": {
-                  "@type": "AggregateRating",
-                  "ratingValue": "5.0",
-                  "reviewCount": "1",
-                  "bestRating": "5",
-                  "worstRating": "1"
-                },
-                "review": [
-                  {
-                    "@type": "Review",
-                    "author": {
-                      "@type": "Person",
-                      "name": `Redaksi ${siteName}`
-                    },
-                    "datePublished": item.createdAt ? String(item.createdAt).substring(0, 10) : "2026-01-01",
-                    "reviewBody": "Iklan baris terverifikasi oleh tim Redaksi.",
-                    "reviewRating": {
-                      "@type": "Rating",
-                      "ratingValue": "5",
-                      "bestRating": "5"
-                    }
-                  }
-                ],
-                "offers": {
-                  "@type": "Offer",
-                  "price": String(numericPrice),
-                  "priceCurrency": "IDR",
-                  "priceValidUntil": "2030-12-31",
-                  "availability": "https://schema.org/InStock",
-                  "itemCondition": "https://schema.org/UsedCondition",
-                  "description": item.harga,
-                  "seller": {
-                    "@type": "Person",
-                    "name": item.nama,
-                    "telephone": item.phone,
-                    "address": {
-                      "@type": "PostalAddress",
-                      "addressLocality": item.kota
-                    }
-                  }
-                }
-              }
+              "name": `${item.kategori}: ${item.keteranganBarang.substring(0, 70)}...`,
+              "description": item.keteranganBarang,
+              "url": `${origin}/iklan-baris`
             };
           })
         }
