@@ -13,117 +13,88 @@ export interface IklanSeedItem {
   createdAt: string;
 }
 
+// Kategorisasi Iklan Baris yang diselaraskan dengan kategori resmi admin situs
 export const ALL_36_KATEGORI = [
-  'Aksesoris',
-  'Aplikasi',
-  'Asuransi',
-  'Bimbel',
-  'Buku',
-  'Daycare',
-  'Jasa',
-  'Kebersihan',
-  'Kehamilan',
-  'Keluarga',
-  'Kesehatan',
-  'Keuangan',
-  'Klinik',
-  'Konsultasi',
-  'Kursus',
-  'Les Privat',
-  'Lifestyle',
-  'Lowongan Kerja',
-  'Mainan',
-  'Mencari Kerja',
-  'Menyusui',
-  'Nutrisi',
-  'Obat',
-  'Pakaian',
-  'Pasca Kelahiran',
-  'Pendidikan',
-  'Pengasuh',
-  'Peralatan',
-  'Perawatan',
-  'Perlengkapan',
-  'Sekolah',
-  'Sepatu',
-  'Seminar',
-  'Training',
-  'Transport',
-  'Wisata',
+  'Pola Asuh',
+  'Tumbuh Kembang',
+  'Kesehatan & Gizi',
+  'Balita',
+  'Psikologi Ibu',
+  'Umum',
 ];
 
 const categoryTemplates: Record<string, { desc: string; harga: string; nama: string; kota: string; pekerjaan: string; phone: string }[]> = {
-  'Aksesoris': [
-    { desc: 'Pita & Jepit Rambut Anak Handmade Premium set 10 pcs warna pastel anti-slip.', harga: 'Rp 45.000', nama: 'Bunda Accessories', kota: 'Bandung', pekerjaan: 'Pengrajin', phone: '0812-1001-2001' },
-    { desc: 'Empeng Silicone Food Grade BPA Free + Clip Rantai Karakter Lucu.', harga: 'Rp 35.000', nama: 'Mama Ceria', kota: 'Jakarta Selatan', pekerjaan: 'Wiraswasta', phone: '0812-1001-2002' },
-    { desc: 'Topi Kupluk Rajut Bayi Warm Soft Velvet untuk Usia 0-2 Tahun.', harga: 'Rp 50.000', nama: 'Toko Perlengkapan', kota: 'Surabaya', pekerjaan: 'Pedagang', phone: '0812-1001-2003' },
-    { desc: 'Kacamata Hitam Anak Anti-UV UV400 Frame Lentur Tahan Banting.', harga: 'Rp 65.000', nama: 'Kacamata Kids', kota: 'Semarang', pekerjaan: 'Wiraswasta', phone: '0812-1001-2004' },
-    { desc: 'Kaos Kaki Bayi Boneka 3D Anti Slip Cotton Breathable Isi 3 Pasang.', harga: 'Rp 40.000', nama: 'Bunda Mitha', kota: 'Yogyakarta', pekerjaan: 'Ibu Rumah Tangga', phone: '0812-1001-2005' },
-    { desc: 'Bando Bunga Mutiara untuk Pesta Anak Usia 1-5 Tahun Handcrafted.', harga: 'Rp 30.000', nama: 'Crafty Mom', kota: 'Depok', pekerjaan: 'Pengrajin', phone: '0812-1001-2006' },
-    { desc: 'Kalung Amber Asli Baltic untuk Bayi Tumbuh Gigi Anti-Nyeri.', harga: 'Rp 180.000', nama: 'Amber Kids ID', kota: 'Tangerang', pekerjaan: 'Importir', phone: '0812-1001-2007' },
-    { desc: 'Sarung Tangan & Kaki Bayi Baru Lahir Bahan Katun Bambu Organik.', harga: 'Rp 28.000', nama: 'Baby Organic', kota: 'Bekasi', pekerjaan: 'Wiraswasta', phone: '0812-1001-2008' },
-    { desc: 'Anting Emas Anak Anti-Alergi Model Bunga Cantik Berat 0.5 Gram.', harga: 'Rp 450.000', nama: 'Toko Emas Ananda', kota: 'Malang', pekerjaan: 'Pedagang Emas', phone: '0812-1001-2009' },
-    { desc: 'Jam Tangan Anak Anti Air Digital Karakter Superhero & Princess.', harga: 'Rp 75.000', nama: 'Papa Gio', kota: 'Medan', pekerjaan: 'Karyawan', phone: '0812-1001-2010' },
+  'Pola Asuh': [
+    { desc: 'Konsultasi Privat Pola Asuh Anak & Manajemen Tantrum Bersama Psikolog Keluarga berpengalaman 10 tahun.', harga: 'Rp 150.000 / Sesi', nama: 'Dr. Ratna, M.Psi', kota: 'Jakarta Selatan', pekerjaan: 'Psikolog Anak', phone: '0812-1001-2001' },
+    { desc: 'Buku Panduan Gentle Parenting & Komunikasi Efektif Tanpa Bentak Hardcover Mulus.', harga: 'Rp 85.000', nama: 'Bunda Pustaka', kota: 'Bandung', pekerjaan: 'Penulis', phone: '0812-1001-2002' },
+    { desc: 'Webinar Series Pola Asuh Remaja & Gadget Management untuk Orang Tua Millennial.', harga: 'Rp 50.000', nama: 'EduParenting ID', kota: 'Surabaya', pekerjaan: 'Konsultan', phone: '0812-1001-2003' },
+    { desc: 'Kelas Online Disiplin Positif Anak Usia Dini Batch 15 Bersama Praktisi.', harga: 'Rp 120.000', nama: 'Mama Ceria', kota: 'Yogyakarta', pekerjaan: 'Trainer Parenting', phone: '0812-1001-2004' },
+    { desc: 'Flashcard Sibling Rivalry & Solusi Anak Suka Rebut Mainan.', harga: 'Rp 45.000', nama: 'Smart Family', kota: 'Depok', pekerjaan: 'Wiraswasta', phone: '0812-1001-2005' },
+    { desc: 'Pendampingan Home Visit Terapi Perilaku Anak Tantrum & Hiperaktif.', harga: 'Rp 250.000 / Kunjungan', nama: 'Kak Fajar, S.Psi', kota: 'Tangerang', pekerjaan: 'Terapis', phone: '0812-1001-2006' },
+    { desc: 'Jasa Konseling Keluarga Harmonis & Solusi Komunikasi Suami Istri.', harga: 'Rp 200.000', nama: 'Bina Keluarga Sejahtera', kota: 'Semarang', pekerjaan: 'Konselor', phone: '0812-1001-2007' },
+    { desc: 'Audiobook Dongeng Pengantar Tidur Pembentukan Karakter & Akhlak Mulia.', harga: 'Rp 35.000', nama: 'Dongeng Cilik', kota: 'Malang', pekerjaan: 'Creator', phone: '0812-1001-2008' },
+    { desc: 'Workshop Parenting Islami Mendidik Anak di Era Digital Interaktif.', harga: 'Rp 75.000', nama: 'Majelis Keluarga', kota: 'Bekasi', pekerjaan: 'Pengajar', phone: '0812-1001-2009' },
+    { desc: 'Konsultasi Privat Pemetaan Bakat & Minat Anak Berbasis Sidik Jari.', harga: 'Rp 300.000', nama: 'Biolink Kids', kota: 'Bogor', pekerjaan: 'Konsultan', phone: '0812-1001-2010' },
   ],
-  'Aplikasi': [
-    { desc: 'Aplikasi Monitoring Tumbuh Kembang Anak & Jadwal Imunisasi Edukasi Parenting.', harga: 'Gratis Download', nama: 'Tim Dev ParentingApp', kota: 'Jakarta Pusat', pekerjaan: 'Developer', phone: '0813-2002-3001' },
-    { desc: 'Langganan Premium App Belajar Baca Calistung Interaktif Anak Usia 3-7 Tahun.', harga: 'Rp 49.000 / Bln', nama: 'EduApp Indonesia', kota: 'Bandung', pekerjaan: 'StartUp Edukasi', phone: '0813-2002-3002' },
-    { desc: 'Aplikasi Penghemat Anggaran Rumah Tangga & Tabungan Pendidikan Keluarga.', harga: 'Rp 29.000 / Thn', nama: 'Finansial Keluarga', kota: 'Surabaya', pekerjaan: 'Konsultan', phone: '0813-2002-3003' },
-    { desc: 'App Dongeng Sebelum Tidur Suara Narator Profesional & Musik Relaksasi.', harga: 'Rp 19.000 / Bln', nama: 'Kisah Cilik App', kota: 'Yogyakarta', pekerjaan: 'Content Creator', phone: '0813-2002-3004' },
-    { desc: 'Aplikasi Jurnal MPASI & Resep Masakan Anak Bebas GTM Lengkap Gizi.', harga: 'Gratis', nama: 'NutriKid App', kota: 'Depok', pekerjaan: 'Nutrisionis', phone: '0813-2002-3005' },
-    { desc: 'App Pembatas Screen Time Anak & Filter Konten Aman untuk HP / Tablet.', harga: 'Rp 39.000 / Bln', nama: 'SafeKids Security', kota: 'Jakarta Selatan', pekerjaan: 'IT Security', phone: '0813-2002-3006' },
-    { desc: 'Aplikasi Pelacak Lokasi GPS Anak Realtime Safe Zone Alert via Smartwatch.', harga: 'Rp 150.000 / Thn', nama: 'KidTracker ID', kota: 'Tangerang', pekerjaan: 'Teknisi', phone: '0813-2002-3007' },
-    { desc: 'App Flashcard Suara 3 Bahasa (Indonesia, Inggris, Mandarin) Balita.', harga: 'Rp 25.000', nama: 'Belajar 3Bahasa', kota: 'Semarang', pekerjaan: 'Pengajar', phone: '0813-2002-3008' },
-    { desc: 'Software Manajemen Daycare & Laporan Harian Orang Tua Realtime.', harga: 'Rp 299.000 / Bln', nama: 'DaycareManager', kota: 'Bogor', pekerjaan: 'Software House', phone: '0813-2002-3009' },
-    { desc: 'App Musik Meditasi & Suara White Noise untuk Tidur Nyenyak Bayi.', harga: 'Rp 15.000', nama: 'Sleepy Baby App', kota: 'Solo', pekerjaan: 'Audio Engineer', phone: '0813-2002-3010' },
+  'Tumbuh Kembang': [
+    { desc: 'Matras Sensory Play & Water Splash Mat Waterproof Stimulasi Motorik Bayi.', harga: 'Rp 125.000', nama: 'Sensory Craft', kota: 'Jakarta Pusat', pekerjaan: 'Pengrajin', phone: '0813-2002-3001' },
+    { desc: 'Alat Tes Milestone & Grafik Tumbuh Kembang Anak Standar WHO Lengkap.', harga: 'Rp 95.000', nama: 'Klinik Anak Sehat', kota: 'Bandung', pekerjaan: 'Bidan', phone: '0813-2002-3002' },
+    { desc: 'Mainan Montessori Kayu Natural Wooden Peg Doll & Sorting Shapes.', harga: 'Rp 140.000', nama: 'Woody Toys ID', kota: 'Surabaya', pekerjaan: 'Craftsman', phone: '0813-2002-3003' },
+    { desc: 'Jasa Stimulasi Fisioterapi Tumbuh Kembang Bayi Terlambat Jalan / Duduk.', harga: 'Rp 250.000', nama: 'Bidan Maya, S.Tr.Keb', kota: 'Yogyakarta', pekerjaan: 'Bidan Senior', phone: '0813-2002-3004' },
+    { desc: 'Paket Mainan Edukasi Aktivitas Motorik Halus Anak Usia 1-3 Tahun.', harga: 'Rp 175.000', nama: 'ToyBox Cerdas', kota: 'Depok', pekerjaan: 'Wiraswasta', phone: '0813-2002-3005' },
+    { desc: 'Baby Walker Roda Kayu Anti O Dilengkapi Rem Pengaman Stabilitas.', harga: 'Rp 220.000', nama: 'Baby Gear Store', kota: 'Tangerang', pekerjaan: 'Pedagang', phone: '0813-2002-3006' },
+    { desc: 'Buku Aktivitas Sensori Quiet Book Kain Flanel Handmade Anti Robek.', harga: 'Rp 65.000', nama: 'Bunda Mitha', kota: 'Semarang', pekerjaan: 'Ibu Rumah Tangga', phone: '0813-2002-3007' },
+    { desc: 'Konsultasi Nutrisi & Stimulasi Motorik Kasar Anak Bersama Dokter Spesialis.', harga: 'Rp 350.000', nama: 'Klinik Pediatrik', kota: 'Malang', pekerjaan: 'Dokter Anak', phone: '0813-2002-3008' },
+    { desc: 'Kartu Flashcard Pintar Pengenalan Huruf, Angka & Hewan Suara 3 Bahasa.', harga: 'Rp 45.000', nama: 'Smart Flashcard', kota: 'Bekasi', pekerjaan: 'Penerbit', phone: '0813-2002-3009' },
+    { desc: 'Playmat Puzzles Foam Mat Alas Lantai Anti Benturan Tebal 2cm.', harga: 'Rp 180.000', nama: 'Foam Mat Indonesia', kota: 'Medan', pekerjaan: 'Distributor', phone: '0813-2002-3010' },
   ],
-  'Asuransi': [
-    { desc: 'Asuransi Pendidikan Anak Syariah Proteksi Dana Sekolah hingga Perguruan Tinggi.', harga: 'Premi Rp 500rb/Bln', nama: 'Agen Asuransi Syariah', kota: 'Jakarta Selatan', pekerjaan: 'Financial Planner', phone: '0814-3003-4001' },
-    { desc: 'Asuransi Kesehatan Keluarga Rawat Inap & Rawat Jalan Kamar VIP Bebas Cashless.', harga: 'Premi Rp 800rb/Bln', nama: 'Bunda Asuransi', kota: 'Surabaya', pekerjaan: 'Agen Asuransi', phone: '0814-3003-4002' },
-    { desc: 'Asuransi Jiwa Proteksi Pencari Nafkah Utama Hadiah Masa Depan Anak.', harga: 'Premi Rp 350rb/Bln', nama: 'Papa Proteksi', kota: 'Bandung', pekerjaan: 'Konsultan', phone: '0814-3003-4003' },
-    { desc: 'Asuransi Melahirkan & Newborn Care Cover Komplikasi & Perawatan Nicu.', harga: 'Premi Rp 600rb/Bln', nama: 'Sahabat Bunda', kota: 'Tangerang', pekerjaan: 'Agen Asuransi', phone: '0814-3003-4004' },
-    { desc: 'Asuransi Kecelakaan Diri Anak Sekolah & Activity Cover 24 Jam Full.', harga: 'Premi Rp 150rb/Thn', nama: 'SafeKid Insure', kota: 'Semarang', pekerjaan: 'Wiraswasta', phone: '0814-3003-4005' },
-    { desc: 'Asuransi Unit Link Edukasi Investasi Dana Kampus Anak Bebas Pajak.', harga: 'Premi Rp 1.000.000/Bln', nama: 'Konsultan Finansial', kota: 'Medan', pekerjaan: 'Perencana Keuangan', phone: '0814-3003-4006' },
-    { desc: 'Asuransi Rawat Jalan Pediatrik Dokter Anak & Spesialis Tanpa Antre.', harga: 'Premi Rp 400rb/Bln', nama: 'Klinik Family Insure', kota: 'Yogyakarta', pekerjaan: 'Agen Resmi', phone: '0814-3003-4007' },
-    { desc: 'Asuransi Penyakit Kritis Anak Cover 50 Jenis Penyakit Berat.', harga: 'Premi Rp 300rb/Bln', nama: 'Pilihan Cerdas', kota: 'Bekasi', pekerjaan: 'Financial Consultant', phone: '0814-3003-4008' },
-    { desc: 'Asuransi Perjalanan Liburan Keluarga Cover Pembatalan & Koper Hilang.', harga: 'Premi Rp 99rb/Trip', nama: 'TravelSafe ID', kota: 'Denpasar', pekerjaan: 'Agen Travel', phone: '0814-3003-4009' },
-    { desc: 'Asuransi Gigi & Mata Anak Cover Perawatan Kacamata & Tambal Gigi.', harga: 'Premi Rp 250rb/Bln', nama: 'Sehat Ceria', kota: 'Malang', pekerjaan: 'Agen Asuransi', phone: '0814-3003-4010' },
+  'Kesehatan & Gizi': [
+    { desc: 'Paket Konsultasi Ahli Gizi & Penyusunan Menu MPASI Anti GTM Berbasis Berat Badan.', harga: 'Rp 100.000', nama: 'NutriKid Center', kota: 'Jakarta Selatan', pekerjaan: 'Nutrisionis', phone: '0814-3003-4001' },
+    { desc: 'Vitamin D3 & Omega 3 Drops Asli Impor untuk Daya Tahan Tubuh & Otak Anak.', harga: 'Rp 210.000', nama: 'Vitamin Sehat Anak', kota: 'Surabaya', pekerjaan: 'Apoteker', phone: '0814-3003-4002' },
+    { desc: 'Kaldu Jamur & Ayam Organik Bubuk Tanpa MSG Aman untuk MPASI 6 Bulan+.', harga: 'Rp 45.000', nama: 'Kaldu Alami Mama', kota: 'Bandung', pekerjaan: 'Wiraswasta', phone: '0814-3003-4003' },
+    { desc: 'Buku Resep MPASI Anti Stunting & Menu Seimbang Keluarga Lengkap.', harga: 'Rp 75.000', nama: 'Dapur Sehat Bunda', kota: 'Yogyakarta',_pekerjaan: 'Chef / Penulis', phone: '0814-3003-4004' },
+    { desc: 'Madu Multivitamin Anak Peningkat Nafsu Makan & Imun Alami Propolis.', harga: 'Rp 90.000', nama: 'Madu Anak Pintar', kota: 'Semarang',_pekerjaan: 'Herbalis', phone: '0814-3003-4005' },
+    { desc: 'Termometer Infrared Digital Ear & Forehead Akurat Medis Garansi 3 Tahun.', harga: 'Rp 160.000', nama: 'Alat Kesehatanku', kota: 'Depok',_pekerjaan: 'Distributor', phone: '0814-3003-4006' },
+    { desc: 'Jasa Vaksinasi Anak ke Rumah (Homecare Vaccine Service) Dokter & Perawat.', harga: 'Rp 150.000 Jasa', nama: 'Homecare Medic', kota: 'Tangerang Selatan',_pekerjaan: 'Perawat Medis', phone: '0814-3003-4007' },
+    { desc: 'Biskuit MPASI Organik Bebas Gluten & Pengawet Rasa Buah Alami.', harga: 'Rp 35.000', nama: 'Organic Baby Food', kota: 'Bogor',_pekerjaan: 'Produsen', phone: '0814-3003-4008' },
+    { desc: 'Milk Warmer & Sterilizer Botol Susu Elektrik 3 in 1 Multifungsi.', harga: 'Rp 195.000', nama: 'Baby Care Store', kota: 'Malang',_pekerjaan: 'Pedagang', phone: '0814-3003-4009' },
+    { desc: 'Teh Herbal Alami Melancarkan ASI & Booster Laktasi Daun Katuk.', harga: 'Rp 50.000',_nama: 'Booster ASI Asli', kota: 'Bekasi',_pekerjaan: 'Herbalis', phone: '0814-3003-4010' },
   ],
-  'Bimbel': [
-    { desc: 'Bimbel Calistung (Baca Tulis Hitung) Balita Usia 4-6 Tahun Metode Fun Learning.', harga: 'Rp 250.000 / Bln', nama: 'Bimbel Ceria Balita', kota: 'Depok', pekerjaan: 'Pengajar PAUD', phone: '0815-4004-5001' },
-    { desc: 'Bimbel Matematika & Logika Metode Kumon / Sempoa Anak SD Kelas 1-6.', harga: 'Rp 350.000 / Bln', nama: 'Sempoa Genius', kota: 'Jakarta Timur', pekerjaan: 'Tutor Matematika', phone: '0815-4004-5002' },
-    { desc: 'Bimbel Sains Eksperimen & Coding Cilik Scratch / Python Kids.', harga: 'Rp 450.000 / Bln', nama: 'RoboKid Academy', kota: 'Bandung', pekerjaan: 'Instruktur IT', phone: '0815-4004-5003' },
-    { desc: 'Bimbel Persiapan Masuk SD Favorit Tes Kesiapan Sekolah & Karakter.', harga: 'Rp 300.000 / Bln', nama: 'Kancil Edukasi', kota: 'Surabaya', pekerjaan: 'Psikolog Pendidikan', phone: '0815-4004-5004' },
-    { desc: 'Bimbel Bahasa Inggris Cambridge Native Speaker Kids Class.', harga: 'Rp 500.000 / Bln', nama: 'English First Kids', kota: 'Tangerang Selatan', pekerjaan: 'Guru Bahasa', phone: '0815-4004-5005' },
-    { desc: 'Bimbel Menggambar & Mewarnai Gradasi Crayon / Cat Air Anak.', harga: 'Rp 200.000 / Bln', nama: 'Sanggar Melukis Cilik', kota: 'Yogyakarta', pekerjaan: 'Pelukis', phone: '0815-4004-5006' },
-    { desc: 'Bimbel Calistung Online via Zoom Interaktif Modul & Kit Dikirim ke Rumah.', harga: 'Rp 180.000 / Bln', nama: 'SmartKids Online', kota: 'Bekasi', pekerjaan: 'Tutor Online', phone: '0815-4004-5007' },
-    { desc: 'Bimbel Tahfidz & Mengaji Al-Qur\'an Metode Ummi / Iqro Cepat Fasih.', harga: 'Rp 220.000 / Bln', nama: 'Rumah Tahfidz Cilik', kota: 'Bogor', pekerjaan: 'Ustazah', phone: '0815-4004-5008' },
-    { desc: 'Bimbel Aritmatika Jari Jariatmatika Cepat Hitung Tanpa Alat.', harga: 'Rp 200.000 / Bln', nama: 'Jarimatika Center', kota: 'Semarang', pekerjaan: 'Pengajar', phone: '0815-4004-5009' },
-    { desc: 'Bimbel Robotik & STEM Anak Buat Robot Sederhana & Coding Legos.', harga: 'Rp 600.000 / Bln', nama: 'STEM Robotics', kota: 'Medan', pekerjaan: 'Teknisi Edukasi', phone: '0815-4004-5010' },
+  'Balita': [
+    { desc: 'Pakaian Setelan Kaos & Celana Pendek Katun Lembut Balita Usia 1-4 Tahun Isi 3.', harga: 'Rp 75.000', nama: 'Baju Anak Lucu', kota: 'Bandung',_pekerjaan: 'Konveksi', phone: '0815-4004-5001' },
+    { desc: 'Sepatu Anak Bunyi Squeaker Lucu Anti Slip untuk Belajar Jalan Toddler.', harga: 'Rp 65.000',_nama: 'Sepatu Ceria Kids', kota: 'Surabaya',_pekerjaan: 'Pedagang', phone: '0815-4004-5002' },
+    { desc: 'Tas Ransel Anak Karakter Hewan Lucu untuk Playgroup & PAUD.', harga: 'Rp 85.000',_nama: 'Tas Kids Ceria', kota: 'Jakarta Timur',_pekerjaan: 'Wiraswasta', phone: '0815-4004-5003' },
+    { desc: 'Kolam Renang Karet Anak Portable Ukuran 1.2 Meter + Pompa Gratis.', harga: 'Rp 135.000',_nama: 'Toys & Fun', kota: 'Depok',_pekerjaan: 'Distributor', phone: '0815-4004-5004' },
+    { desc: 'Pispot Latihan Toilet Training Anak (Potty Training Chair) Motif Bebek.', harga: 'Rp 95.000',_nama: 'Baby Essentials', kota: 'Tangerang',_pekerjaan: 'Pedagang', phone: '0815-4004-5005' },
+    { desc: 'Sewa Mainan Perosotan & Ayunan Plastik Anak Indoor / Outdoor Bulanan.', harga: 'Rp 200.000 / Bln',_nama: 'Rental Mainan Kids', kota: 'Semarang',_pekerjaan: 'Rental Owner', phone: '0815-4004-5006' },
+    { desc: 'Baju Muslim koko & Gamis Bayi Balita Bahan Katun Toyobo Adem.', harga: 'Rp 110.000',_nama: 'Busana Muslim Anak', kota: 'Yogyakarta',_pekerjaan: 'Konveksi', phone: '0815-4004-5007' },
+    { desc: 'Sepeda Roda Tiga Anak Stroller Dorongan Besi Kokoh SNI.', harga: 'Rp 275.000',_nama: 'Toko Sepeda Ananda', kota: 'Malang',_pekerjaan: 'Pedagang', phone: '0815-4004-5008' },
+    { desc: 'Mainan Balok Susun Kayu Building Blocks 100 Pcs + Tas Penyimpanan.', harga: 'Rp 120.000',_nama: 'WoodToys Store', kota: 'Bekasi',_pekerjaan: 'Wiraswasta', phone: '0815-4004-5009' },
+    { desc: 'Jas Hujan Anak Ponco Karakter Lucu Bahan PVC Tebal Aman Anti Air.', harga: 'Rp 45.000',_nama: 'Raincoat Kids', kota: 'Bogor',_pekerjaan: 'Pedagang', phone: '0815-4004-5010' },
   ],
-  'Buku': [
-    { desc: 'Buku Boardbook Bayi Seri Mengenal Anggota Tubuh & Hewan Tebal Mulus.', harga: 'Rp 65.000', nama: 'Bunda Pustaka', kota: 'Surabaya', pekerjaan: 'Penjual Buku', phone: '0816-5005-6001' },
-    { desc: 'Buku Ensiklopedia Pop-up Anak World of Wonders 3D Hardcover.', harga: 'Rp 185.000', nama: 'Toko Buku Kids', kota: 'Jakarta Selatan', pekerjaan: 'Penerbit', phone: '0816-5005-6002' },
-    { desc: 'Buku Storybook 3 Bahasa (Indonesia, Inggris, Mandarin) + QR Audio.', harga: 'Rp 95.000', nama: 'Pustaka Cilik', kota: 'Bandung', pekerjaan: 'Penulis', phone: '0816-5005-6003' },
-    { desc: 'Buku Kain Soft Quiet Book Sensori Balita Washable Aman Digigit.', harga: 'Rp 55.000', nama: 'Sensory Craft', kota: 'Yogyakarta', pekerjaan: 'Pengrajin', phone: '0816-5005-6004' },
-    { desc: 'Buku Dongeng Fabel Karakter Moral Pembentukan Akhlak Anak Set 10 Bks.', harga: 'Rp 120.000', nama: 'Mama Baca', kota: 'Semarang', pekerjaan: 'Ibu Rumah Tangga', phone: '0816-5005-6005' },
-    { desc: 'Buku Activity Book Wipe Clean Hapus Tulis Calistung & Labirin.', harga: 'Rp 45.000', nama: 'SmartKids Press', kota: 'Depok', pekerjaan: 'Pedagang', phone: '0816-5005-6006' },
-    { desc: 'Buku Komik Edukasi Sains & Tubuh Manusia Gambar Full Color.', harga: 'Rp 75.000', nama: 'Komik Cilik', kota: 'Malang', pekerjaan: 'Komikus', phone: '0816-5005-6007' },
-    { desc: 'Buku Kamus Bergambar 1000 Kata Pertama Bayi & Balita Hardcover.', harga: 'Rp 110.000', nama: 'Gramedia Reseller', kota: 'Tangerang', pekerjaan: 'Agen Resmi', phone: '0816-5005-6008' },
-    { desc: 'Buku Parenting Pola Asuh Mendidik Anak Tanpa Marah & Bentak.', harga: 'Rp 85.000', nama: 'Bunda Ayah Smart', kota: 'Bekasi', pekerjaan: 'Konsultan Parenting', phone: '0816-5005-6009' },
-    { desc: 'Buku Mewarnai Magic Water Book Tanpa Noda Bisa Dipakai Berulang.', harga: 'Rp 25.000', nama: 'Toys & Books', kota: 'Solo', pekerjaan: 'Wiraswasta', phone: '0816-5005-6010' },
+  'Psikologi Ibu': [
+    { desc: 'Konseling Online Pemulihan Baby Blues & Postpartum Depression Bersama Psikolog Klinis.', harga: 'Rp 175.000 / Sesi', nama: 'Psikolog Klinis Ibu', kota: 'Jakarta Selatan', pekerjaan: 'Psikolog', phone: '0816-5005-6001' },
+    { desc: 'Jurnal Harian Ibu Mindfulness & Self-Care Notebook Cetak Eksklusif.', harga: 'Rp 65.000', nama: 'Mindful Mom ID', kota: 'Bandung', pekerjaan: 'Penulis', phone: '0816-5005-6002' },
+    { desc: 'Kelas Support Group Mental Health Ibu Muda & Sharing Circle Mingguan.', harga: 'Gratis Donasi', nama: 'Ibu Bahagia Community', kota: 'Surabaya', pekerjaan: 'Community Leader', phone: '0816-5005-6003' },
+    { desc: 'Paket Aromaterapi Essential Oil Relaxing & Diffuser Anti Stres Ibu Rumah Tangga.', harga: 'Rp 220.000', nama: 'Aroma Calm', kota: 'Yogyakarta', pekerjaan: 'Wiraswasta', phone: '0816-5005-6004' },
+    { desc: 'Buku Self-Healing untuk Ibu: Melepaskan Beban Burnout & Kelelahan Mental.', harga: 'Rp 88.000', nama: 'Pustaka Ibu', kota: 'Semarang', pekerjaan: 'Penerbit', phone: '0816-5005-6005' },
+    { desc: 'Konsultasi Privat Mengatasi Kecemasan Pola Asuh & Overthinking Ibu.', harga: 'Rp 150.000', nama: 'Ibu Tenang Center', kota: 'Depok', pekerjaan: 'Konselor', phone: '0816-5005-6006' },
+    { desc: 'Teh Bunga Chamomile & Lavender Organik Relaksasi Tidur Nyenyak Ibu.', harga: 'Rp 45.000', nama: 'Herbal Relax', kota: 'Malang', pekerjaan: 'Herbalis', phone: '0816-5005-6007' },
+    { desc: 'Bantal Menyusui & Relaksasi Punggung Ergonomis Anti Pegal.', harga: 'Rp 130.000', nama: 'Comfort Mom', kota: 'Tangerang', pekerjaan: 'Produsen', phone: '0816-5005-6008' },
+    { desc: 'Voucher Konseling Psikologi Keluarga & Hubungan Pernikahan Online.', harga: 'Rp 200.000', nama: 'Family Care Psikologi', kota: 'Bekasi', pekerjaan: 'Psikolog', phone: '0816-5005-6009' },
+    { desc: 'Paket Yoga Prenatal & Postnatal Relaksasi Pernapasan Ibu Hamil & Menyusui.', harga: 'Rp 100.000', nama: 'Mom Yoga Studio', kota: 'Bali', pekerjaan: 'Instruktur Yoga', phone: '0816-5005-6010' },
   ],
-  'Daycare': [
-    { desc: 'Daycare / Penitipan Anak Harian & Bulanan Usia 3 Bln - 4 Thn Pengasuh Bidan & Perawat.', harga: 'Rp 1.800.000 / Bln', nama: 'Bunda Daycare', kota: 'Jakarta Selatan', pekerjaan: 'Pengelola Daycare', phone: '0817-6006-7001' },
-    { desc: 'Daycare Islami Terpadu & Tahfidz Cilik Kurikulum Merdeka Ruangan AC CCTV 24Jam.', harga: 'Rp 2.100.000 / Bln', nama: 'Rumah Daycare An-Nahl', kota: 'Depok', pekerjaan: 'Lembaga Pendidikan', phone: '0817-6006-7002' },
-    { desc: 'Daycare Executive Area Bintaro Sektor 9 Laporan Tumbuh Kembang via App.', harga: 'Rp 2.500.000 / Bln', nama: 'Little Star Daycare', kota: 'Tangerang Selatan', pekerjaan: 'Pengelola', phone: '0817-6006-7003' },
-    { desc: 'Daycare Montessori & Playgroup Stimulasi Sensorik Harian Catering Gizi Sehat.', harga: 'Rp 2.200.000 / Bln', nama: 'Montessori Daycare', kota: 'Bandung', pekerjaan: 'Praktisi Montessori', phone: '0817-6006-7004' },
-    { desc: 'Daycare Kantoran Sudirman & Kuningan Khusus Anak Karyawan Jam 07.00-19.00.', harga: 'Rp 3.000.000 / Bln', nama: 'Office Park Daycare', kota: 'Jakarta Pusat', pekerjaan: 'Manajemen', phone: '0817-6006-7005' },
-    { desc: 'Daycare Sentul Edukasi Alam & Kebun Organik Playground Luas & Aman.', harga: 'Rp 1.950.000 / Bln', nama: 'Green Daycare Sentul', kota: 'Bogor', pekerjaan: 'Pengelola', phone: '0817-6006-7006' },
-    { desc: 'Daycare Flexi Shift Malam & Akhir Pekan Khusus Nakes / Pekerja Shift.', harga: 'Rp 150.000 / Hari', nama: 'CareNight Daycare', kota: 'Surabaya', pekerjaan: 'Bidan Pengelola', phone: '0817-6006-7007' },
-    { desc: 'Daycare Bayi Usia 2 Bulan - 1 Tahun Perawat Khusus Newborn & Ruang Laktasi.', harga: 'Rp 2.800.000 / Bln', nama: 'BabyCare Center', kota: 'Bekasi', pekerjaan: 'Perawat Senior', phone: '0817-6006-7008' },
-    { desc: 'Daycare Weekend & Liburan Sekolah Penitipan Anak Harian Lengkap Activity.', harga: 'Rp 200.000 / Hari', nama: 'Holiday Daycare', kota: 'Yogyakarta', pekerjaan: 'Pengelola', phone: '0817-6006-7009' },
-    { desc: 'Daycare Inklusi Anak Spesial Support Pendampingan Tumbuh Kembang.', harga: 'Rp 2.700.000 / Bln', nama: 'Inklusi Daycare', kota: 'Semarang', pekerjaan: 'Terapis', phone: '0817-6006-7010' },
+  'Umum': [
+    { desc: 'Jasa Pembersihan Rumah / Cleaning Service Pasca Renovasi & Cuci Kasur Bayi.', harga: 'Rp 150.000', nama: 'CleanHome Service', kota: 'Jakarta Selatan', pekerjaan: 'Penyedia Jasa', phone: '0817-6006-7001' },
+    { desc: 'Jasa Dokumentasi Foto Keluarga & Newborn Studio / Home Visit Profesional.', harga: 'Rp 500.000', nama: 'Moments Photography', kota: 'Bandung', pekerjaan: 'Fotografer', phone: '0817-6006-7002' },
+    { desc: 'Sewa Perlengkapan Bayi (Stroller, Car Seat, Bouncer) Mingguan / Bulanan.', harga: 'Rp 75.000 / Mgg', nama: 'Rental Perlengkapan Bayi', kota: 'Surabaya', pekerjaan: 'Rental Owner', phone: '0817-6006-7003' },
+    { desc: 'Jasa Penyalur ART, Asisten Rumah Tangga & Pengasuh Bayi Bergaransi Resmi.', harga: 'Adm Rp 500.000', nama: 'Yayasan Berkah Bunda', kota: 'Depok', pekerjaan: 'Penyalur Resmi', phone: '0817-6006-7004' },
+    { desc: 'Catering Harian Menu Sehat Keluarga & Anak Bebas MSG Free Delivery.', harga: 'Rp 35.000 / Porsi', nama: 'Dapur Bunda Catering', kota: 'Tangerang', pekerjaan: 'Catering Owner', phone: '0817-6006-7005' },
+    { desc: 'Jasa Laundry Khusus Perlengkapan Bayi (Stroller, Car Seat, Kasur Bayi) Steril.', harga: 'Rp 60.000', nama: 'Baby Laundry Express', kota: 'Semarang',_pekerjaan: 'Wiraswasta', phone: '0817-6006-7006' },
+    { desc: 'Paket Souvenir Ultah Anak Custom Nama & Karakter Murah Meriah.', harga: 'Rp 10.000 / Pcs', nama: 'Souvenir Ceria', kota: 'Yogyakarta',_pekerjaan: 'Konveksi', phone: '0817-6006-7007' },
+    { desc: 'Jasa Perbaikan & Service Stroller / Kursi Roda Anak Panggilan ke Rumah.', harga: 'Rp 90.000',_nama: 'Service Stroller Kilat', kota: 'Malang',_pekerjaan: 'Teknisi', phone: '0817-6006-7008' },
+    { desc: 'Sewa Kostum Karnaval & Profesi Anak (Dokter, Polisi, Pilot) Ukuran Balita.',_harga: 'Rp 50.000 / Hari', nama: 'Kostum Anak Ceria', kota: 'Bekasi',_pekerjaan: 'Rental', phone: '0817-6006-7009' },
+    { desc: 'Tiket Masuk Wisata Edukasi Keluarga & Playground Anak Indoor Terbesar.', harga: 'Rp 75.000', nama: 'Wonderland Kids', kota: 'Bogor',_pekerjaan: 'Marketing', phone: '0817-6006-7010' },
   ],
 };
 
@@ -131,18 +102,17 @@ export function generate360ClassifiedAds(): IklanSeedItem[] {
   const result: IklanSeedItem[] = [];
   let globalId = 1;
 
-  // We loop 10 rounds across all 36 categories (interleaved / round-robin)
-  for (let round = 0; round < 10; round++) {
+  // We loop 15 rounds across all categories (interleaved / round-robin)
+  for (let round = 0; round < 15; round++) {
     for (let catIdx = 0; catIdx < ALL_36_KATEGORI.length; catIdx++) {
       const cat = ALL_36_KATEGORI[catIdx];
       const templates = categoryTemplates[cat];
 
       let itemData: { desc: string; harga: string; nama: string; kota: string; pekerjaan: string; phone: string };
 
-      if (templates && templates[round]) {
-        itemData = templates[round];
+      if (templates && templates[round % templates.length]) {
+        itemData = templates[round % templates.length];
       } else {
-        // High quality fallback generation tailored specifically for category
         const cities = ['Jakarta Selatan', 'Surabaya', 'Bandung', 'Depok', 'Tangerang', 'Bekasi', 'Yogyakarta', 'Semarang', 'Bogor', 'Malang', 'Medan', 'Makassar'];
         const city = cities[(round + catIdx) % cities.length];
         const names = ['Bunda Ratna', 'Mama Abel', 'Papa Darren', 'Kak Nurul, S.Pd', 'Siti Aminah', 'Bidan Maya', 'Ibu Claris', 'Pak Hendra', 'Mama Kenzo', 'Umi Kalsum'];

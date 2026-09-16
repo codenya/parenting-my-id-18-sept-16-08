@@ -11,42 +11,12 @@ interface IklanBarisPageProps {
 }
 
 const KATEGORI_OPTIONS = [
-  'Aksesoris',
-  'Aplikasi',
-  'Asuransi',
-  'Bimbel',
-  'Buku',
-  'Daycare',
-  'Jasa',
-  'Kebersihan',
-  'Kehamilan',
-  'Keluarga',
-  'Kesehatan',
-  'Keuangan',
-  'Klinik',
-  'Konsultasi',
-  'Kursus',
-  'Les Privat',
-  'Lifestyle',
-  'Lowongan Kerja',
-  'Mainan',
-  'Mencari Kerja',
-  'Menyusui',
-  'Nutrisi',
-  'Obat',
-  'Pakaian',
-  'Pasca Kelahiran',
-  'Pendidikan',
-  'Pengasuh',
-  'Peralatan',
-  'Perawatan',
-  'Perlengkapan',
-  'Sekolah',
-  'Sepatu',
-  'Seminar',
-  'Training',
-  'Transport',
-  'Wisata',
+  'Pola Asuh',
+  'Tumbuh Kembang',
+  'Kesehatan & Gizi',
+  'Balita',
+  'Psikologi Ibu',
+  'Umum',
 ];
 
 export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPageProps) {
@@ -69,7 +39,7 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
   const [pekerjaan, setPekerjaan] = useState('');
   const [tahunLahir, setTahunLahir] = useState<number | ''>('');
   const [phone, setPhone] = useState('');
-  const [kategori, setKategori] = useState('JASA NANNY & BABYSITTER');
+  const [kategori, setKategori] = useState('Pola Asuh');
   const [keteranganBarang, setKeteranganBarang] = useState('');
   const [harga, setHarga] = useState('');
   const [expiresAt, setExpiresAt] = useState('');
@@ -305,7 +275,7 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
         setPekerjaan('');
         setTahunLahir('');
         setPhone('');
-        setKategori('Otomotif');
+        setKategori('Pola Asuh');
         setKeteranganBarang('');
         setHarga('');
         setExpiresAt('');

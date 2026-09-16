@@ -4916,6 +4916,17 @@ app.get(['/kategori/:category', '/kategori/:category/'], (req, res, next) => {
   }
 });
 
+// Explicit Robots.txt with Content-Signal directives
+app.get('/robots.txt', (req, res) => {
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  return res.send(`User-agent: *
+Allow: /
+Content-Signal: ai-train=no, search=yes, ai-input=no
+`);
+});
+
 // RFC 9727 API Catalog Endpoint for AI Agent Discovery
 app.get('/.well-known/api-catalog', (req, res) => {
   res.setHeader('Content-Type', 'application/linkset+json; charset=utf-8');
