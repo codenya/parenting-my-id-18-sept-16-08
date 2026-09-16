@@ -5,9 +5,9 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const __filename = typeof import.meta !== 'undefined' && import.meta.url ? fileURLToPath(import.meta.url) : '';
-const __dirname = typeof import.meta !== 'undefined' && import.meta.url && __filename ? path.dirname(__filename) : process.cwd();
-const rootDir = path.resolve(__dirname, '..');
+
+
+const rootDir = typeof __dirname !== 'undefined' ? path.resolve(__dirname, '..') : (typeof import.meta !== 'undefined' && import.meta.url ? path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..') : process.cwd());
 
 export function getSiteConfig() {
   let siteName = process.env.SITE_NAME || 'Modern Edge Blog';

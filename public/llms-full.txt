@@ -1,4 +1,4 @@
-# Arsip Lengkap Artikel Parenting.my.id (LLMs Full Text)
+# Arsip Lengkap Artikel Modern Edge Blog (LLMs Full Text)
 
 Dokumen ini memuat kumpulan artikel lengkap dalam format Markdown untuk Large Language Models (LLMs).
 
@@ -6,7 +6,7 @@ Dokumen ini memuat kumpulan artikel lengkap dalam format Markdown untuk Large La
 
 # Panduan Lengkap Pola Asuh Demokratis untuk Mendidik Anak Tangguh Masa Kini
 
-* **URL:** https://parenting.my.id/baca/panduan-lengkap-pola-asuh-demokratis-anak-masa-kini
+* **URL:** https://example.com/baca/panduan-lengkap-pola-asuh-demokratis-anak-masa-kini
 * **Penulis:** Dr. Ratna Sari, M.Psi
 * **Kategori:** Pola Asuh
 * **Terakhir Diperbarui:** 2026-09-01T04:39:21.210Z
@@ -50,7 +50,7 @@ Untuk kelompok usia **balita**, penerapan komunikasi terbuka sangat efektif jika
 
 # 5 Aktivitas Sensory Play Seru untuk Melatih Motorik Halus Balita di Rumah
 
-* **URL:** https://parenting.my.id/baca/5-aktivitas-sensory-play-seru-untuk-melatih-motorik-balita
+* **URL:** https://example.com/baca/5-aktivitas-sensory-play-seru-untuk-melatih-motorik-balita
 * **Penulis:** Ahmad Zulkarnain, S.Ked
 * **Kategori:** Tumbuh Kembang
 * **Terakhir Diperbarui:** 2026-09-02T04:39:21.210Z
@@ -92,7 +92,7 @@ Jika anak sudah menunjukkan tanda-tanda kelelahan, istirahatlah dan pastikan keb
 
 # Mengenal Bahaya Stunting dan Cara Pencegahannya Sejak 1000 Hari Pertama Kehidupan
 
-* **URL:** https://parenting.my.id/baca/mengenal-bahaya-stunting-dan-cara-pencegahannya-sejak-1000-hpk
+* **URL:** https://example.com/baca/mengenal-bahaya-stunting-dan-cara-pencegahannya-sejak-1000-hpk
 * **Penulis:** Dr. Ratna Sari, M.Psi
 * **Kategori:** Kesehatan & Gizi
 * **Terakhir Diperbarui:** 2026-09-03T04:39:21.210Z
