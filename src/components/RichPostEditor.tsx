@@ -1290,145 +1290,165 @@ export default function RichPostEditor({
       )}
       
       {/* ------------------------------------------------------------- */}
-      {/* EDITOR CONTROL BAR & STATUS */}
+      {/* EDITOR CONTROL BAR & STATUS (STICKY) */}
       {/* ------------------------------------------------------------- */}
-      <div className={`sticky top-0 z-30 flex flex-wrap items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl md:rounded-3xl shadow-xs border transition-colors ${
+      <div className={`sticky top-0 z-30 flex flex-col gap-2.5 p-3 sm:p-4 rounded-2xl md:rounded-3xl shadow-sm border transition-colors ${
         userRole === 'writer'
-          ? 'bg-[#FAF9F6] dark:bg-slate-900 text-slate-800 dark:text-slate-100 border-[#E5E3DC] dark:border-slate-800'
-          : 'bg-slate-900 text-white border-slate-800 shadow-md'
+          ? 'bg-[#FAF9F6]/95 dark:bg-slate-900/95 backdrop-blur-md text-slate-800 dark:text-slate-100 border-[#E5E3DC] dark:border-slate-800'
+          : 'bg-slate-900/95 backdrop-blur-md text-white border-slate-800 shadow-md'
       }`}>
         
-        {/* VIEW MODE & ZEN MODE TOGGLE */}
-        <div className="flex items-center gap-2">
-          <div className={`flex items-center gap-1 p-1 rounded-2xl border ${
-            userRole === 'writer'
-              ? 'bg-slate-100/80 dark:bg-slate-800 border-slate-200 dark:border-slate-700'
-              : 'bg-slate-800 border-slate-700'
-          }`}>
+        {/* BARIS ATAS: STATUS AUTOSAVE, ZEN MODE & TOMBOL AKSI UTAMA (SIMPAN DRAF, KIRIM, TERBITKAN) */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 w-full">
+          {/* Sisi Kiri: Zen Mode & AutoSave */}
+          <div className="flex items-center justify-between sm:justify-start gap-2">
+            <div className="flex items-center gap-1.5">
+              {setIsZenMode && (
+                <button
+                  type="button"
+                  onClick={() => setIsZenMode(!isZenMode)}
+                  title={isZenMode ? "Keluar dari Zen Mode (Tampilkan Sidebar)" : "Zen Mode (Sembunyikan Sidebar & Perluas Ruang Ketik)"}
+                  className={`p-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center ${
+                    isZenMode
+                      ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                      : userRole === 'writer'
+                        ? 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+                        : 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700'
+                  }`}
+                >
+                  {isZenMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                </button>
+              )}
+              {autoSaveStatus === 'saved' && (
+                <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/80 px-3 py-1 rounded-full">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> <span className="truncate">{userRole === 'writer' ? 'Draf Tersimpan' : 'Draf Tersimpan di D1'}</span>
+                </span>
+              )}
+              {autoSaveStatus === 'saving' && (
+                <span className="inline-flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-300 font-semibold bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800/80 px-3 py-1 rounded-full animate-pulse">
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Menyimpan draf...
+                </span>
+              )}
+              {autoSaveStatus === 'dirty' && (
+                <span className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 px-3 py-1">
+                  Perubahan belum disimpan...
+                </span>
+              )}
+            </div>
+
+            {/* Badge status artikel untuk mobile */}
+            <span className={`sm:hidden px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
+              currentStatus === 'published' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' :
+              currentStatus === 'pending_approval' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' :
+              currentStatus === 'rejected' ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300' :
+              'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+            }`}>
+              {currentStatus === 'published' ? 'Terbit' : currentStatus === 'pending_approval' ? 'Review' : currentStatus === 'rejected' ? 'Revisi' : 'Draf'}
+            </span>
+          </div>
+
+          {/* Sisi Kanan: Save & Publish Role-Based Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+            {/* Simpan Draf (Soft Slate/Gray) */}
             <button
               type="button"
+              onClick={() => onPublishSubmit('draft')}
+              className="w-full sm:w-auto justify-center px-3.5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-200 text-xs font-bold transition-colors border border-slate-300/80 dark:border-slate-600 flex items-center gap-1.5"
+            >
+              <FileText className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+              <span>Simpan Draf</span>
+            </button>
+
+            {/* Writer Specific Action (Emerald Green) */}
+            {userRole === 'writer' && (
+              <button
+                type="button"
+                onClick={() => onPublishSubmit('pending_approval')}
+                className="w-full sm:w-auto justify-center px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>Kirim untuk Ditinjau 🚀</span>
+              </button>
+            )}
+
+            {/* Editor & Admin Actions */}
+            {(userRole === 'editor' || userRole === 'admin') && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setShowRejectModal(true)}
+                  className="w-full sm:w-auto justify-center px-3.5 py-2 rounded-xl bg-rose-950/40 text-rose-300 hover:bg-rose-900/60 text-xs font-bold transition-colors border border-rose-800/60 flex items-center gap-1.5"
+                >
+                  <XCircle className="w-3.5 h-3.5" />
+                  <span>Tolak / Minta Revisi</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onPublishSubmit('published')}
+                  className="w-full sm:w-auto justify-center px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold hover:from-emerald-500 hover:to-teal-500 shadow-md transition-colors flex items-center gap-1.5"
+                >
+                  <ThumbsUp className="w-3.5 h-3.5" />
+                  <span>Setujui & Terbitkan ✅</span>
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* BARIS KEDUA: TOMBOL STICKY TULIS DAN PRATINJAU DIBAWAHNYA (PALING SERING DIPAKAI PENULIS) */}
+        <div className="w-full pt-2 border-t border-slate-200/80 dark:border-slate-800/80">
+          <div className="grid grid-cols-2 md:flex md:items-center gap-2 w-full">
+            {/* Tombol Tulis */}
+            <button
+              type="button"
+              id="sticky-btn-tulis"
               onClick={() => setViewMode('write')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
+              className={`w-full md:w-auto justify-center px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 ${
                 viewMode === 'write'
-                  ? 'bg-rose-600 text-white shadow-xs'
-                  : userRole === 'writer' ? 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700' : 'text-slate-300 hover:text-white hover:bg-slate-700'
+                  ? 'bg-rose-600 text-white shadow-md ring-2 ring-rose-200 dark:ring-rose-950'
+                  : userRole === 'writer'
+                    ? 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
+                    : 'bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700'
               }`}
             >
-              <Edit3 className="w-3.5 h-3.5" />
+              <Edit3 className="w-4 h-4" />
               <span>Tulis</span>
             </button>
 
-            {/* HIDDEN ON MOBILE (SCREEN < MD) TO AVOID UNSUITABLE SPLIT SCREEN */}
+            {/* Tombol Bagi Layar (Split) - khusus layar tablet / desktop */}
             <button
               type="button"
+              id="sticky-btn-split"
               onClick={() => setViewMode('split')}
-              className={`hidden md:flex px-3 py-1.5 rounded-xl text-xs font-bold transition-colors items-center gap-1.5 ${
+              className={`hidden md:flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all ${
                 viewMode === 'split'
-                  ? 'bg-rose-600 text-white shadow-xs'
-                  : userRole === 'writer' ? 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700' : 'text-slate-300 hover:text-white hover:bg-slate-700'
+                  ? 'bg-rose-600 text-white shadow-md ring-2 ring-rose-200 dark:ring-rose-950'
+                  : userRole === 'writer'
+                    ? 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
+                    : 'bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700'
               }`}
             >
-              <Columns className="w-3.5 h-3.5" />
+              <Columns className="w-4 h-4" />
               <span>Bagi Layar</span>
             </button>
 
+            {/* Tombol Pratinjau */}
             <button
               type="button"
+              id="sticky-btn-pratinjau"
               onClick={() => setViewMode('preview')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
+              className={`w-full md:w-auto justify-center px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 ${
                 viewMode === 'preview'
-                  ? 'bg-rose-600 text-white shadow-xs'
-                  : userRole === 'writer' ? 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700' : 'text-slate-300 hover:text-white hover:bg-slate-700'
+                  ? 'bg-rose-600 text-white shadow-md ring-2 ring-rose-200 dark:ring-rose-950'
+                  : userRole === 'writer'
+                    ? 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
+                    : 'bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700'
               }`}
             >
-              <Eye className="w-3.5 h-3.5" />
+              <Eye className="w-4 h-4" />
               <span>Pratinjau</span>
             </button>
           </div>
-
-          {/* ZEN MODE TOGGLER */}
-          {setIsZenMode && (
-            <button
-              type="button"
-              onClick={() => setIsZenMode(!isZenMode)}
-              title={isZenMode ? "Keluar dari Zen Mode (Tampilkan Sidebar)" : "Zen Mode (Sembunyikan Sidebar & Perluas Ruang Ketik)"}
-              className={`p-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center ${
-                isZenMode
-                  ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
-                  : userRole === 'writer'
-                    ? 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
-                    : 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700'
-              }`}
-            >
-              {isZenMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-            </button>
-          )}
-        </div>
-
-        {/* AUTO-SAVE STATUS INDICATOR */}
-        <div className="hidden sm:flex items-center gap-2">
-          {autoSaveStatus === 'saved' && (
-            <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/80 px-3 py-1 rounded-full">
-              <CheckCircle2 className="w-3.5 h-3.5" /> {userRole === 'writer' ? 'Draf Tersimpan' : 'Draf Tersimpan di Cloudflare D1'}
-            </span>
-          )}
-          {autoSaveStatus === 'saving' && (
-            <span className="inline-flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-300 font-semibold bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800/80 px-3 py-1 rounded-full animate-pulse">
-              <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Menyimpan draf...
-            </span>
-          )}
-          {autoSaveStatus === 'dirty' && (
-            <span className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 px-3 py-1">
-              Perubahan belum disimpan...
-            </span>
-          )}
-        </div>
-
-        {/* SAVE & PUBLISH ROLE-BASED ACTION BUTTONS */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-          {/* Simpan Draf (Soft Slate/Gray) */}
-          <button
-            type="button"
-            onClick={() => onPublishSubmit('draft')}
-            className="w-full sm:w-auto justify-center px-3.5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-200 text-xs font-bold transition-colors border border-slate-300/80 dark:border-slate-600 flex items-center gap-1.5"
-          >
-            <FileText className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
-            <span>Simpan Draf</span>
-          </button>
-
-          {/* Writer Specific Action (Emerald Green) */}
-          {userRole === 'writer' && (
-            <button
-              type="button"
-              onClick={() => onPublishSubmit('pending_approval')}
-              className="w-full sm:w-auto justify-center px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5"
-            >
-              <Send className="w-3.5 h-3.5" />
-              <span>Kirim untuk Ditinjau 🚀</span>
-            </button>
-          )}
-
-          {/* Editor & Admin Actions */}
-          {(userRole === 'editor' || userRole === 'admin') && (
-            <>
-              <button
-                type="button"
-                onClick={() => setShowRejectModal(true)}
-                className="w-full sm:w-auto justify-center px-3.5 py-2 rounded-xl bg-rose-950/40 text-rose-300 hover:bg-rose-900/60 text-xs font-bold transition-colors border border-rose-800/60 flex items-center gap-1.5"
-              >
-                <XCircle className="w-3.5 h-3.5" />
-                <span>Tolak / Minta Revisi</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => onPublishSubmit('published')}
-                className="w-full sm:w-auto justify-center px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold hover:from-emerald-500 hover:to-teal-500 shadow-md transition-colors flex items-center gap-1.5"
-              >
-                <ThumbsUp className="w-3.5 h-3.5" />
-                <span>Setujui & Terbitkan ✅</span>
-              </button>
-            </>
-          )}
         </div>
       </div>
 
@@ -5101,20 +5121,50 @@ export default function RichPostEditor({
 
       {/* BOTTOM ACTION BAR FOR CONVENIENT SAVING / PUBLISHING */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg">
-        <div className="flex items-center justify-between sm:justify-start gap-2">
-          <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
-            Status Artikel:
-          </span>
-          <span className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold uppercase ${
-            currentStatus === 'published' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' :
-            currentStatus === 'pending_approval' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' :
-            currentStatus === 'rejected' ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300' :
-            'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
-          }`}>
-            {currentStatus === 'published' ? 'Terbit ✅' :
-             currentStatus === 'pending_approval' ? 'Menunggu Ditinjau ⏳' :
-             currentStatus === 'rejected' ? 'Perlu Revisi ❌' : 'Draf 📝'}
-          </span>
+        <div className="flex items-center justify-between sm:justify-start gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
+              Status Artikel:
+            </span>
+            <span className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold uppercase ${
+              currentStatus === 'published' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' :
+              currentStatus === 'pending_approval' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' :
+              currentStatus === 'rejected' ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300' :
+              'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+            }`}>
+              {currentStatus === 'published' ? 'Terbit ✅' :
+               currentStatus === 'pending_approval' ? 'Menunggu Ditinjau ⏳' :
+               currentStatus === 'rejected' ? 'Perlu Revisi ❌' : 'Draf 📝'}
+            </span>
+          </div>
+
+          {/* Quick Tulis & Pratinjau toggle at bottom bar */}
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <button
+              type="button"
+              onClick={() => setViewMode('write')}
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                viewMode === 'write'
+                  ? 'bg-rose-600 text-white shadow-xs'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+              <span>Tulis</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('preview')}
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                viewMode === 'preview'
+                  ? 'bg-rose-600 text-white shadow-xs'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              <Eye className="w-3.5 h-3.5" />
+              <span>Pratinjau</span>
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
