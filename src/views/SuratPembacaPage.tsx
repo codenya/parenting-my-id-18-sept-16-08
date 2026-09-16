@@ -127,7 +127,7 @@ export default function SuratPembacaPage({ siteConfig, onNavigate }: SuratPembac
         {/* HEADER HERO */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-10 shadow-sm mb-8 text-center relative overflow-hidden">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rose-50 dark:bg-rose-950/80 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 text-xs font-bold uppercase tracking-wider mb-4">
-            <Mail className="w-4 h-4" /> Surat Pembaca
+            <Mail className="w-4 h-4" /> {siteConfig?.surat_pembaca_channel_label || 'Kanal Surat Pembaca'}
           </div>
           <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight mb-3">
             {siteConfig?.surat_pembaca_title || `Kanal Surat Pembaca ${siteName}`}
@@ -296,7 +296,7 @@ export default function SuratPembacaPage({ siteConfig, onNavigate }: SuratPembac
                   className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm leading-relaxed focus:ring-2 focus:ring-rose-500 focus:outline-none"
                 />
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                  * Catatan Keamanan: Tautan URL di dalam pesan akan secara otomatis dikonversi menjadi teks biasa tanpa tautan aktif.
+                  {siteConfig?.surat_pembaca_notice || '* Catatan Keamanan: Tautan URL di dalam pesan akan secara otomatis dikonversi menjadi teks biasa tanpa tautan aktif.'}
                 </p>
               </div>
 

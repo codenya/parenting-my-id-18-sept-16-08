@@ -3,7 +3,6 @@ import { Tag, Send, CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Phone,
 import { IklanBarisItem, SiteConfig } from '../types';
 import TurnstileWidget from '../components/TurnstileWidget';
 import NewspaperClassifiedGrid from '../components/NewspaperClassifiedGrid';
-import { parseNumericPrice } from '../lib/priceUtils';
 
 interface IklanBarisPageProps {
   siteConfig?: SiteConfig;
@@ -286,58 +285,12 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
           "name": `Daftar Iklan Baris ${selectedKategori} (Halaman ${currentPage})`,
           "numberOfItems": ads.length,
           "itemListElement": ads.map((item, index) => {
-            const numericPrice = parseNumericPrice(item.harga);
             return {
               "@type": "ListItem",
               "position": index + 1,
-              "item": {
-                "@type": "Product",
-                "@id": `${origin}/iklan-baris#ad-${item.id}`,
-                "name": `${item.kategori}: ${item.keteranganBarang.substring(0, 70)}...`,
-                "description": item.keteranganBarang,
-                "category": item.kategori,
-                "aggregateRating": {
-                  "@type": "AggregateRating",
-                  "ratingValue": "5.0",
-                  "reviewCount": "1",
-                  "bestRating": "5",
-                  "worstRating": "1"
-                },
-                "review": [
-                  {
-                    "@type": "Review",
-                    "author": {
-                      "@type": "Person",
-                      "name": `Redaksi ${siteName}`
-                    },
-                    "datePublished": item.createdAt ? String(item.createdAt).substring(0, 10) : "2026-01-01",
-                    "reviewBody": "Iklan baris terverifikasi oleh tim Redaksi.",
-                    "reviewRating": {
-                      "@type": "Rating",
-                      "ratingValue": "5",
-                      "bestRating": "5"
-                    }
-                  }
-                ],
-                "offers": {
-                  "@type": "Offer",
-                  "price": String(numericPrice),
-                  "priceCurrency": "IDR",
-                  "priceValidUntil": "2030-12-31",
-                  "availability": "https://schema.org/InStock",
-                  "itemCondition": "https://schema.org/UsedCondition",
-                  "description": item.harga,
-                  "seller": {
-                    "@type": "Person",
-                    "name": item.nama,
-                    "telephone": item.phone,
-                    "address": {
-                      "@type": "PostalAddress",
-                      "addressLocality": item.kota
-                    }
-                  }
-                }
-              }
+              "name": `${item.kategori}: ${item.keteranganBarang.substring(0, 70)}...`,
+              "description": item.keteranganBarang,
+              "url": `${origin}/iklan-baris`
             };
           })
         }
@@ -637,7 +590,7 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
                   className="w-full px-3 py-2.5 rounded-xl border-2 border-slate-400 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white leading-relaxed focus:ring-2 focus:ring-amber-500 focus:outline-none font-mono text-xs"
                 />
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                  * Tautan URL akan otomatis dikonversi menjadi teks biasa. Iklan baris tidak menggunakan gambar sesuai format cetak koran Kompas.
+                  * {siteConfig?.classified_notice || 'Iklan baris gratis : Tautan URL akan otomatis dikonversi menjadi teks biasa. Jika ingin menggunakan URL dan gambar iklan, hubungi redaksi/editor untuk tarif iklan baris berbayar.'}
                 </p>
               </div>
 
@@ -699,8 +652,9 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
         )}
 
         {/* LAYOUT VIEW MODE SWITCHER & CATEGORY FILTER TABS */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-3 mb-6 border-b-2 border-slate-300 dark:border-slate-800">
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 py-1">
+        <div className="flex flex-col gap-3 pb-3 mb-6 border-b-2 border-slate-300 dark:border-slate-800">
+          {/* Category filter buttons in a compact scrollable/wrapped container */}
+          <div className="max-h-36 overflow-y-auto p-2.5 bg-stone-100 dark:bg-slate-900 rounded-xl border border-slate-300 dark:border-slate-800 flex flex-wrap items-center gap-1.5 sm:gap-2">
             <button
               onClick={() => { setSelectedKategori('Semua'); setCurrentPage(1); }}
               className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md sm:rounded-lg font-bold sm:font-black text-[11px] sm:text-xs uppercase tracking-tight sm:tracking-wider transition-all whitespace-nowrap ${
@@ -729,33 +683,38 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
             })}
           </div>
 
-          {/* VIEW SWITCHER: NEWSPAPER PRINT (JADUL) VS CARDS (MODERN) */}
-          <div className="flex items-center gap-1 bg-stone-200 dark:bg-slate-800 p-1 rounded-xl self-end sm:self-auto shrink-0">
-            <button
-              onClick={() => setViewMode('newspaper')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black uppercase transition-all ${
-                viewMode === 'newspaper'
-                  ? 'bg-black text-white shadow'
-                  : 'text-slate-700 dark:text-slate-300 hover:text-black'
-              }`}
-              title="Tampilan Format Koran Cetak (JADUL)"
-            >
-              <FileText className="w-3.5 h-3.5" />
-              <span>JADUL</span>
-            </button>
+          {/* VIEW SWITCHER: NEWSPAPER PRINT (JADUL) VS CARDS (MODERN) on a new row below categories */}
+          <div className="flex items-center justify-between pt-1">
+            <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Pilih Format Tampilan:
+            </div>
+            <div className="flex items-center gap-1 bg-stone-200 dark:bg-slate-800 p-1 rounded-xl shrink-0">
+              <button
+                onClick={() => setViewMode('newspaper')}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black uppercase transition-all ${
+                  viewMode === 'newspaper'
+                    ? 'bg-black text-white shadow'
+                    : 'text-slate-700 dark:text-slate-300 hover:text-black'
+                }`}
+                title="Tampilan Format Koran Cetak (JADUL)"
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span>JADUL</span>
+              </button>
 
-            <button
-              onClick={() => setViewMode('cards')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black uppercase transition-all ${
-                viewMode === 'cards'
-                  ? 'bg-black text-white shadow'
-                  : 'text-slate-700 dark:text-slate-300 hover:text-black'
-              }`}
-              title="Tampilan Kartu Digital (MODERN)"
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
-              <span>MODERN</span>
-            </button>
+              <button
+                onClick={() => setViewMode('cards')}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black uppercase transition-all ${
+                  viewMode === 'cards'
+                    ? 'bg-black text-white shadow'
+                    : 'text-slate-700 dark:text-slate-300 hover:text-black'
+                }`}
+                title="Tampilan Kartu Digital (MODERN)"
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+                <span>MODERN</span>
+              </button>
+            </div>
           </div>
         </div>
 
