@@ -115,15 +115,45 @@ export default function App() {
   }, [effectiveConfig?.default_theme_mode, effectiveConfig?.enable_theme_toggle]);
 
   useEffect(() => {
-    if (effectiveConfig?.active_theme_preset) {
-      const theme = THEME_PRESETS.find(t => t.id === effectiveConfig.active_theme_preset);
-      if (theme) {
-        document.documentElement.style.setProperty('--color-primary', theme.colors.primary);
-        document.documentElement.style.setProperty('--color-secondary', theme.colors.secondary);
-        document.documentElement.style.setProperty('--font-sans', theme.fonts.sans);
-        document.documentElement.style.setProperty('--font-heading', theme.fonts.heading);
+    const fontMode = effectiveConfig?.font_override_mode || 'system';
+    const activePresetId = effectiveConfig?.active_theme_preset || 'corp-blue';
+    const theme = THEME_PRESETS.find(t => t.id === activePresetId);
 
-        // High-speed web font loader to eliminate FOUT/FOIT and prevent Layout Shifts
+    // 1. Terapkan warna dari Theme Preset
+    if (theme) {
+      document.documentElement.style.setProperty('--color-primary', theme.colors.primary);
+      document.documentElement.style.setProperty('--color-secondary', theme.colors.secondary);
+    } else {
+      document.documentElement.style.removeProperty('--color-primary');
+      document.documentElement.style.removeProperty('--color-secondary');
+    }
+
+    // 2. Evaluasi Font Override vs Font Tema (Prioritas: font_override_mode)
+    let sansFont = '';
+    let headingFont = '';
+    let fontUrlToLoad: string | null = null;
+
+    if (fontMode === 'system') {
+      // System Font Stack: 0 KB download, native OS font stack, Zero FOUT & Zero CLS
+      sansFont = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif";
+      headingFont = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif";
+      fontUrlToLoad = null;
+    } else if (fontMode === 'inter') {
+      // Inter Variable Font: 1 berkas WOFF2 mencakup weight 100-900 dengan font-display: swap
+      sansFont = "'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif";
+      headingFont = "'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif";
+      fontUrlToLoad = 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap';
+    } else if (fontMode === 'plus-jakarta-sans') {
+      // Plus Jakarta Sans Variable Font: 1 berkas WOFF2 mencakup weight 200-800 dengan font-display: swap
+      sansFont = "'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif";
+      headingFont = "'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif";
+      fontUrlToLoad = 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap';
+    } else if (fontMode === 'theme') {
+      // Gunakan Font Tema bawaan dari Theme Preset
+      if (theme) {
+        sansFont = theme.fonts.sans;
+        headingFont = theme.fonts.heading;
+
         try {
           const sansClean = theme.fonts.sans.replace(/"/g, '').split(',')[0].trim();
           const headingClean = theme.fonts.heading.replace(/"/g, '').split(',')[0].trim();
@@ -133,34 +163,40 @@ export default function App() {
 
           if (fontsToLoad.length > 0) {
             const fontParams = fontsToLoad.map(f => `family=${encodeURIComponent(f)}:wght@400;500;700;800;900`).join('&');
-            const fontUrl = `https://fonts.googleapis.com/css2?${fontParams}&display=optional`;
-            
-            let linkEl = document.getElementById('dynamic-google-fonts') as HTMLLinkElement | null;
-            if (!linkEl) {
-              linkEl = document.createElement('link');
-              linkEl.id = 'dynamic-google-fonts';
-              linkEl.rel = 'stylesheet';
-              document.head.appendChild(linkEl);
-            }
-            if (linkEl.href !== fontUrl) {
-              linkEl.href = fontUrl;
-            }
+            fontUrlToLoad = `https://fonts.googleapis.com/css2?${fontParams}&display=swap`;
           }
         } catch (e) {
-          console.error('[FontLoader] Failed to inject dynamic fonts:', e);
+          console.error('[FontLoader] Failed to parse theme fonts:', e);
         }
+      } else {
+        sansFont = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif";
+        headingFont = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif";
+      }
+    }
+
+    // Set variabel CSS font
+    document.documentElement.style.setProperty('--font-sans', sansFont);
+    document.documentElement.style.setProperty('--font-heading', headingFont);
+
+    // 3. Kelola link Google Fonts eksternal secara aman dan efisien
+    let linkEl = document.getElementById('dynamic-google-fonts') as HTMLLinkElement | null;
+    if (fontUrlToLoad) {
+      if (!linkEl) {
+        linkEl = document.createElement('link');
+        linkEl.id = 'dynamic-google-fonts';
+        linkEl.rel = 'stylesheet';
+        document.head.appendChild(linkEl);
+      }
+      if (linkEl.href !== fontUrlToLoad) {
+        linkEl.href = fontUrlToLoad;
       }
     } else {
-      document.documentElement.style.removeProperty('--color-primary');
-      document.documentElement.style.removeProperty('--color-secondary');
-      document.documentElement.style.removeProperty('--font-sans');
-      document.documentElement.style.removeProperty('--font-heading');
-      const linkEl = document.getElementById('dynamic-google-fonts');
+      // Jika mode system (0 KB) atau tidak ada font eksternal, hapus link Google Fonts
       if (linkEl) {
         linkEl.remove();
       }
     }
-  }, [effectiveConfig?.active_theme_preset]);
+  }, [effectiveConfig?.active_theme_preset, effectiveConfig?.font_override_mode]);
 
   const fetchConfig = async () => {
     try {

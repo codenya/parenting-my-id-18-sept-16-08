@@ -135,6 +135,7 @@ export interface SiteConfig {
   mobile_admin_btn_label?: string;
   mobile_show_logged_username?: boolean;
   active_theme_preset?: string;
+  font_override_mode?: 'system' | 'inter' | 'plus-jakarta-sans' | 'theme';
   site_domain?: string;
   site_url?: string;
   default_theme_mode?: 'light' | 'dark' | 'auto';

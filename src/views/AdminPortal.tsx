@@ -363,6 +363,7 @@ export default function AdminPortal({
 
   // Site Config Form State
   const [cfgActiveThemePreset, setCfgActiveThemePreset] = useState(siteConfig?.active_theme_preset || 'corp-blue');
+  const [cfgFontOverrideMode, setCfgFontOverrideMode] = useState<'system' | 'inter' | 'plus-jakarta-sans' | 'theme'>(siteConfig?.font_override_mode || 'system');
   const [cfgSiteName, setCfgSiteName] = useState(siteConfig?.site_name || 'Website Utama');
   const [cfgMobileAdminBtnLabel, setCfgMobileAdminBtnLabel] = useState(siteConfig?.mobile_admin_btn_label || 'Portal Admin & Editor');
   const [cfgMobileShowLoggedUsername, setCfgMobileShowLoggedUsername] = useState(siteConfig?.mobile_show_logged_username || false);
@@ -708,6 +709,7 @@ export default function AdminPortal({
     if (siteConfig) {
       setCfgHomepageDisplayMode(siteConfig.homepage_display_mode ?? 'default');
       setCfgActiveThemePreset(siteConfig.active_theme_preset ?? DEFAULT_SITE_CONFIG.active_theme_preset ?? 'corp-blue');
+      setCfgFontOverrideMode(siteConfig.font_override_mode ?? DEFAULT_SITE_CONFIG.font_override_mode ?? 'system');
       setCfgSiteName(siteConfig.site_name ?? DEFAULT_SITE_CONFIG.site_name ?? '');
       setCfgTechBadgeHero(siteConfig.tech_badge_hero ?? 'Cloudflare D1 Edge Architecture');
       setCfgTechBadgePages(siteConfig.tech_badge_pages ?? 'Cloudflare Pages Edge');
@@ -985,6 +987,7 @@ export default function AdminPortal({
       const draftConfig: SiteConfig = {
         homepage_display_mode: cfgHomepageDisplayMode,
         active_theme_preset: cfgActiveThemePreset,
+        font_override_mode: cfgFontOverrideMode,
         site_name: cfgSiteName,
         mobile_admin_btn_label: cfgMobileAdminBtnLabel,
         mobile_show_logged_username: cfgMobileShowLoggedUsername,
@@ -1315,6 +1318,7 @@ export default function AdminPortal({
       const updatedCfg: SiteConfig = {
         homepage_display_mode: cfgHomepageDisplayMode,
         active_theme_preset: cfgActiveThemePreset,
+        font_override_mode: cfgFontOverrideMode,
         site_name: cfgSiteName,
         mobile_admin_btn_label: cfgMobileAdminBtnLabel,
         mobile_show_logged_username: cfgMobileShowLoggedUsername,
@@ -3807,6 +3811,157 @@ export default function AdminPortal({
                     </div>
                   </label>
                 ))}
+              </div>
+
+              {/* FITUR OVERRIDE FONT SYSTEM & PERFORMANCE */}
+              <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-950 space-y-3 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold">
+                      <Zap className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h5 className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span>Override Font System & Performance</span>
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold uppercase">SUPERCHARGED SPEED</span>
+                      </h5>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                        Pilih mode font untuk menggantikan/menimpa font bawaan tema demi kecepatan loading maksimal, bebas FOUT, dan penghematan bandwidth.
+                      </p>
+                    </div>
+                  </div>
+                  {cfgFontOverrideMode === 'system' && (
+                    <span className="self-start sm:self-auto px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-[11px] font-extrabold flex items-center gap-1">
+                      ⚡ 0 KB Download
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-1">
+                  {/* Option 1: System Font Stack */}
+                  <label
+                    className={`cursor-pointer border-2 rounded-xl p-3 flex items-start gap-3 transition-all ${
+                      cfgFontOverrideMode === 'system'
+                        ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/20 shadow-xs'
+                        : 'border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700 bg-white dark:bg-slate-900'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="font_override_mode"
+                      value="system"
+                      checked={cfgFontOverrideMode === 'system'}
+                      onChange={(e) => setCfgFontOverrideMode(e.target.value as any)}
+                      className="mt-0.5"
+                    />
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-xs text-slate-900 dark:text-white">
+                          System Font Stack (Default & Paling Ringan - 0 KB)
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-[9px] font-black">
+                          0 KB
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed font-sans">
+                        Menggunakan font native OS (San Francisco, Segoe UI, Roboto, Ubuntu). Teks tampil instan 0 ms, nol layout shift, tanpa unduhan font web eksternal.
+                      </p>
+                    </div>
+                  </label>
+
+                  {/* Option 2: Inter Variable */}
+                  <label
+                    className={`cursor-pointer border-2 rounded-xl p-3 flex items-start gap-3 transition-all ${
+                      cfgFontOverrideMode === 'inter'
+                        ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/20 shadow-xs'
+                        : 'border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700 bg-white dark:bg-slate-900'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="font_override_mode"
+                      value="inter"
+                      checked={cfgFontOverrideMode === 'inter'}
+                      onChange={(e) => setCfgFontOverrideMode(e.target.value as any)}
+                      className="mt-0.5"
+                    />
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-xs text-slate-900 dark:text-white">
+                          Inter Variable (WOFF2)
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[9px] font-black">
+                          VARIABLE
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                        Font modern dan presisi tinggi. Hanya 1 berkas .woff2 variabel (weight 100–900) dengan aturan font-display: swap untuk rendering cepat.
+                      </p>
+                    </div>
+                  </label>
+
+                  {/* Option 3: Plus Jakarta Sans Variable */}
+                  <label
+                    className={`cursor-pointer border-2 rounded-xl p-3 flex items-start gap-3 transition-all ${
+                      cfgFontOverrideMode === 'plus-jakarta-sans'
+                        ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/20 shadow-xs'
+                        : 'border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700 bg-white dark:bg-slate-900'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="font_override_mode"
+                      value="plus-jakarta-sans"
+                      checked={cfgFontOverrideMode === 'plus-jakarta-sans'}
+                      onChange={(e) => setCfgFontOverrideMode(e.target.value as any)}
+                      className="mt-0.5"
+                    />
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-xs text-slate-900 dark:text-white">
+                          Plus Jakarta Sans Variable (WOFF2)
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 text-[9px] font-black">
+                          VARIABLE
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                        Font geometris elegan khas portal modern. Hanya 1 berkas .woff2 variabel (weight 200–800) dengan aturan font-display: swap.
+                      </p>
+                    </div>
+                  </label>
+
+                  {/* Option 4: Gunakan Font Tema */}
+                  <label
+                    className={`cursor-pointer border-2 rounded-xl p-3 flex items-start gap-3 transition-all ${
+                      cfgFontOverrideMode === 'theme'
+                        ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/20 shadow-xs'
+                        : 'border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700 bg-white dark:bg-slate-900'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="font_override_mode"
+                      value="theme"
+                      checked={cfgFontOverrideMode === 'theme'}
+                      onChange={(e) => setCfgFontOverrideMode(e.target.value as any)}
+                      className="mt-0.5"
+                    />
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-xs text-slate-900 dark:text-white">
+                          Gunakan Font Tema (Default bawaan theme preset)
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[9px] font-black">
+                          PRESET
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                        Mengikuti tipografi spesifik dari Preset Tema di atas (misal: Space Grotesk, Quicksand, Merriweather, dsb.) dengan font-display: swap.
+                      </p>
+                    </div>
+                  </label>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
