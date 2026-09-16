@@ -165,6 +165,8 @@ CREATE TABLE IF NOT EXISTS iklan_baris (
   status TEXT DEFAULT 'pending', -- 'pending' | 'published' | 'rejected' | 'expired'
   rejection_reason TEXT,
   expires_at TEXT,
+  image_url TEXT,
+  is_admin_ad INTEGER DEFAULT 0,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
