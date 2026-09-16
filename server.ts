@@ -2039,9 +2039,11 @@ app.get('/api/iklan-baris', async (req, res) => {
       return { ...item, status: computedStatus };
     });
 
+    let totalAll = 0;
     const categoryCounts: Record<string, number> = {};
     mockIklanBaris.forEach(item => {
       if ((isStaff || item.status === 'published') && !isAdExpired(item)) {
+        totalAll++;
         const k = item.kategori;
         if (k) {
           categoryCounts[k] = (categoryCounts[k] || 0) + 1;
@@ -2053,6 +2055,7 @@ app.get('/api/iklan-baris', async (req, res) => {
       success: true,
       items: sanitizedItems,
       total,
+      totalAll,
       page,
       limit,
       totalPages,

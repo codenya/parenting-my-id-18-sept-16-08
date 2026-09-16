@@ -69,8 +69,30 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalCount, setTotalCount] = useState(0);
+    const [totalAllCount, setTotalAllCount] = useState(0);
     const [selectedKategori, setSelectedKategori] = useState('Semua');
     const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
+
+    const formatCount = (count: number): string => {
+      if (count > 999) return '> 1000';
+      return String(count);
+    };
+
+    const getCategoryCount = (katName: string): number => {
+      if (categoryCounts[katName] !== undefined) return Number(categoryCounts[katName]) || 0;
+      if (categoryCounts[katName.toUpperCase()] !== undefined) return Number(categoryCounts[katName.toUpperCase()]) || 0;
+      const clean = katName.trim().toLowerCase();
+      for (const [key, val] of Object.entries(categoryCounts)) {
+        if (key.trim().toLowerCase() === clean) return Number(val) || 0;
+      }
+      return 0;
+    };
+
+    const totalSumFromCategories = useMemo(() => {
+      return (Object.values(categoryCounts) as number[]).reduce<number>((acc, c) => acc + (typeof c === 'number' ? c : (Number(c) || 0)), 0);
+    }, [categoryCounts]);
+
+    const displayTotalAll = totalAllCount || (selectedKategori === 'Semua' ? totalCount : 0) || totalSumFromCategories || totalCount;
   
     // Form State
     const [showForm, setShowForm] = useState(false);
@@ -115,7 +137,7 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
 'Peralatan',
 'Perawatan',
 'Perlengkapan',
-'Sekolah ',
+'Sekolah',
 'Sepatu',
 'Seminar',
 'Training',
@@ -137,6 +159,29 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState('');
   const [submitError, setSubmitError] = useState('');
+
+  // Initial fetch for category counts across all categories
+  useEffect(() => {
+    const fetchInitialCounts = async () => {
+      try {
+        const res = await fetch('/api/iklan-baris?page=1&limit=1');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.categoryCounts && Object.keys(data.categoryCounts).length > 0) {
+            setCategoryCounts(data.categoryCounts);
+          }
+          if (data.totalAll !== undefined) {
+            setTotalAllCount(data.totalAll);
+          } else if (data.total !== undefined) {
+            setTotalAllCount(data.total);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load initial category counts:', err);
+      }
+    };
+    fetchInitialCounts();
+  }, []);
 
   // Read initial URL Search Parameters on mount (e.g., ?kat=nanny&page=2 or ?kategori=nanny&page=2)
   useEffect(() => {
@@ -164,7 +209,12 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
         setAds(data.items || []);
         setTotalPages(data.totalPages || 1);
         setTotalCount(data.total || 0);
-        if (data.categoryCounts) {
+        if (data.totalAll !== undefined) {
+          setTotalAllCount(data.totalAll);
+        } else if (kat === 'Semua') {
+          setTotalAllCount(data.total || 0);
+        }
+        if (data.categoryCounts && Object.keys(data.categoryCounts).length > 0) {
           setCategoryCounts(data.categoryCounts);
         }
       }
@@ -650,30 +700,30 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
 
         {/* LAYOUT VIEW MODE SWITCHER & CATEGORY FILTER TABS */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-3 mb-6 border-b-2 border-slate-300 dark:border-slate-800">
-          <div className="flex flex-wrap items-center gap-2 py-1">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 py-1">
             <button
               onClick={() => { setSelectedKategori('Semua'); setCurrentPage(1); }}
-              className={`px-3.5 py-1.5 rounded-lg font-black text-xs uppercase tracking-wider transition-all ${
+              className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md sm:rounded-lg font-bold sm:font-black text-[11px] sm:text-xs uppercase tracking-tight sm:tracking-wider transition-all whitespace-nowrap ${
                 selectedKategori === 'Semua'
                   ? 'bg-slate-900 text-amber-300 dark:bg-amber-400 dark:text-slate-900 shadow'
                   : 'bg-stone-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-stone-300'
               }`}
             >
-              Semua - {totalCount}
+              Semua : {formatCount(displayTotalAll)}
             </button>
             {KATEGORI_OPTIONS.map((kat) => {
-              const count = categoryCounts[kat] || categoryCounts[kat.toUpperCase()] || 0;
+              const count = getCategoryCount(kat);
               return (
                 <button
                   key={kat}
                   onClick={() => { setSelectedKategori(kat); setCurrentPage(1); }}
-                  className={`px-3.5 py-1.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all ${
+                  className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md sm:rounded-lg font-medium sm:font-bold text-[11px] sm:text-xs uppercase tracking-tight sm:tracking-wider transition-all whitespace-nowrap ${
                     selectedKategori === kat
                       ? 'bg-slate-900 text-amber-300 dark:bg-amber-400 dark:text-slate-900 shadow'
                       : 'bg-stone-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-stone-300'
                   }`}
                 >
-                  {kat} - {count}
+                  {kat} : {formatCount(count)}
                 </button>
               );
             })}

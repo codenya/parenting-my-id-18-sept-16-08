@@ -3503,13 +3503,39 @@ Berdasarkan judul artikel: "${title}" dan isi: "${(content || '').slice(0, 500)}
             };
           });
 
+          // Calculate categoryCounts and totalAll across all active published ads
+          const catCountsRes: any = await env.DB.prepare(`
+            SELECT kategori, COUNT(*) as cnt 
+            FROM iklan_baris 
+            WHERE status = 'published' AND (expires_at IS NULL OR expires_at = '' OR date(expires_at) >= date('now'))
+            GROUP BY kategori
+          `).all();
+
+          const totalAllRes: any = await env.DB.prepare(`
+            SELECT COUNT(*) as total_all 
+            FROM iklan_baris 
+            WHERE status = 'published' AND (expires_at IS NULL OR expires_at = '' OR date(expires_at) >= date('now'))
+          `).first();
+
+          const categoryCounts: Record<string, number> = {};
+          if (catCountsRes && catCountsRes.results) {
+            for (const r of catCountsRes.results) {
+              if (r.kategori) {
+                categoryCounts[r.kategori] = Number(r.cnt) || 0;
+              }
+            }
+          }
+          const totalAll = totalAllRes ? Number(totalAllRes.total_all) : total;
+
           return jsonResponse({
             success: true,
             items: mappedResults,
             total,
+            totalAll,
             page,
             limit,
-            totalPages: Math.ceil(total / limit) || 1
+            totalPages: Math.ceil(total / limit) || 1,
+            categoryCounts
           });
         } catch (e: any) {
           console.error('D1 iklan_baris GET error:', e);
@@ -3547,13 +3573,27 @@ Berdasarkan judul artikel: "${title}" dan isi: "${(content || '').slice(0, 500)}
         status: (i.status === 'expired' || isItemExpired(i)) ? 'expired' : i.status
       }));
 
+      const categoryCounts: Record<string, number> = {};
+      let totalAll = 0;
+      cfMockIklanBaris.forEach(item => {
+        if (item.status === 'published' && !isItemExpired(item)) {
+          totalAll++;
+          const k = item.kategori;
+          if (k) {
+            categoryCounts[k] = (categoryCounts[k] || 0) + 1;
+          }
+        }
+      });
+
       return jsonResponse({
         success: true,
         items: mappedPaginated,
         total: filtered.length,
+        totalAll,
         page,
         limit,
-        totalPages: Math.ceil(filtered.length / limit) || 1
+        totalPages: Math.ceil(filtered.length / limit) || 1,
+        categoryCounts
       });
     }
 
