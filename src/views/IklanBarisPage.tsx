@@ -270,6 +270,7 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
 
     // Ensure ads are deduplicated by id to strictly avoid duplicate ItemList entries in Google validator
     const uniqueAds = Array.from(new Map<number, IklanBarisItem>(ads.map((item) => [item.id, item])).values());
+    const seenDescriptions = new Set<string>();
 
     return {
       "@context": "https://schema.org",
@@ -278,7 +279,15 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
       "name": `Daftar Iklan Baris ${selectedKategori} (Halaman ${currentPage})`,
       "numberOfItems": uniqueAds.length,
       "itemListElement": uniqueAds.map((item, index) => {
-        const cleanDesc = (item.keteranganBarang || '').trim();
+        let cleanDesc = (item.keteranganBarang || '').trim();
+        // Prevent "Identical property values given" by ensuring unique description per ListItem
+        if (!cleanDesc) {
+          cleanDesc = `${item.kategori} - ${item.nama} (#${item.id})`;
+        } else if (seenDescriptions.has(cleanDesc)) {
+          cleanDesc = `${cleanDesc} (Iklan #${item.id})`;
+        }
+        seenDescriptions.add(cleanDesc);
+
         return {
           "@type": "ListItem",
           "position": index + 1,
@@ -386,13 +395,6 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
 
   return (
     <div className="min-h-screen bg-amber-50/40 dark:bg-slate-950 text-slate-900 dark:text-slate-100 py-10 font-sans">
-      
-      {/* JSON-LD SCHEMA FOR GOOGLEBOT CRAWLING */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }}
-      />
-
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         
         {/* SIMPLIFIED HEADER */}
