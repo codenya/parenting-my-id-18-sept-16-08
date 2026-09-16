@@ -7,12 +7,14 @@ interface SmartRelatedArticlesProps {
   currentPost: Post;
   allPosts: Post[];
   onSelectPost: (slug: string) => void;
+  heading?: string;
 }
 
 export default function SmartRelatedArticles({
   currentPost,
   allPosts,
   onSelectPost,
+  heading,
 }: SmartRelatedArticlesProps) {
   const relatedPosts = useMemo(() => {
     if (!currentPost || !allPosts) return [];
@@ -65,7 +67,7 @@ export default function SmartRelatedArticles({
             <Sparkles className="w-4 h-4" />
           </div>
           <h2 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Artikel Terkait Rekomendasi
+            {heading || 'Artikel Terkait Rekomendasi'}
           </h2>
         </div>
         <span className="text-xs font-bold text-slate-700 dark:text-slate-300">

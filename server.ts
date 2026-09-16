@@ -2101,13 +2101,28 @@ app.post('/api/iklan-baris', async (req, res) => {
       }
     }
 
-    // 4. Input Validation
+    // 4. Input Validation & Category Enforcement against Admin Config
     if (!kategori || !keteranganBarang || !harga || !nama || !kota || !pekerjaan || !tahunLahir || !phone) {
       return res.status(400).json({ error: 'Seluruh kolom isian formulir iklan baris wajib diisi.' });
     }
 
     // 5. Anti-XSS & URL to Plain Text Sanitization
     const cleanKategori = cleanTextAndStripUrls(String(kategori));
+    let allowedCategories = ['Aksesoris', 'Aplikasi', 'Asuransi', 'Bimbel', 'Buku', 'Daycare', 'Jasa', 'Kebersihan', 'Kehamilan', 'Keluarga', 'Kesehatan', 'Keuangan', 'Klinik', 'Konsultasi', 'Kursus', 'Les Privat', 'Lifestyle', 'Lowongan Kerja', 'Mainan', 'Mencari Kerja', 'Menyusui', 'Nutrisi Gizi', 'Obat', 'Pakaian', 'Pasca Kelahiran', 'Pendidikan', 'Pengasuh', 'Peralatan', 'Perawatan', 'Perlengkapan', 'Sekolah', 'Sepatu', 'Seminar', 'Training', 'Transport', 'Wisata', 'Pola Asuh', 'Balita', 'Psikologi Ibu', 'Tumbuh Kembang', 'Umum'];
+    try {
+      const configPath = path.join(process.cwd(), 'public', 'site_config.json');
+      if (fs.existsSync(configPath)) {
+        const parsed = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+        if (parsed.classified_categories) {
+          allowedCategories = parsed.classified_categories.split(',').map((s: string) => s.trim()).filter(Boolean);
+        }
+      }
+    } catch (e) {}
+
+    if (!allowedCategories.includes(cleanKategori)) {
+      return res.status(400).json({ error: `Kategori iklan baris tidak valid. Harap pilih kategori resmi yang ditentukan admin: ${allowedCategories.join(', ')}` });
+    }
+
     const cleanKet = cleanTextAndStripUrls(String(keteranganBarang));
     const cleanHarga = cleanTextAndStripUrls(String(harga));
     const cleanNama = cleanTextAndStripUrls(String(nama));
@@ -4914,6 +4929,17 @@ app.get(['/kategori/:category', '/kategori/:category/'], (req, res, next) => {
     console.error('Error pre-rendering Category Page HTML:', e);
     return next();
   }
+});
+
+// Explicit Robots.txt with Content-Signal directives
+app.get('/robots.txt', (req, res) => {
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  return res.send(`User-agent: *
+Allow: /
+Content-Signal: ai-train=no, search=yes, ai-input=no
+`);
 });
 
 // RFC 9727 API Catalog Endpoint for AI Agent Discovery

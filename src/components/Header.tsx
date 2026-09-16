@@ -225,7 +225,7 @@ export default function Header({ currentView, onNavigate, currentUser, onLogout,
           {customHamburgerLinks ? (
             <div className="space-y-1">
               <span className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block mb-1">
-                Menu Utama (Navigasi Mobile)
+                {siteConfig?.mobile_menu_label || 'Menu Utama (Navigasi Mobile)'}
               </span>
               {customHamburgerLinks.map((link, idx) => (
                 <a

@@ -308,6 +308,7 @@ export interface SiteConfig {
   classified_edition?: string;
   classified_price_tag?: string;
   classified_phone?: string;
+  classified_categories?: string;
 
   // Model 10: Knowledge Base
   kb_badge_text?: string;

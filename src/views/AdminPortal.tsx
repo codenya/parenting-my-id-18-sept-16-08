@@ -625,6 +625,7 @@ export default function AdminPortal({
   const [cfgClassifiedEdition, setCfgClassifiedEdition] = useState(siteConfig?.classified_edition || '1988/2026');
   const [cfgClassifiedPriceTag, setCfgClassifiedPriceTag] = useState(siteConfig?.classified_price_tag || 'HARGA ECERAN RP 500,-');
   const [cfgClassifiedPhone, setCfgClassifiedPhone] = useState(siteConfig?.classified_phone || '(021) 7654321');
+  const [cfgClassifiedCategories, setCfgClassifiedCategories] = useState(siteConfig?.classified_categories || 'Aksesoris, Aplikasi, Asuransi, Bimbel, Buku, Daycare, Jasa, Kebersihan, Kehamilan, Keluarga, Kesehatan, Keuangan, Klinik, Konsultasi, Kursus, Les Privat, Lifestyle, Lowongan Kerja, Mainan, Mencari Kerja, Menyusui, Nutrisi Gizi, Obat, Pakaian, Pasca Kelahiran, Pendidikan, Pengasuh, Peralatan, Perawatan, Perlengkapan, Sekolah, Sepatu, Seminar, Training, Transport, Wisata, Pola Asuh, Balita, Psikologi Ibu, Tumbuh Kembang, Umum');
 
   // 9. Knowledge Base Model States
   const [cfgKbBadgeText, setCfgKbBadgeText] = useState(siteConfig?.kb_badge_text || 'Ensiklopedia & Pusat Bantuan');
@@ -898,6 +899,7 @@ export default function AdminPortal({
       setCfgClassifiedEdition(siteConfig.classified_edition || '1988/2026');
       setCfgClassifiedPriceTag(siteConfig.classified_price_tag || 'HARGA ECERAN RP 500,-');
       setCfgClassifiedPhone(siteConfig.classified_phone || '(021) 7654321');
+      setCfgClassifiedCategories(siteConfig.classified_categories || 'Aksesoris, Aplikasi, Asuransi, Bimbel, Buku, Daycare, Jasa, Kebersihan, Kehamilan, Keluarga, Kesehatan, Keuangan, Klinik, Konsultasi, Kursus, Les Privat, Lifestyle, Lowongan Kerja, Mainan, Mencari Kerja, Menyusui, Nutrisi Gizi, Obat, Pakaian, Pasca Kelahiran, Pendidikan, Pengasuh, Peralatan, Perawatan, Perlengkapan, Sekolah, Sepatu, Seminar, Training, Transport, Wisata, Pola Asuh, Balita, Psikologi Ibu, Tumbuh Kembang, Umum');
 
       setCfgKbBadgeText(siteConfig.kb_badge_text || 'Ensiklopedia & Pusat Bantuan');
       setCfgKbTitle(siteConfig.kb_title || 'Bagaimana Kami Bisa Membantu Pengasuhan Anda?');
@@ -1121,6 +1123,7 @@ export default function AdminPortal({
         classified_edition: cfgClassifiedEdition,
         classified_price_tag: cfgClassifiedPriceTag,
         classified_phone: cfgClassifiedPhone,
+        classified_categories: cfgClassifiedCategories,
 
         kb_badge_text: cfgKbBadgeText,
         kb_title: cfgKbTitle,
@@ -1443,6 +1446,7 @@ export default function AdminPortal({
         classified_edition: cfgClassifiedEdition,
         classified_price_tag: cfgClassifiedPriceTag,
         classified_phone: cfgClassifiedPhone,
+        classified_categories: cfgClassifiedCategories,
 
         kb_badge_text: cfgKbBadgeText,
         kb_title: cfgKbTitle,
@@ -5322,6 +5326,22 @@ export default function AdminPortal({
                           className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-semibold focus:ring-2 focus:ring-rose-500"
                         />
                       </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                        Daftar Kategori Iklan Baris Resmi Wajib Patuh (classified_categories - Pisahkan dengan koma)
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={cfgClassifiedCategories}
+                        onChange={(e) => setCfgClassifiedCategories(e.target.value)}
+                        placeholder="Pola Asuh, Tumbuh Kembang, Kesehatan & Gizi, Balita, Psikologi Ibu, Umum"
+                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-semibold focus:ring-2 focus:ring-rose-500"
+                      />
+                      <p className="text-[11px] text-slate-500 mt-1">
+                        Kategori ini akan langsung diterapkan secara otomatis pada form pasang iklan dan menu filter publik. User wajib memilih salah satu dari kategori yang Anda tentukan di atas.
+                      </p>
                     </div>
                   </div>
                 )}
