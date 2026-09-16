@@ -302,10 +302,7 @@ export default function NewspaperClassifiedGrid({
           <div key={catName} className="kategori-block newspaper-block mb-4">
             
             {/* CATEGORY HEADER TITLE WITH AD COUNT INDICATOR (SEPARATED BY : WITHOUT UNIT) */}
-            <h3 
-              onClick={() => onSelectCategory && onSelectCategory(catName)}
-              className="kategori-title cursor-pointer hover:bg-gray-800 transition-colors block m-0"
-            >
+            <h3 className="kategori-title block m-0">
               {catName} : {formatCount(getCategoryCount(catName, blocks.length))}
             </h3>
 
