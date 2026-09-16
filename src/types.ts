@@ -320,6 +320,12 @@ export interface SiteConfig {
   classified_price_tag?: string;
   classified_phone?: string;
   classified_categories?: string;
+  classified_notice?: string;
+
+  // Surat Pembaca Config
+  surat_pembaca_channel_label?: string;
+  surat_pembaca_login_info?: string;
+  surat_pembaca_notice?: string;
 
   // Model 10: Knowledge Base
   kb_badge_text?: string;

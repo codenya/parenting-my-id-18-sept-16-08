@@ -626,6 +626,7 @@ export default function AdminPortal({
   const [cfgClassifiedPriceTag, setCfgClassifiedPriceTag] = useState(siteConfig?.classified_price_tag || 'HARGA ECERAN RP 500,-');
   const [cfgClassifiedPhone, setCfgClassifiedPhone] = useState(siteConfig?.classified_phone || '(021) 7654321');
   const [cfgClassifiedCategories, setCfgClassifiedCategories] = useState(siteConfig?.classified_categories || 'Aksesoris, Aplikasi, Asuransi, Bimbel, Buku, Daycare, Jasa, Kebersihan, Kehamilan, Keluarga, Kesehatan, Keuangan, Klinik, Konsultasi, Kursus, Les Privat, Lifestyle, Lowongan Kerja, Mainan, Mencari Kerja, Menyusui, Nutrisi Gizi, Obat, Pakaian, Pasca Kelahiran, Pendidikan, Pengasuh, Peralatan, Perawatan, Perlengkapan, Sekolah, Sepatu, Seminar, Training, Transport, Wisata, Pola Asuh, Balita, Psikologi Ibu, Tumbuh Kembang, Umum');
+  const [cfgClassifiedNotice, setCfgClassifiedNotice] = useState(siteConfig?.classified_notice || 'Iklan baris gratis : Tautan URL akan otomatis dikonversi menjadi teks biasa. Jika ingin menggunakan URL dan gambar iklan, hubungi redaksi/editor untuk tarif iklan baris berbayar.');
 
   // 9. Knowledge Base Model States
   const [cfgKbBadgeText, setCfgKbBadgeText] = useState(siteConfig?.kb_badge_text || 'Ensiklopedia & Pusat Bantuan');
@@ -900,6 +901,7 @@ export default function AdminPortal({
       setCfgClassifiedPriceTag(siteConfig.classified_price_tag || 'HARGA ECERAN RP 500,-');
       setCfgClassifiedPhone(siteConfig.classified_phone || '(021) 7654321');
       setCfgClassifiedCategories(siteConfig.classified_categories || 'Aksesoris, Aplikasi, Asuransi, Bimbel, Buku, Daycare, Jasa, Kebersihan, Kehamilan, Keluarga, Kesehatan, Keuangan, Klinik, Konsultasi, Kursus, Les Privat, Lifestyle, Lowongan Kerja, Mainan, Mencari Kerja, Menyusui, Nutrisi Gizi, Obat, Pakaian, Pasca Kelahiran, Pendidikan, Pengasuh, Peralatan, Perawatan, Perlengkapan, Sekolah, Sepatu, Seminar, Training, Transport, Wisata, Pola Asuh, Balita, Psikologi Ibu, Tumbuh Kembang, Umum');
+      setCfgClassifiedNotice(siteConfig.classified_notice || 'Iklan baris gratis : Tautan URL akan otomatis dikonversi menjadi teks biasa. Jika ingin menggunakan URL dan gambar iklan, hubungi redaksi/editor untuk tarif iklan baris berbayar.');
 
       setCfgKbBadgeText(siteConfig.kb_badge_text || 'Ensiklopedia & Pusat Bantuan');
       setCfgKbTitle(siteConfig.kb_title || 'Bagaimana Kami Bisa Membantu Pengasuhan Anda?');
@@ -1124,6 +1126,7 @@ export default function AdminPortal({
         classified_price_tag: cfgClassifiedPriceTag,
         classified_phone: cfgClassifiedPhone,
         classified_categories: cfgClassifiedCategories,
+        classified_notice: cfgClassifiedNotice,
 
         kb_badge_text: cfgKbBadgeText,
         kb_title: cfgKbTitle,
@@ -1447,6 +1450,7 @@ export default function AdminPortal({
         classified_price_tag: cfgClassifiedPriceTag,
         classified_phone: cfgClassifiedPhone,
         classified_categories: cfgClassifiedCategories,
+        classified_notice: cfgClassifiedNotice,
 
         kb_badge_text: cfgKbBadgeText,
         kb_title: cfgKbTitle,
@@ -5341,6 +5345,22 @@ export default function AdminPortal({
                       />
                       <p className="text-[11px] text-slate-500 mt-1">
                         Kategori ini akan langsung diterapkan secara otomatis pada form pasang iklan dan menu filter publik. User wajib memilih salah satu dari kategori yang Anda tentukan di atas.
+                      </p>
+                    </div>
+
+                    <div className="mt-4">
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                        Catatan / Peringatan Form Iklan Baris (classified_notice)
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={cfgClassifiedNotice}
+                        onChange={(e) => setCfgClassifiedNotice(e.target.value)}
+                        placeholder="Iklan baris gratis : Tautan URL akan otomatis dikonversi..."
+                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-semibold focus:ring-2 focus:ring-rose-500"
+                      />
+                      <p className="text-[11px] text-slate-500 mt-1">
+                        Teks pemberitahuan atau ketentuan pasang iklan yang tampil di bawah form input keterangan barang.
                       </p>
                     </div>
                   </div>
