@@ -1,6 +1,7 @@
 {
   "homepage_display_mode": "default",
   "active_theme_preset": "blog-pastel",
+  "font_override_mode": "system",
   "site_name": "Modern Edge Blog",
   "mobile_admin_btn_label": "Portal Admin & Editor",
   "mobile_show_logged_username": false,

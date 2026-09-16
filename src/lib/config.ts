@@ -71,6 +71,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
   mobile_admin_btn_label: 'Portal Admin & Editor',
   mobile_show_logged_username: false,
   active_theme_preset: 'corp-blue',
+  font_override_mode: 'system',
   site_domain: 'parenting.my.id',
   default_theme_mode: 'auto',
   font_density_scale: 'standard',
