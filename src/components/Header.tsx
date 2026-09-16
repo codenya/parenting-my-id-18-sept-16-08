@@ -98,7 +98,14 @@ export default function Header({ currentView, onNavigate, currentUser, onLogout,
   const logoutTooltip = `Keluar / Logout (Hard Link: /admin-${String(siteConfig?.admin_url_suffix || '9999')}?logout=true)`;
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-rose-100 dark:border-slate-800 h-16 min-h-[64px]">
+    <>
+      {siteConfig?.enable_top_announcement && (
+        <div className={`w-full ${siteConfig.top_announcement_bg || 'bg-rose-600'} ${siteConfig.top_announcement_text_color || 'text-white'} text-xs font-semibold py-1.5 px-4 text-center tracking-wide flex items-center justify-center gap-2 border-b border-rose-700/50`}>
+          <Sparkles className="w-3.5 h-3.5 shrink-0 animate-pulse" />
+          <span>{siteConfig.top_announcement_text || '🚀 PENTING: Gunakan fitur Pencarian & Kategori di atas untuk navigasi cepat artikel pilihan...'}</span>
+        </div>
+      )}
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-rose-100 dark:border-slate-800 h-16 min-h-[64px]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           
@@ -313,5 +320,6 @@ export default function Header({ currentView, onNavigate, currentUser, onLogout,
         </div>
       )}
     </header>
+    </>
   );
 }

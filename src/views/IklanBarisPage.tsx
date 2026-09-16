@@ -288,9 +288,9 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
             return {
               "@type": "ListItem",
               "position": index + 1,
-              "name": `${item.kategori}: ${item.keteranganBarang.substring(0, 70)}...`,
+              "name": `${item.kategori} - ${item.nama} (#${item.id}): ${item.keteranganBarang.substring(0, 60)}...`,
               "description": item.keteranganBarang,
-              "url": `${origin}/iklan-baris`
+              "url": `${pageUrl}#ad-${item.id}`
             };
           })
         }

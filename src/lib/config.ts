@@ -87,6 +87,34 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
   footer_badge_2: 'Diperbarui Rutin',
   footer_badge_3: '100% Gratis',
 
+  // 8 GUI Manageable Component Defaults
+  enable_top_announcement: false,
+  top_announcement_text: '🚀 PENTING: Gunakan fitur Pencarian & Kategori di atas untuk navigasi cepat artikel pilihan...',
+  top_announcement_bg: 'bg-rose-600',
+  top_announcement_text_color: 'text-white',
+
+  enable_whatsapp_widget: true,
+  whatsapp_number: '6281234567890',
+  whatsapp_default_message: 'Halo Redaksi, saya ingin bertanya seputar...',
+  whatsapp_position: 'bottom-right',
+
+  enable_custom_ad_slots: false,
+  custom_ad_leaderboard_html: '',
+  custom_ad_rectangle_html: '',
+  custom_ad_slot_size: '728x90',
+
+  enable_habit_simulator: true,
+  habit_simulator_title: 'Simulasi Kebiasaan Positif',
+  habit_simulator_subtitle: 'Ukur kebiasaan pengasuhan anak sehari-hari',
+
+  enable_interactive_quiz: true,
+  quiz_builder_title: 'Kuis Edukasi & Psikologi Anak',
+
+  enable_interactive_timeline: true,
+
+  cusdis_app_id: '',
+  cusdis_host: 'https://cusdis.com',
+
   // Performance Metric Box Defaults
   show_performance_box: true,
   show_tech_badges: true,
