@@ -321,9 +321,9 @@ export default function NewspaperClassifiedGrid({
                       <img
                         src={block.dbData.imageUrl}
                         alt="Ilustrasi Iklan"
-                        className="max-w-[120px] max-h-[90px] w-auto h-auto object-cover grayscale rounded-sm border border-gray-300 block my-1"
                         loading="lazy"
-                        style={{ filter: 'grayscale(100%)' }}
+                        decoding="async"
+                        className="w-full h-auto max-h-[400px] object-contain grayscale rounded-sm border border-gray-300 block my-1"
                       />
                     </div>
                   )}
