@@ -85,7 +85,47 @@ interface IklanBarisPageProps {
     const [expiresAt, setExpiresAt] = useState('');
 
     useEffect(() => {
-      const opts = siteConfig?.classified_categories ? siteConfig.classified_categories.split(',').map(s => s.trim()).filter(Boolean) : ['Pola Asuh', 'Tumbuh Kembang', 'Kesehatan & Gizi', 'Balita', 'Psikologi Ibu', 'Umum'];
+      const opts = siteConfig?.classified_categories ? siteConfig.classified_categories.split(',').map(s => s.trim()).filter(Boolean) : ['Aksesoris',
+'Aplikasi',
+'Asuransi',
+'Bimbel',
+'Buku',
+'Daycare',
+'Jasa',
+'Kebersihan',
+'Kehamilan',
+'Keluarga',
+'Kesehatan',
+'Keuangan',
+'Klinik',
+'Konsultasi',
+'Kursus',
+'Les Privat',
+'Lifestyle',
+'Lowongan Kerja',
+'Mainan',
+'Mencari Kerja',
+'Menyusui',
+'Nutrisi Gizi',
+'Obat',
+'Pakaian',
+'Pasca Kelahiran',
+'Pendidikan',
+'Pengasuh',
+'Peralatan',
+'Perawatan',
+'Perlengkapan',
+'Sekolah ',
+'Sepatu',
+'Seminar',
+'Training',
+'Transport',
+'Wisata',
+'Pola Asuh',
+'Balita',
+'Psikologi Ibu',
+'Tumbuh Kembang',
+'Umum'];
       if (opts.length > 0 && (!kategori || !opts.includes(kategori))) {
         setKategori(opts[0]);
       }
