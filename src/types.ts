@@ -116,6 +116,15 @@ export interface SiteConfig {
   social_twitter: string;
   footer_menu_links: NavLink[];
   footer_category_links?: NavLink[];
+  footer_category_heading?: string;
+  footer_quick_links_heading?: string;
+  mobile_menu_label?: string;
+  article_share_label?: string;
+  related_articles_heading?: string;
+  classified_max_chars?: string;
+  surat_pembaca_title?: string;
+  surat_pembaca_subtitle?: string;
+  surat_pembaca_guidelines?: string;
   comment_engine_mode?: 'both' | 'native' | 'cusdis' | 'none';
   admin_login_title?: string;
   admin_login_subtitle?: string;
