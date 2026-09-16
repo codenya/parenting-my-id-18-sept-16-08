@@ -6,11 +6,12 @@ import { parseAndRenderReferences } from '../lib/referenceParser';
 import { AutoLink, User, PostRevision, UserRole, PostStatus } from '../types';
 import SeoAuditWidget from './SeoAuditWidget';
 import { 
-  Bold, Italic, Strikethrough, Heading1, Heading2, Heading3, 
+  Bold, Italic, Strikethrough, Heading2, Heading3, 
   List, ListOrdered, CheckSquare, Quote, Code, Table, Minus, 
   Link as LinkIcon, Link2, Image as ImageIcon, Upload, Eye, Edit3, Columns, 
   Undo, Redo, Sparkles, CheckCircle2, RefreshCw, X, Copy, Check, FileText,
-  Users, History, RotateCcw, Award, ShieldCheck, Send, AlertTriangle, AlertCircle, ThumbsUp, XCircle, Video, ShoppingBag, Maximize2, Minimize2
+  Users, History, RotateCcw, Award, ShieldCheck, Send, AlertTriangle, AlertCircle, ThumbsUp, XCircle, Video, ShoppingBag, Maximize2, Minimize2,
+  RemoveFormatting
 } from 'lucide-react';
 
 interface RichPostEditorProps {
@@ -602,17 +603,28 @@ export default function RichPostEditor({
     activeStates: {
       bold: boolean;
       italic: boolean;
-      h1: boolean;
       h2: boolean;
+      h3: boolean;
       quote: boolean;
       pullquote: boolean;
+      bulletList: boolean;
+      numberedList: boolean;
     };
   }>({
     visible: false,
     x: 0,
     y: 0,
     showBelow: false,
-    activeStates: { bold: false, italic: false, h1: false, h2: false, quote: false, pullquote: false },
+    activeStates: {
+      bold: false,
+      italic: false,
+      h2: false,
+      h3: false,
+      quote: false,
+      pullquote: false,
+      bulletList: false,
+      numberedList: false,
+    },
   });
 
   const [flyingLinkMode, setFlyingLinkMode] = useState(false);
@@ -654,10 +666,12 @@ export default function RichPostEditor({
       (textarea.value.substring(Math.max(0, start - 2), start) === '**' && textarea.value.substring(end, end + 2) === '**');
     const isItalic = (selectedText.startsWith('*') && selectedText.endsWith('*') && !selectedText.startsWith('**') && selectedText.length >= 2) ||
       (textarea.value.substring(Math.max(0, start - 1), start) === '*' && textarea.value.substring(end, end + 1) === '*');
-    const isH1 = fullLine.startsWith('# ') && !fullLine.startsWith('## ');
     const isH2 = fullLine.startsWith('## ') && !fullLine.startsWith('### ');
+    const isH3 = fullLine.startsWith('### ') && !fullLine.startsWith('#### ');
     const isPullquote = fullLine.includes('pullquote') || fullLine.includes('blockquote class="pullquote"');
     const isQuote = (fullLine.startsWith('> ') || fullLine.includes('<blockquote')) && !isPullquote;
+    const isBulletList = /^\s*[-*+]\s+/.test(fullLine);
+    const isNumberedList = /^\s*\d+\.\s+/.test(fullLine);
 
     // Hitung posisi toolbar melayang di atas teks
     const rect = textarea.getBoundingClientRect();
@@ -678,7 +692,7 @@ export default function RichPostEditor({
     }
 
     // Hindari toolbar terpotong di tepi layar
-    const toolbarHalfWidth = 140;
+    const toolbarHalfWidth = 175;
     posX = Math.max(toolbarHalfWidth + 12, Math.min(window.innerWidth - toolbarHalfWidth - 12, posX));
 
     // Jika terlalu dekat dengan batas atas layar (< 75px), posisikan di bawah seleksi
@@ -693,10 +707,12 @@ export default function RichPostEditor({
       activeStates: {
         bold: isBold,
         italic: isItalic,
-        h1: isH1,
         h2: isH2,
+        h3: isH3,
         quote: isQuote,
         pullquote: isPullquote,
+        bulletList: isBulletList,
+        numberedList: isNumberedList,
       },
     });
   };
@@ -784,8 +800,9 @@ export default function RichPostEditor({
     }, 10);
   };
 
-  // 3. Tombol H1 (T Besar)
-  const handleFlyingH1 = () => {
+  // 3. Tombol H Besar (H2: ## )
+  // Mengubah baris teks yang disorot menjadi sub-judul ## (atau kembali ke normal text jika diklik sekali lagi)
+  const handleFlyingH2 = () => {
     if (!textareaRef.current) return;
     const ta = textareaRef.current;
     const s = ta.selectionStart;
@@ -797,11 +814,12 @@ export default function RichPostEditor({
     const fullLine = ta.value.substring(lineStart, lineEnd);
     let newLine = '';
 
-    if (fullLine.startsWith('# ') && !fullLine.startsWith('## ')) {
-      // Toggle off kembali ke teks normal
-      newLine = fullLine.replace(/^#\s+/, '');
+    if (fullLine.startsWith('## ') && !fullLine.startsWith('### ')) {
+      // Toggle off: kembali ke teks normal tanpa markup
+      newLine = fullLine.replace(/^##\s+/, '');
     } else {
-      newLine = `# ${fullLine.replace(/^#+\s*/, '')}`;
+      // Hapus heading lama jika ada lalu ubah ke ## (H2)
+      newLine = `## ${fullLine.replace(/^#+\s*/, '')}`;
     }
 
     const updated = ta.value.substring(0, lineStart) + newLine + ta.value.substring(lineEnd);
@@ -816,8 +834,9 @@ export default function RichPostEditor({
     }, 10);
   };
 
-  // 4. Tombol H2 (T Kecil)
-  const handleFlyingH2 = () => {
+  // 4. Tombol H Kecil (H3: ### )
+  // Mengubah baris teks yang disorot menjadi sub-judul ### (atau kembali ke normal text jika diklik sekali lagi)
+  const handleFlyingH3 = () => {
     if (!textareaRef.current) return;
     const ta = textareaRef.current;
     const s = ta.selectionStart;
@@ -829,11 +848,12 @@ export default function RichPostEditor({
     const fullLine = ta.value.substring(lineStart, lineEnd);
     let newLine = '';
 
-    if (fullLine.startsWith('## ') && !fullLine.startsWith('### ')) {
-      // Toggle off kembali ke teks normal
-      newLine = fullLine.replace(/^##\s+/, '');
+    if (fullLine.startsWith('### ') && !fullLine.startsWith('#### ')) {
+      // Toggle off: kembali ke teks normal tanpa markup
+      newLine = fullLine.replace(/^###\s+/, '');
     } else {
-      newLine = `## ${fullLine.replace(/^#+\s*/, '')}`;
+      // Hapus heading lama jika ada lalu ubah ke ### (H3)
+      newLine = `### ${fullLine.replace(/^#+\s*/, '')}`;
     }
 
     const updated = ta.value.substring(0, lineStart) + newLine + ta.value.substring(lineEnd);
@@ -892,7 +912,125 @@ export default function RichPostEditor({
     }, 10);
   };
 
-  // 6. Tombol Link (Ikatan Rantai)
+  // 6. Tombol Daftar (List) - Siklus 3 Status:
+  // Klik 1: Mengubah baris yang disorot menjadi Daftar Poin (Bullet List: - item)
+  // Klik 2: Mengubah menjadi Daftar Angka (Numbered List: 1. item, 2. item, dst.)
+  // Klik 3: Mengembalikan menjadi teks normal tanpa markup list
+  const handleFlyingList = () => {
+    if (!textareaRef.current) return;
+    const ta = textareaRef.current;
+    const s = ta.selectionStart;
+    const e = ta.selectionEnd;
+    const lineStart = ta.value.lastIndexOf('\n', s - 1) + 1;
+    let lineEnd = ta.value.indexOf('\n', e);
+    if (lineEnd === -1) lineEnd = ta.value.length;
+
+    const selectedBlock = ta.value.substring(lineStart, lineEnd);
+    const lines = selectedBlock.split('\n');
+
+    // Cek apakah blok saat ini sudah berupa numbered list atau bullet list
+    const hasNumbered = lines.some(l => /^\s*\d+\.\s+/.test(l));
+    const hasBullet = lines.some(l => /^\s*[-*+]\s+/.test(l));
+
+    let newLines: string[] = [];
+
+    if (hasNumbered) {
+      // Siklus 3: Kembali ke teks normal tanpa markup list
+      newLines = lines.map(line => line.replace(/^\s*\d+\.\s+/, ''));
+    } else if (hasBullet) {
+      // Siklus 2: Ubah dari bullet list menjadi daftar angka (1., 2., 3., dst.)
+      let num = 1;
+      newLines = lines.map(line => {
+        const cleaned = line.replace(/^\s*[-*+]\s+/, '');
+        if (cleaned.trim().length === 0) return line;
+        return `${num++}. ${cleaned}`;
+      });
+    } else {
+      // Siklus 1: Ubah menjadi daftar pin / bullet list (- item)
+      newLines = lines.map(line => {
+        if (line.trim().length === 0) return line;
+        return `- ${line.replace(/^\s*#+\s*/, '').replace(/^\s*>\s*/, '').trim()}`;
+      });
+    }
+
+    const replacement = newLines.join('\n');
+    const updated = ta.value.substring(0, lineStart) + replacement + ta.value.substring(lineEnd);
+    updateMarkdownWithHistory(updated);
+
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(lineStart, lineStart + replacement.length);
+        updateFlyingToolbar();
+      }
+    }, 10);
+  };
+
+  // 7. Tombol Penghapus Format ke Teks Normal Tanpa Markup
+  const handleFlyingClearFormatting = () => {
+    if (!textareaRef.current) return;
+    const ta = textareaRef.current;
+    const s = ta.selectionStart;
+    const e = ta.selectionEnd;
+    if (s === e) return;
+
+    // Cek apakah seleksi mencakup awal baris atau seluruh baris
+    const lineStart = ta.value.lastIndexOf('\n', s - 1) + 1;
+    let lineEnd = ta.value.indexOf('\n', e);
+    if (lineEnd === -1) lineEnd = ta.value.length;
+
+    const isFullLineOrMulti =
+      s === lineStart ||
+      ta.value.substring(s, e).includes('\n') ||
+      (s <= lineStart + 4 && /^[#>*\-+0-9. ]+$/.test(ta.value.substring(lineStart, s)));
+
+    const targetStart = isFullLineOrMulti ? lineStart : s;
+    const targetEnd = isFullLineOrMulti ? lineEnd : e;
+    const rawText = ta.value.substring(targetStart, targetEnd);
+
+    let cleaned = rawText
+      // Hapus HTML blockquote / pullquote
+      .replace(/<blockquote class="pullquote">\s*/gi, '')
+      .replace(/<\/blockquote>/gi, '')
+      .replace(/<\/?blockquote[^>]*>/gi, '')
+      // Hapus link & gambar markdown
+      .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      // Hapus format inline markdown
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/__([^_]+)__/g, '$1')
+      .replace(/\*([^*]+)\*/g, '$1')
+      .replace(/_([^_]+)_/g, '$1')
+      .replace(/~~([^~]+)~~/g, '$1')
+      .replace(/`([^`]+)`/g, '$1');
+
+    if (isFullLineOrMulti) {
+      cleaned = cleaned
+        .split('\n')
+        .map(line =>
+          line
+            .replace(/^#+\s*/, '')
+            .replace(/^>\s*/, '')
+            .replace(/^[-*+]\s+/, '')
+            .replace(/^\d+\.\s+/, '')
+            .replace(/^\[[ xX]\]\s+/, '')
+        )
+        .join('\n');
+    }
+
+    const updated = ta.value.substring(0, targetStart) + cleaned + ta.value.substring(targetEnd);
+    updateMarkdownWithHistory(updated);
+
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(targetStart, targetStart + cleaned.length);
+        updateFlyingToolbar();
+      }
+    }, 10);
+  };
+
+  // 8. Tombol Link (Ikatan Rantai)
   const handleOpenFlyingLink = () => {
     setFlyingLinkMode(true);
     setFlyingLinkUrl('');
@@ -1001,34 +1139,42 @@ export default function RichPostEditor({
               {/* Divider */}
               <span className="w-px h-5 bg-white/20 mx-1"></span>
 
-              {/* H1 (T Besar) */}
-              <button
-                type="button"
-                id="flying-btn-h1"
-                onClick={handleFlyingH1}
-                className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm transition-colors ${
-                  flyingToolbar.activeStates.h1
-                    ? 'text-emerald-400 bg-white/15'
-                    : 'text-slate-200 hover:text-white hover:bg-white/10'
-                }`}
-                title="Judul Utama (H1)"
-              >
-                <span className="font-serif font-black text-base">T</span>
-              </button>
-
-              {/* H2 (T Kecil) */}
+              {/* H Besar (H2) */}
               <button
                 type="button"
                 id="flying-btn-h2"
                 onClick={handleFlyingH2}
-                className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs transition-colors ${
+                className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm transition-colors ${
                   flyingToolbar.activeStates.h2
                     ? 'text-emerald-400 bg-white/15'
                     : 'text-slate-200 hover:text-white hover:bg-white/10'
                 }`}
-                title="Sub-judul (H2)"
+                title={
+                  flyingToolbar.activeStates.h2
+                    ? 'H2 Aktif (Klik lagi untuk kembali ke teks normal)'
+                    : 'H Besar / Sub-judul (H2)'
+                }
               >
-                <span className="font-serif font-bold text-xs">T</span>
+                <span className="font-serif font-black text-base">H</span>
+              </button>
+
+              {/* H Kecil (H3) */}
+              <button
+                type="button"
+                id="flying-btn-h3"
+                onClick={handleFlyingH3}
+                className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs transition-colors ${
+                  flyingToolbar.activeStates.h3
+                    ? 'text-emerald-400 bg-white/15'
+                    : 'text-slate-200 hover:text-white hover:bg-white/10'
+                }`}
+                title={
+                  flyingToolbar.activeStates.h3
+                    ? 'H3 Aktif (Klik lagi untuk kembali ke teks normal)'
+                    : 'H Kecil / Sub-judul Kecil (H3)'
+                }
+              >
+                <span className="font-serif font-bold text-xs">H</span>
               </button>
 
               {/* Quote (Blockquote & Pull Quote) */}
@@ -1050,6 +1196,48 @@ export default function RichPostEditor({
                 }
               >
                 <span className="font-serif font-black text-base leading-none">&ldquo;&rdquo;</span>
+              </button>
+
+              {/* Divider */}
+              <span className="w-px h-5 bg-white/20 mx-1"></span>
+
+              {/* List / Daftar (Klik 1x: Poin Bullet, Klik 2x: Angka, Klik 3x: Normal) */}
+              <button
+                type="button"
+                id="flying-btn-list"
+                onClick={handleFlyingList}
+                className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-colors ${
+                  flyingToolbar.activeStates.bulletList || flyingToolbar.activeStates.numberedList
+                    ? 'text-emerald-400 bg-white/15'
+                    : 'text-slate-200 hover:text-white hover:bg-white/10'
+                }`}
+                title={
+                  flyingToolbar.activeStates.numberedList
+                    ? 'Daftar Angka Aktif (Klik lagi untuk kembali ke teks normal)'
+                    : flyingToolbar.activeStates.bulletList
+                    ? 'Daftar Poin Aktif (Klik lagi untuk ubah ke Daftar Angka)'
+                    : 'Daftar (Klik 1x: Poin Bulat, Klik 2x: Angka, Klik 3x: Normal)'
+                }
+              >
+                {flyingToolbar.activeStates.numberedList ? (
+                  <ListOrdered className="w-3.5 h-3.5" />
+                ) : (
+                  <List className="w-3.5 h-3.5" />
+                )}
+              </button>
+
+              {/* Divider */}
+              <span className="w-px h-5 bg-white/20 mx-1"></span>
+
+              {/* Clear Formatting / Hapus Format Teks */}
+              <button
+                type="button"
+                id="flying-btn-clear-format"
+                onClick={handleFlyingClearFormatting}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-300 hover:text-rose-400 hover:bg-white/10 transition-colors"
+                title="Hapus Semua Format (Kembali ke Teks Normal Tanpa Markup)"
+              >
+                <RemoveFormatting className="w-3.5 h-3.5" />
               </button>
             </div>
           ) : (
@@ -4163,18 +4351,18 @@ export default function RichPostEditor({
                   >
                     <Strikethrough className="w-4 h-4" />
                   </button>
-                </div>
-
-                {/* HEADINGS GROUP */}
-                <div className="flex items-center gap-0.5 px-2 border-r border-[#E2E0D8] dark:border-slate-700">
                   <button
                     type="button"
-                    onClick={() => applyFormatting('# ', '', 'Judul Utama (H1)')}
-                    className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors text-xs font-extrabold"
-                    title="Judul Utama (H1)"
+                    onClick={handleFlyingClearFormatting}
+                    className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors"
+                    title="Hapus Semua Format (Normal Teks Tanpa Markup)"
                   >
-                    <Heading1 className="w-4 h-4" />
+                    <RemoveFormatting className="w-4 h-4" />
                   </button>
+                </div>
+
+                {/* HEADINGS GROUP (H1 otomatis diset oleh sistem untuk judul artikel) */}
+                <div className="flex items-center gap-0.5 px-2 border-r border-[#E2E0D8] dark:border-slate-700">
                   <button
                     type="button"
                     onClick={() => applyFormatting('## ', '', 'Subjudul Bagian (H2)')}
