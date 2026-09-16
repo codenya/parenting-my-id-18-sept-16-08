@@ -590,8 +590,516 @@ export default function RichPostEditor({
     return { words, chars, readTime, paragraphs };
   }, [markdown]);
 
+  // ========================================================
+  // MEDIUM-STYLE FLYING TOOLBAR (MELAYANG DI ATAS TEKS TERPILIH)
+  // Tersedia di semua level: Author (Writer), Editor, Admin
+  // ========================================================
+  const [flyingToolbar, setFlyingToolbar] = useState<{
+    visible: boolean;
+    x: number;
+    y: number;
+    showBelow?: boolean;
+    activeStates: {
+      bold: boolean;
+      italic: boolean;
+      h1: boolean;
+      h2: boolean;
+      quote: boolean;
+      pullquote: boolean;
+    };
+  }>({
+    visible: false,
+    x: 0,
+    y: 0,
+    showBelow: false,
+    activeStates: { bold: false, italic: false, h1: false, h2: false, quote: false, pullquote: false },
+  });
+
+  const [flyingLinkMode, setFlyingLinkMode] = useState(false);
+  const [flyingLinkUrl, setFlyingLinkUrl] = useState('');
+  const flyingToolbarRef = useRef<HTMLDivElement | null>(null);
+  const flyingLinkInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Update Flying Toolbar Position & Active States
+  const updateFlyingToolbar = (mouseClientX?: number, mouseClientY?: number) => {
+    const textarea = textareaRef.current;
+    if (!textarea) {
+      if (!flyingLinkMode) setFlyingToolbar(prev => ({ ...prev, visible: false }));
+      return;
+    }
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+
+    // Sembunyikan jika tidak ada teks yang disorot
+    if (start === end || start === undefined || end === undefined) {
+      if (!flyingLinkMode) setFlyingToolbar(prev => ({ ...prev, visible: false }));
+      return;
+    }
+
+    const selectedText = textarea.value.substring(start, end).trim();
+    if (selectedText.length === 0) {
+      if (!flyingLinkMode) setFlyingToolbar(prev => ({ ...prev, visible: false }));
+      return;
+    }
+
+    // Deteksi baris yang memuat teks seleksi
+    const lineStart = textarea.value.lastIndexOf('\n', start - 1) + 1;
+    let lineEnd = textarea.value.indexOf('\n', end);
+    if (lineEnd === -1) lineEnd = textarea.value.length;
+    const fullLine = textarea.value.substring(lineStart, lineEnd);
+
+    // Cek format aktif
+    const isBold = (selectedText.startsWith('**') && selectedText.endsWith('**') && selectedText.length >= 4) ||
+      (textarea.value.substring(Math.max(0, start - 2), start) === '**' && textarea.value.substring(end, end + 2) === '**');
+    const isItalic = (selectedText.startsWith('*') && selectedText.endsWith('*') && !selectedText.startsWith('**') && selectedText.length >= 2) ||
+      (textarea.value.substring(Math.max(0, start - 1), start) === '*' && textarea.value.substring(end, end + 1) === '*');
+    const isH1 = fullLine.startsWith('# ') && !fullLine.startsWith('## ');
+    const isH2 = fullLine.startsWith('## ') && !fullLine.startsWith('### ');
+    const isPullquote = fullLine.includes('pullquote') || fullLine.includes('blockquote class="pullquote"');
+    const isQuote = (fullLine.startsWith('> ') || fullLine.includes('<blockquote')) && !isPullquote;
+
+    // Hitung posisi toolbar melayang di atas teks
+    const rect = textarea.getBoundingClientRect();
+    let posX = rect.left + rect.width / 2;
+    let posY = rect.top;
+
+    if (mouseClientX !== undefined && mouseClientY !== undefined) {
+      posX = mouseClientX;
+      posY = mouseClientY;
+    } else {
+      const textBefore = textarea.value.substring(0, start);
+      const lines = textBefore.split('\n');
+      const currentLineIndex = lines.length - 1;
+      const lineHeight = 22;
+      const calculatedY = rect.top + 24 + (currentLineIndex * lineHeight) - textarea.scrollTop;
+      posY = Math.max(rect.top + 10, Math.min(rect.bottom - 10, calculatedY));
+      posX = rect.left + Math.min(rect.width * 0.8, 60 + (lines[currentLineIndex]?.length || 0) * 8);
+    }
+
+    // Hindari toolbar terpotong di tepi layar
+    const toolbarHalfWidth = 140;
+    posX = Math.max(toolbarHalfWidth + 12, Math.min(window.innerWidth - toolbarHalfWidth - 12, posX));
+
+    // Jika terlalu dekat dengan batas atas layar (< 75px), posisikan di bawah seleksi
+    const showBelow = posY - 65 < 55;
+    const finalY = showBelow ? posY + 35 : posY - 12;
+
+    setFlyingToolbar({
+      visible: true,
+      x: posX,
+      y: finalY,
+      showBelow,
+      activeStates: {
+        bold: isBold,
+        italic: isItalic,
+        h1: isH1,
+        h2: isH2,
+        quote: isQuote,
+        pullquote: isPullquote,
+      },
+    });
+  };
+
+  // Tutup Flying Toolbar saat klik di luar area
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (
+        flyingToolbarRef.current &&
+        !flyingToolbarRef.current.contains(e.target as Node) &&
+        textareaRef.current &&
+        !textareaRef.current.contains(e.target as Node)
+      ) {
+        setFlyingToolbar(prev => ({ ...prev, visible: false }));
+        setFlyingLinkMode(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, []);
+
+  // 1. Tombol B (Bold)
+  const handleFlyingBold = () => {
+    if (!textareaRef.current) return;
+    const ta = textareaRef.current;
+    const s = ta.selectionStart;
+    const e = ta.selectionEnd;
+    const text = ta.value.substring(s, e);
+    if (!text) return;
+
+    let replacement = '';
+    let newStart = s;
+    let newEnd = e;
+
+    if (text.startsWith('**') && text.endsWith('**') && text.length >= 4) {
+      replacement = text.slice(2, -2);
+      newEnd = s + replacement.length;
+    } else {
+      replacement = `**${text}**`;
+      newEnd = s + replacement.length;
+    }
+
+    const updated = ta.value.substring(0, s) + replacement + ta.value.substring(e);
+    updateMarkdownWithHistory(updated);
+
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(newStart, newEnd);
+        updateFlyingToolbar();
+      }
+    }, 10);
+  };
+
+  // 2. Tombol i (Italic)
+  const handleFlyingItalic = () => {
+    if (!textareaRef.current) return;
+    const ta = textareaRef.current;
+    const s = ta.selectionStart;
+    const e = ta.selectionEnd;
+    const text = ta.value.substring(s, e);
+    if (!text) return;
+
+    let replacement = '';
+    let newStart = s;
+    let newEnd = e;
+
+    if (text.startsWith('*') && text.endsWith('*') && !text.startsWith('**') && text.length >= 2) {
+      replacement = text.slice(1, -1);
+      newEnd = s + replacement.length;
+    } else {
+      replacement = `*${text}*`;
+      newEnd = s + replacement.length;
+    }
+
+    const updated = ta.value.substring(0, s) + replacement + ta.value.substring(e);
+    updateMarkdownWithHistory(updated);
+
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(newStart, newEnd);
+        updateFlyingToolbar();
+      }
+    }, 10);
+  };
+
+  // 3. Tombol H1 (T Besar)
+  const handleFlyingH1 = () => {
+    if (!textareaRef.current) return;
+    const ta = textareaRef.current;
+    const s = ta.selectionStart;
+    const e = ta.selectionEnd;
+    const lineStart = ta.value.lastIndexOf('\n', s - 1) + 1;
+    let lineEnd = ta.value.indexOf('\n', e);
+    if (lineEnd === -1) lineEnd = ta.value.length;
+
+    const fullLine = ta.value.substring(lineStart, lineEnd);
+    let newLine = '';
+
+    if (fullLine.startsWith('# ') && !fullLine.startsWith('## ')) {
+      // Toggle off kembali ke teks normal
+      newLine = fullLine.replace(/^#\s+/, '');
+    } else {
+      newLine = `# ${fullLine.replace(/^#+\s*/, '')}`;
+    }
+
+    const updated = ta.value.substring(0, lineStart) + newLine + ta.value.substring(lineEnd);
+    updateMarkdownWithHistory(updated);
+
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(lineStart, lineStart + newLine.length);
+        updateFlyingToolbar();
+      }
+    }, 10);
+  };
+
+  // 4. Tombol H2 (T Kecil)
+  const handleFlyingH2 = () => {
+    if (!textareaRef.current) return;
+    const ta = textareaRef.current;
+    const s = ta.selectionStart;
+    const e = ta.selectionEnd;
+    const lineStart = ta.value.lastIndexOf('\n', s - 1) + 1;
+    let lineEnd = ta.value.indexOf('\n', e);
+    if (lineEnd === -1) lineEnd = ta.value.length;
+
+    const fullLine = ta.value.substring(lineStart, lineEnd);
+    let newLine = '';
+
+    if (fullLine.startsWith('## ') && !fullLine.startsWith('### ')) {
+      // Toggle off kembali ke teks normal
+      newLine = fullLine.replace(/^##\s+/, '');
+    } else {
+      newLine = `## ${fullLine.replace(/^#+\s*/, '')}`;
+    }
+
+    const updated = ta.value.substring(0, lineStart) + newLine + ta.value.substring(lineEnd);
+    updateMarkdownWithHistory(updated);
+
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(lineStart, lineStart + newLine.length);
+        updateFlyingToolbar();
+      }
+    }, 10);
+  };
+
+  // 5. Tombol Quote (Tanda Petik) - Siklus 3 Status:
+  // Klik 1: Mengubah teks menjadi Blockquote biasa (> Teks)
+  // Klik 2: Mengubahnya menjadi Pull Quote bergaya besar khas Medium (<blockquote class="pullquote">)
+  // Klik 3: Mengembalikan menjadi teks paragraf normal
+  const handleFlyingQuote = () => {
+    if (!textareaRef.current) return;
+    const ta = textareaRef.current;
+    const s = ta.selectionStart;
+    const e = ta.selectionEnd;
+    const lineStart = ta.value.lastIndexOf('\n', s - 1) + 1;
+    let lineEnd = ta.value.indexOf('\n', e);
+    if (lineEnd === -1) lineEnd = ta.value.length;
+
+    const fullLine = ta.value.substring(lineStart, lineEnd);
+    let newLine = '';
+
+    if (fullLine.includes('pullquote') || fullLine.includes('<blockquote')) {
+      // Status 3: Dari Pull Quote kembali ke normal
+      newLine = fullLine
+        .replace(/<blockquote class="pullquote">\s*/gi, '')
+        .replace(/\s*<\/blockquote>/gi, '')
+        .replace(/^>\s*/gm, '')
+        .trim();
+    } else if (fullLine.startsWith('> ')) {
+      // Status 2: Dari Blockquote biasa ke Pull Quote bergaya besar
+      const clean = fullLine.replace(/^>\s*/gm, '').trim();
+      newLine = `<blockquote class="pullquote">\n${clean}\n</blockquote>`;
+    } else {
+      // Status 1: Dari teks biasa ke Blockquote biasa
+      newLine = `> ${fullLine.trim()}`;
+    }
+
+    const updated = ta.value.substring(0, lineStart) + newLine + ta.value.substring(lineEnd);
+    updateMarkdownWithHistory(updated);
+
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(lineStart, lineStart + newLine.length);
+        updateFlyingToolbar();
+      }
+    }, 10);
+  };
+
+  // 6. Tombol Link (Ikatan Rantai)
+  const handleOpenFlyingLink = () => {
+    setFlyingLinkMode(true);
+    setFlyingLinkUrl('');
+    setTimeout(() => {
+      flyingLinkInputRef.current?.focus();
+    }, 60);
+  };
+
+  const handleApplyFlyingLink = () => {
+    if (!textareaRef.current) return;
+    const ta = textareaRef.current;
+    const s = ta.selectionStart;
+    const e = ta.selectionEnd;
+    const text = ta.value.substring(s, e).trim() || 'Link';
+    let url = flyingLinkUrl.trim();
+
+    if (url) {
+      if (!/^https?:\/\//i.test(url) && !url.startsWith('#') && !url.startsWith('/')) {
+        url = 'https://' + url;
+      }
+      const formatted = `[${text}](${url})`;
+      const updated = ta.value.substring(0, s) + formatted + ta.value.substring(e);
+      updateMarkdownWithHistory(updated);
+
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+          textareaRef.current.setSelectionRange(s, s + formatted.length);
+        }
+      }, 10);
+    }
+
+    setFlyingLinkMode(false);
+    setFlyingLinkUrl('');
+    setFlyingToolbar(prev => ({ ...prev, visible: false }));
+  };
+
   return (
     <div className="space-y-6">
+
+      {/* ======================================================== */}
+      {/* MEDIUM-STYLE FLYING TOOLBAR (MELAYANG DI ATAS SELEKSI TEKS) */}
+      {/* ======================================================== */}
+      {flyingToolbar.visible && (
+        <div
+          ref={flyingToolbarRef}
+          id="medium-flying-toolbar"
+          style={{
+            position: 'fixed',
+            left: `${flyingToolbar.x}px`,
+            top: `${flyingToolbar.y}px`,
+            transform: 'translate(-50%, -100%)',
+            zIndex: 9999,
+          }}
+          onMouseDown={(e) => {
+            // Cegah textarea kehilangan fokus/seleksi saat tombol toolbar diklik
+            if ((e.target as HTMLElement).tagName !== 'INPUT') {
+              e.preventDefault();
+            }
+          }}
+          className="flex items-center bg-[#242424] dark:bg-slate-950 text-white rounded-xl shadow-2xl ring-1 ring-white/10 px-2 py-1.5 transition-all duration-150 animate-in fade-in zoom-in-95"
+        >
+          {!flyingLinkMode ? (
+            <div className="flex items-center gap-0.5">
+              {/* Bold */}
+              <button
+                type="button"
+                id="flying-btn-bold"
+                onClick={handleFlyingBold}
+                className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm transition-colors ${
+                  flyingToolbar.activeStates.bold
+                    ? 'text-emerald-400 bg-white/15'
+                    : 'text-slate-200 hover:text-white hover:bg-white/10'
+                }`}
+                title="Tebalkan Teks (Bold)"
+              >
+                <strong className="font-black">B</strong>
+              </button>
+
+              {/* Italic */}
+              <button
+                type="button"
+                id="flying-btn-italic"
+                onClick={handleFlyingItalic}
+                className={`w-8 h-8 rounded-lg flex items-center justify-center italic text-sm transition-colors ${
+                  flyingToolbar.activeStates.italic
+                    ? 'text-emerald-400 bg-white/15'
+                    : 'text-slate-200 hover:text-white hover:bg-white/10'
+                }`}
+                title="Miringkan Teks (Italic)"
+              >
+                <span className="font-serif italic text-base">i</span>
+              </button>
+
+              {/* Link */}
+              <button
+                type="button"
+                id="flying-btn-link"
+                onClick={handleOpenFlyingLink}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-200 hover:text-white hover:bg-white/10 transition-colors"
+                title="Sisipkan Tautan (Link)"
+              >
+                <LinkIcon className="w-3.5 h-3.5" />
+              </button>
+
+              {/* Divider */}
+              <span className="w-px h-5 bg-white/20 mx-1"></span>
+
+              {/* H1 (T Besar) */}
+              <button
+                type="button"
+                id="flying-btn-h1"
+                onClick={handleFlyingH1}
+                className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm transition-colors ${
+                  flyingToolbar.activeStates.h1
+                    ? 'text-emerald-400 bg-white/15'
+                    : 'text-slate-200 hover:text-white hover:bg-white/10'
+                }`}
+                title="Judul Utama (H1)"
+              >
+                <span className="font-serif font-black text-base">T</span>
+              </button>
+
+              {/* H2 (T Kecil) */}
+              <button
+                type="button"
+                id="flying-btn-h2"
+                onClick={handleFlyingH2}
+                className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs transition-colors ${
+                  flyingToolbar.activeStates.h2
+                    ? 'text-emerald-400 bg-white/15'
+                    : 'text-slate-200 hover:text-white hover:bg-white/10'
+                }`}
+                title="Sub-judul (H2)"
+              >
+                <span className="font-serif font-bold text-xs">T</span>
+              </button>
+
+              {/* Quote (Blockquote & Pull Quote) */}
+              <button
+                type="button"
+                id="flying-btn-quote"
+                onClick={handleFlyingQuote}
+                className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-colors ${
+                  flyingToolbar.activeStates.quote || flyingToolbar.activeStates.pullquote
+                    ? 'text-emerald-400 bg-white/15'
+                    : 'text-slate-200 hover:text-white hover:bg-white/10'
+                }`}
+                title={
+                  flyingToolbar.activeStates.pullquote
+                    ? 'Pull Quote Aktif (Klik untuk kembalikan ke teks biasa)'
+                    : flyingToolbar.activeStates.quote
+                    ? 'Blockquote Aktif (Klik untuk ubah jadi Pull Quote besar)'
+                    : 'Kutipan (Klik 1x: Blockquote, Klik 2x: Pull Quote)'
+                }
+              >
+                <span className="font-serif font-black text-base leading-none">&ldquo;&rdquo;</span>
+              </button>
+            </div>
+          ) : (
+            /* INLINE LINK INPUT */
+            <div className="flex items-center gap-1.5 px-1 py-0.5">
+              <input
+                ref={flyingLinkInputRef}
+                type="url"
+                value={flyingLinkUrl}
+                onChange={(e) => setFlyingLinkUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleApplyFlyingLink();
+                  } else if (e.key === 'Escape') {
+                    setFlyingLinkMode(false);
+                  }
+                }}
+                placeholder="Tempel URL tautan..."
+                className="w-44 sm:w-56 px-2.5 py-1 text-xs bg-black/40 text-white rounded-lg border border-white/20 focus:outline-none focus:border-emerald-400"
+              />
+              <button
+                type="button"
+                onClick={handleApplyFlyingLink}
+                className="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
+                title="Terapkan Tautan"
+              >
+                <Check className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setFlyingLinkMode(false)}
+                className="p-1.5 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
+                title="Batal"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
+          {/* Panah Segitiga Bawah / Atas (Arrow Pointer) */}
+          <div
+            className={`absolute left-1/2 -translate-x-1/2 w-0 h-0 pointer-events-none ${
+              flyingToolbar.showBelow
+                ? '-top-1.5 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[6px] border-b-[#242424] dark:border-b-slate-950'
+                : '-bottom-1.5 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-[#242424] dark:border-t-slate-950'
+            }`}
+          />
+        </div>
+      )}
       
       {/* ------------------------------------------------------------- */}
       {/* EDITOR CONTROL BAR & STATUS */}
@@ -3835,6 +4343,16 @@ export default function RichPostEditor({
                   >
                     Bersihkan
                   </button>
+
+                  {/* FLYING TOOLBAR INDICATOR (MEDIUM STYLE) */}
+                  <span
+                    id="flying-toolbar-status-badge"
+                    className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-2xs"
+                    title="Sorot (highlight) teks apa pun di editor untuk memunculkan Flying Toolbar ala Medium!"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Flying Toolbar Aktif</span>
+                  </span>
                 </div>
               </div>
             </div>
@@ -3852,6 +4370,18 @@ export default function RichPostEditor({
                     rows={18}
                     value={markdown}
                     onChange={(e) => updateMarkdownWithHistory(e.target.value)}
+                    onMouseUp={(e) => updateFlyingToolbar(e.clientX, e.clientY)}
+                    onKeyUp={(e) => {
+                      if (e.key === 'Shift' || e.key.startsWith('Arrow')) {
+                        updateFlyingToolbar();
+                      }
+                    }}
+                    onSelect={() => updateFlyingToolbar()}
+                    onScroll={() => {
+                      if (flyingToolbar.visible && !flyingLinkMode) {
+                        setFlyingToolbar(prev => ({ ...prev, visible: false }));
+                      }
+                    }}
                     placeholder="Tulis artikel lengkap dengan format markdown di sini..."
                     className={`w-full p-4 sm:p-6 rounded-2xl border font-mono text-sm leading-relaxed focus:outline-none focus:ring-2 ${
                       userRole === 'writer'
@@ -3874,6 +4404,18 @@ export default function RichPostEditor({
                       rows={18}
                       value={markdown}
                       onChange={(e) => updateMarkdownWithHistory(e.target.value)}
+                      onMouseUp={(e) => updateFlyingToolbar(e.clientX, e.clientY)}
+                      onKeyUp={(e) => {
+                        if (e.key === 'Shift' || e.key.startsWith('Arrow')) {
+                          updateFlyingToolbar();
+                        }
+                      }}
+                      onSelect={() => updateFlyingToolbar()}
+                      onScroll={() => {
+                        if (flyingToolbar.visible && !flyingLinkMode) {
+                          setFlyingToolbar(prev => ({ ...prev, visible: false }));
+                        }
+                      }}
                       placeholder="Tulis konten artikel di sini..."
                       className={`w-full p-4 rounded-2xl border font-mono text-xs leading-relaxed focus:outline-none focus:ring-2 ${
                         userRole === 'writer'

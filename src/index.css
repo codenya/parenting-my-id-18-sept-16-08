@@ -151,6 +151,37 @@ html {
     margin-top: 1.25rem;
     margin-bottom: 1.25rem;
     padding-left: 1rem;
+    border-left: 3px solid currentColor;
+    font-style: italic;
+    opacity: 0.9;
+  }
+
+  /* Medium-style Pull Quote (Tekan 2x pada ikon Quote Flying Toolbar) */
+  .article-body blockquote.pullquote,
+  blockquote.pullquote {
+    margin: 2.5rem auto !important;
+    padding: 1.25rem 2rem !important;
+    border-left: none !important;
+    text-align: center !important;
+    font-size: 1.55rem !important;
+    line-height: 1.45 !important;
+    font-style: italic !important;
+    font-weight: 700 !important;
+    position: relative !important;
+    max-width: 85% !important;
+  }
+
+  .article-body blockquote.pullquote::before,
+  blockquote.pullquote::before {
+    content: "“";
+    display: block;
+    font-size: 3.5rem;
+    line-height: 1.5rem;
+    height: 1.5rem;
+    color: var(--color-primary, #e11d48);
+    opacity: 0.6;
+    margin-bottom: 0.75rem;
+    font-family: Georgia, serif;
   }
 
   /* Metadata / Small text elements */
