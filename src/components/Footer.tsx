@@ -118,7 +118,7 @@ export default function Footer({ siteConfig, onNavigate }: FooterProps) {
           {/* QUICK LINKS / KATEGORI ARTIKEL */}
           <div>
             <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-4">
-              Kategori Artikel
+              {siteConfig?.footer_category_heading || 'Kategori Artikel'}
             </h4>
             <ul className="space-y-2.5 text-sm">
               {categoryLinks.map((item, idx) => (
@@ -140,7 +140,7 @@ export default function Footer({ siteConfig, onNavigate }: FooterProps) {
           {/* SEO & INFRASTRUCTURE */}
           <div>
             <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-4">
-              Tautan Navigasi Platform
+              {siteConfig?.footer_quick_links_heading || 'Tautan Navigasi Platform'}
             </h4>
             <ul className="space-y-2.5 text-sm">
               {footerLinks.map((item, idx) => (

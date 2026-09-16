@@ -540,6 +540,7 @@ interface IklanBarisPageProps {
                 <textarea
                   required
                   rows={4}
+                  maxLength={parseInt(siteConfig?.classified_max_chars || '250', 10)}
                   value={keteranganBarang}
                   onChange={(e) => setKeteranganBarang(e.target.value)}
                   placeholder="Contoh: HONDA BRIO E CVT 2021 Putih Mulus. KM 25rb Service Rutin Resmi. Pajak Panjang Bln 09-2027. Surat Lengkap Atas Nama Sendiri. Bebas Banjir/Tabrakan."

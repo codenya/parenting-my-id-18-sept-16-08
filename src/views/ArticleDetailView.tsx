@@ -886,7 +886,7 @@ export default function ArticleDetailView({
           {/* SHARE BUTTONS */}
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-bold text-slate-500 flex items-center gap-1">
-              <Share2 className="w-3.5 h-3.5" /> Bagikan:
+              <Share2 className="w-3.5 h-3.5" /> {siteConfig?.article_share_label || 'Bagikan:'}
             </span>
             
             <a
@@ -1096,6 +1096,7 @@ export default function ArticleDetailView({
         currentPost={post}
         allPosts={posts}
         onSelectPost={onSelectPost}
+        heading={siteConfig?.related_articles_heading}
       />
     </article>
   );

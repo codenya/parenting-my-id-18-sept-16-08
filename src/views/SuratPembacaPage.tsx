@@ -130,10 +130,13 @@ export default function SuratPembacaPage({ siteConfig, onNavigate }: SuratPembac
             <Mail className="w-4 h-4" /> Surat Pembaca
           </div>
           <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight mb-3">
-            Kanal Surat Pembaca {siteName}
+            {siteConfig?.surat_pembaca_title || `Kanal Surat Pembaca ${siteName}`}
           </h1>
           <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed mb-6">
-            Wadah aspirasi, kritik membangun, saran, dan pengalaman warga masyarakat. Setiap surat yang dikirimkan oleh pembaca akan ditinjau dan diedit oleh tim Editor sebelum dipublikasikan secara terbuka.
+            {siteConfig?.surat_pembaca_subtitle || 'Wadah aspirasi, kritik membangun, saran, dan pengalaman warga masyarakat. Setiap surat yang dikirimkan oleh pembaca akan ditinjau dan diedit oleh tim Editor sebelum dipublikasikan secara terbuka.'}
+          </p>
+          <p className="text-xs text-rose-600 dark:text-rose-400 font-medium mb-6">
+            {siteConfig?.surat_pembaca_guidelines || 'Pastikan isi surat sopan, tidak mengandung unsur SARA, dan menyertakan identitas yang valid.'}
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
