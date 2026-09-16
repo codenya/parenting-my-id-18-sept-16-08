@@ -14,11 +14,20 @@ import { generate360ClassifiedAds } from './src/lib/iklanBarisSeed.js';
 
 dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+
+const currentDir = typeof __dirname !== 'undefined' ? __dirname : (typeof import.meta !== 'undefined' && import.meta.url ? path.dirname(fileURLToPath(import.meta.url)) : process.cwd());
 
 const app = express();
 const PORT = 3000;
+
+function getBaseUrl(req: any): string {
+  const { SITE_URL } = getSiteConfig();
+  if (SITE_URL && SITE_URL !== 'https://domain.com') {
+    return SITE_URL.replace(/\/$/, '');
+  }
+  const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+  return `${protocol}://${req.get('host')}`.replace(/\/$/, '');
+}
 
 function isUnsplashUrl(url: string | undefined | null): boolean {
   if (!url) return false;
@@ -1356,16 +1365,16 @@ function requireAuth(allowedRoles: string[] = ['admin', 'editor', 'writer']) {
     const token = extractTokenFromHeaderOrCookie(authHeader, cookieHeader);
 
     if (!token) {
-      return res.status(401).json({ error: 'Akses ditolak: Autentikasi sesi diperlukan (Header Authorization Bearer atau Cookie).' });
+      res.setHeader("WWW-Authenticate", `Bearer realm="api", resource_metadata="${getBaseUrl(req)}/.well-known/oauth-protected-resource"`); return res.status(401).json({ error: 'Akses ditolak: Autentikasi sesi diperlukan (Header Authorization Bearer atau Cookie).' });
     }
 
-    const jwtSecret = process.env.JWT_SECRET || 'parenting-unified-jwt-secret-key-2026-secure';
+    const jwtSecret = process.env.JWT_SECRET || 'edge-unified-jwt-secret-key-2026-secure';
 
     // 1. STATELESS SIGNED JWT VALIDATION (Zero database query load, cryptographic verification)
     if (token.includes('.') && token.split('.').length === 3) {
       const jwtResult = await verifyJwtHmacSha256(token, jwtSecret);
       if (!jwtResult.valid || !jwtResult.payload) {
-        return res.status(401).json({ error: `Akses ditolak: ${jwtResult.error || 'Token tidak valid atau telah kedaluwarsa.'}` });
+        res.setHeader("WWW-Authenticate", `Bearer realm="api", resource_metadata="${getBaseUrl(req)}/.well-known/oauth-protected-resource"`); return res.status(401).json({ error: `Akses ditolak: ${jwtResult.error || 'Token tidak valid atau telah kedaluwarsa.'}` });
       }
 
       const role = jwtResult.payload.role || 'writer';
@@ -1402,7 +1411,7 @@ function requireAuth(allowedRoles: string[] = ['admin', 'editor', 'writer']) {
       return next();
     }
 
-    return res.status(401).json({ error: 'Akses ditolak: Format token sesi tidak valid.' });
+    res.setHeader("WWW-Authenticate", `Bearer realm="api", resource_metadata="${getBaseUrl(req)}/.well-known/oauth-protected-resource"`); return res.status(401).json({ error: 'Akses ditolak: Format token sesi tidak valid.' });
   };
 }
 
@@ -1782,7 +1791,7 @@ app.get('/api/surat-pembaca', async (req, res) => {
     const cookieHeader = req.headers.cookie;
     const token = extractTokenFromHeaderOrCookie(authHeader, cookieHeader);
     if (token) {
-      const jwtSecret = process.env.JWT_SECRET || 'parenting-unified-jwt-secret-key-2026-secure';
+      const jwtSecret = process.env.JWT_SECRET || 'edge-unified-jwt-secret-key-2026-secure';
       if (token.includes('.') && token.split('.').length === 3) {
         const jwtResult = await verifyJwtHmacSha256(token, jwtSecret);
         if (jwtResult.valid && jwtResult.payload && (jwtResult.payload.role === 'admin' || jwtResult.payload.role === 'editor')) {
@@ -1981,7 +1990,7 @@ app.get('/api/iklan-baris', async (req, res) => {
     const cookieHeader = req.headers.cookie;
     const token = extractTokenFromHeaderOrCookie(authHeader, cookieHeader);
     if (token) {
-      const jwtSecret = process.env.JWT_SECRET || 'parenting-unified-jwt-secret-key-2026-secure';
+      const jwtSecret = process.env.JWT_SECRET || 'edge-unified-jwt-secret-key-2026-secure';
       if (token.includes('.') && token.split('.').length === 3) {
         const jwtResult = await verifyJwtHmacSha256(token, jwtSecret);
         if (jwtResult.valid && jwtResult.payload && (jwtResult.payload.role === 'admin' || jwtResult.payload.role === 'editor')) {
@@ -3241,7 +3250,7 @@ app.post('/api/auth/login', async (req, res) => {
     loginAttemptsMap.set(clientIp, currentRecord);
 
     const remainingAttempts = Math.max(0, 5 - currentRecord.attempts);
-    return res.status(401).json({
+    res.setHeader("WWW-Authenticate", `Bearer realm="api", resource_metadata="${getBaseUrl(req)}/.well-known/oauth-protected-resource"`); return res.status(401).json({
       error: remainingAttempts > 0
         ? `Email atau password salah. Sisa percobaan: ${remainingAttempts} kali sebelum akses diblokir 15 menit.`
         : 'Terlalu banyak percobaan gagal. Akses diblokir selama 15 menit demi keamanan (Anti Brute Force).',
@@ -3253,7 +3262,7 @@ app.post('/api/auth/login', async (req, res) => {
 
   // Return user info and verified stateless Signed JWT token (zero DB overhead)
   const { password: _, ...userWithoutPassword } = user;
-  const jwtSecret = process.env.JWT_SECRET || 'parenting-unified-jwt-secret-key-2026-secure';
+  const jwtSecret = process.env.JWT_SECRET || 'edge-unified-jwt-secret-key-2026-secure';
   const token = await signJwtHmacSha256(
     {
       id: user.id,
@@ -3687,7 +3696,7 @@ app.get('/llms.txt', (req, res) => {
 });
 
 app.get('/llms-full.txt', (req, res) => {
-  const activeSiteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+  const activeSiteUrl = getBaseUrl(req);
   let activeSiteName = 'Portal Informasi';
   try {
     const configPath = path.join(process.cwd(), 'public', 'site_config.json');
@@ -3736,7 +3745,7 @@ app.get('/baca/:slug', (req, res, next) => {
   }
 
   try {
-    const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    const siteUrl = getBaseUrl(req);
     
     let siteName = 'Blog Engine';
     let siteDescription = 'Portal berita & informasi terpercaya.';
@@ -3789,7 +3798,7 @@ app.get('/baca/:slug', (req, res, next) => {
       res.setHeader('x-markdown-tokens', tokenCount.toString());
       res.setHeader('Vary', 'Accept');
       res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400');
-      res.setHeader('Link', `</.well-known/api-catalog>; rel="api-catalog", </api/posts>; rel="service-desc"; type="application/json", <${canonicalUrl}>; rel="canonical"`);
+      res.setHeader('Link', `</.well-known/api-catalog>; rel="api-catalog", </.well-known/oauth-protected-resource>; rel="service-desc"; type="application/json", <${canonicalUrl}>; rel="canonical"`);
       return res.status(200).send(markdownText);
     }
 
@@ -3919,7 +3928,7 @@ app.get('/baca/:slug', (req, res, next) => {
 
     res.header('Content-Type', 'text/html; charset=utf-8');
     res.header('Vary', 'Accept');
-    res.header('Link', `</.well-known/api-catalog>; rel="api-catalog", </api/posts>; rel="service-desc"; type="application/json", <${canonicalUrl}>; rel="canonical"`);
+    res.header('Link', `</.well-known/api-catalog>; rel="api-catalog", </.well-known/oauth-protected-resource>; rel="service-desc"; type="application/json", <${canonicalUrl}>; rel="canonical"`);
     return res.send(htmlTemplate);
   } catch (e) {
     console.error('Error pre-rendering HTML:', e);
@@ -3930,7 +3939,7 @@ app.get('/baca/:slug', (req, res, next) => {
 // 8.B.1. SSR / STATIC HTML PRE-RENDERING FOR AUTHORS INDEX PAGE (/author)
 app.get(['/author', '/author/'], (req, res, next) => {
   try {
-    const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    const siteUrl = getBaseUrl(req);
     
     let siteName = 'Parenting';
     let siteDescription = 'Portal informasi dan panduan pengasuhan anak modern, nutrisi balita, serta kesehatan keluarga Indonesia.';
@@ -4114,7 +4123,7 @@ app.get('/author/:username', (req, res, next) => {
   );
 
   try {
-    const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    const siteUrl = getBaseUrl(req);
     
     let siteName = 'Blog Engine';
     let siteDescription = 'Portal berita & informasi terpercaya.';
@@ -4255,7 +4264,7 @@ app.get('/author/:username', (req, res, next) => {
 // 8.C.1. SSR / STATIC HTML PRE-RENDERING FOR TAGS INDEX PAGE (/tag)
 app.get(['/tag', '/tag/'], (req, res, next) => {
   try {
-    const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    const siteUrl = getBaseUrl(req);
     
     let siteName = 'Parenting';
     let siteDescription = 'Portal informasi dan panduan pengasuhan anak modern, nutrisi balita, serta kesehatan keluarga Indonesia.';
@@ -4444,7 +4453,7 @@ app.get(['/tag/:tag', '/tag/:tag/'], (req, res, next) => {
       matchedPosts = mockPosts.filter((p) => !p.status || p.status === 'published').slice(0, 5);
     }
 
-    const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    const siteUrl = getBaseUrl(req);
     
     let siteName = 'Parenting';
     let siteDescription = 'Portal informasi dan panduan pengasuhan anak modern, nutrisi balita, serta kesehatan keluarga Indonesia.';
@@ -4583,7 +4592,7 @@ app.get(['/tag/:tag', '/tag/:tag/'], (req, res, next) => {
 // 8.D.1. SSR / STATIC HTML PRE-RENDERING FOR CATEGORIES INDEX PAGE (/kategori)
 app.get(['/kategori', '/kategori/'], (req, res, next) => {
   try {
-    const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    const siteUrl = getBaseUrl(req);
     
     let siteName = 'Parenting';
     let siteDescription = 'Portal informasi dan panduan pengasuhan anak modern, nutrisi balita, serta kesehatan keluarga Indonesia.';
@@ -4772,7 +4781,7 @@ app.get(['/kategori/:category', '/kategori/:category/'], (req, res, next) => {
       matchedPosts = mockPosts.filter((p) => !p.status || p.status === 'published').slice(0, 5);
     }
 
-    const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    const siteUrl = getBaseUrl(req);
     
     let siteName = 'Parenting';
     let siteDescription = 'Portal informasi dan panduan pengasuhan anak modern, nutrisi balita, serta kesehatan keluarga Indonesia.';
@@ -5007,7 +5016,7 @@ app.get('/.well-known/api-catalog', (req, res) => {
 
 // RFC 9728 Protected Resource Metadata (PRM)
 app.get('/.well-known/oauth-protected-resource', (req, res) => {
-  const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+  const siteUrl = getBaseUrl(req);
   const prm = {
     resource: siteUrl,
     authorization_servers: [siteUrl],
@@ -5027,7 +5036,7 @@ app.get('/.well-known/oauth-protected-resource', (req, res) => {
 
 // RFC 8414 OAuth Authorization Server Metadata with agent_auth block
 app.get('/.well-known/oauth-authorization-server', (req, res) => {
-  const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+  const siteUrl = getBaseUrl(req);
   const asMetadata = {
     issuer: siteUrl,
     authorization_endpoint: `${siteUrl}/api/auth/authorize`,
@@ -5075,7 +5084,7 @@ app.get('/.well-known/oauth-authorization-server', (req, res) => {
 
 // A2A Agent Card Endpoint (Agent-to-Agent Protocol)
 app.get(['/.well-known/agent-card.json', '/.well-known/a2a.json', '/.well-known/agent.json'], (req, res) => {
-  const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+  const siteUrl = getBaseUrl(req);
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Cache-Control', 'public, max-age=3600');
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -5257,7 +5266,7 @@ app.get([
 
 // MCP Server Card Endpoint (Model Context Protocol - SEP-1649 & SEP-2127)
 app.get(['/.well-known/mcp/server-card.json', '/.well-known/mcp.json', '/.well-known/mcp-server.json'], (req, res) => {
-  const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+  const siteUrl = getBaseUrl(req);
   let siteName = 'Site Content & Interaction MCP Server';
   let siteDescription = 'Model Context Protocol (MCP) server providing context discovery, article retrieval, and interactive tools for AI agents.';
 
@@ -5403,7 +5412,7 @@ app.get(['/.well-known/mcp/server-card.json', '/.well-known/mcp.json', '/.well-k
 app.get(
   ['/.well-known/http-message-signatures-directory', '/.well-known/http-message-signatures-directory.json'],
   (req, res) => {
-    const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    const siteUrl = getBaseUrl(req);
     const jwks = {
       keys: [
         {
@@ -5461,7 +5470,7 @@ app.all(['/mcp', '/api/mcp'], (req, res) => {
     return res.sendStatus(204);
   }
 
-  const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+  const siteUrl = getBaseUrl(req);
   let siteName = 'Site Content & Interaction MCP Server';
   let siteDescription = 'Model Context Protocol (MCP) server providing context discovery, article retrieval, and interactive tools for AI agents.';
 
@@ -5725,7 +5734,7 @@ app.get(['/.well-known/webmcp.json', '/.well-known/mcp-web.json'], (req, res) =>
 
 // Auth.md Service Root Markdown Document for Autonomous Agent Registration
 app.get('/auth.md', (req, res) => {
-  const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+  const siteUrl = getBaseUrl(req);
   const siteHost = req.get('host') || 'localhost:3000';
   let siteName = 'Portal Informasi';
   let siteDescription = 'Portal informasi dan publikasi konten digital.';
@@ -5861,7 +5870,7 @@ curl -X POST "${siteUrl}/api/agent/revoke" \\
 // Agent Auth Registration Endpoints
 app.post('/api/agent/register', (req, res) => {
   const { client_name, identity_type = 'anonymous', scopes = ['posts:read', 'read'] } = req.body || {};
-  const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+  const siteUrl = getBaseUrl(req);
   const agentId = 'agt_' + Math.random().toString(36).substring(2, 10);
   const token = 'agt_live_' + Buffer.from(`${agentId}:${Date.now()}`).toString('base64url');
 
@@ -5970,7 +5979,7 @@ function handleMarkdownNegotiation(req: express.Request, res: express.Response):
     return false;
   }
 
-  const siteUrl = (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+  const siteUrl = getBaseUrl(req);
   let siteName = 'Blog Engine';
   let siteDescription = 'Portal berita & informasi terpercaya.';
   try {
@@ -6015,7 +6024,7 @@ function handleMarkdownNegotiation(req: express.Request, res: express.Response):
   res.setHeader('x-markdown-tokens', tokenCount.toString());
   res.setHeader('Vary', 'Accept');
   res.setHeader('Cache-Control', 'public, max-age=60');
-  res.setHeader('Link', '</.well-known/api-catalog>; rel="api-catalog", </api/posts>; rel="service-desc"; type="application/json", </llms.txt>; rel="describedby"; type="text/plain", </feed.xml>; rel="alternate"; type="application/rss+xml"');
+  res.setHeader('Link', '</.well-known/api-catalog>; rel="api-catalog", </.well-known/oauth-protected-resource>; rel="service-desc"; type="application/json", </llms.txt>; rel="describedby"; type="text/plain", </feed.xml>; rel="alternate"; type="application/rss+xml"');
   res.status(200).send(markdownText);
   return true;
 }
@@ -6056,12 +6065,12 @@ async function startServer() {
       }
 
       try {
-        let template = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf-8');
+        let template = fs.readFileSync(path.resolve(currentDir, 'index.html'), 'utf-8');
         template = await vite.transformIndexHtml(url, template);
         template = injectSpaPreload(template, mockPosts);
         res.setHeader('Vary', 'Accept');
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.setHeader('Link', '</.well-known/api-catalog>; rel="api-catalog", </api/posts>; rel="service-desc"; type="application/json", </llms.txt>; rel="describedby"; type="text/plain", </feed.xml>; rel="alternate"; type="application/rss+xml"');
+        res.setHeader('Link', '</.well-known/api-catalog>; rel="api-catalog", </.well-known/oauth-protected-resource>; rel="service-desc"; type="application/json", </llms.txt>; rel="describedby"; type="text/plain", </feed.xml>; rel="alternate"; type="application/rss+xml"');
         res.status(200).send(template);
       } catch (e) {
         vite.ssrFixStacktrace(e as Error);
@@ -6096,7 +6105,7 @@ async function startServer() {
       htmlTemplate = injectSpaPreload(htmlTemplate, mockPosts);
       res.setHeader('Vary', 'Accept');
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      res.setHeader('Link', '</.well-known/api-catalog>; rel="api-catalog", </api/posts>; rel="service-desc"; type="application/json", </llms.txt>; rel="describedby"; type="text/plain", </feed.xml>; rel="alternate"; type="application/rss+xml"');
+      res.setHeader('Link', '</.well-known/api-catalog>; rel="api-catalog", </.well-known/oauth-protected-resource>; rel="service-desc"; type="application/json", </llms.txt>; rel="describedby"; type="text/plain", </feed.xml>; rel="alternate"; type="application/rss+xml"');
       res.status(200).send(htmlTemplate);
     });
   }
