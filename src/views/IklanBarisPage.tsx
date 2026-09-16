@@ -10,39 +10,51 @@ interface IklanBarisPageProps {
   onNavigate?: (view: string, param?: string) => void;
 }
 
-const KATEGORI_OPTIONS = [
-  'Pola Asuh',
-  'Tumbuh Kembang',
-  'Kesehatan & Gizi',
-  'Balita',
-  'Psikologi Ibu',
-  'Umum',
-];
+  const KATEGORI_OPTIONS = useMemo(() => {
+    if (siteConfig?.classified_categories) {
+      return siteConfig.classified_categories.split(',').map(s => s.trim()).filter(Boolean);
+    }
+    return [
+      'Pola Asuh',
+      'Tumbuh Kembang',
+      'Kesehatan & Gizi',
+      'Balita',
+      'Psikologi Ibu',
+      'Umum',
+    ];
+  }, [siteConfig?.classified_categories]);
 
-export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPageProps) {
-  const siteName = siteConfig?.site_name || 'Portal Digital';
+  export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPageProps) {
+    const siteName = siteConfig?.site_name || 'Portal Digital';
+    
+    // View Mode State: 'newspaper' (Default print newspaper grid) or 'cards' (Modern card list)
+    const [viewMode, setViewMode] = useState<'newspaper' | 'cards'>('newspaper');
+    const [ads, setAds] = useState<IklanBarisItem[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
+    const [selectedKategori, setSelectedKategori] = useState('Semua');
+    const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
   
-  // View Mode State: 'newspaper' (Default print newspaper grid) or 'cards' (Modern card list)
-  const [viewMode, setViewMode] = useState<'newspaper' | 'cards'>('newspaper');
-  const [ads, setAds] = useState<IklanBarisItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const [selectedKategori, setSelectedKategori] = useState('Semua');
-  const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
+    // Form State
+    const [showForm, setShowForm] = useState(false);
+    const [nama, setNama] = useState('');
+    const [kota, setKota] = useState('');
+    const [pekerjaan, setPekerjaan] = useState('');
+    const [tahunLahir, setTahunLahir] = useState<number | ''>('');
+    const [phone, setPhone] = useState('');
+    const [kategori, setKategori] = useState('');
+    const [keteranganBarang, setKeteranganBarang] = useState('');
+    const [harga, setHarga] = useState('');
+    const [expiresAt, setExpiresAt] = useState('');
 
-  // Form State
-  const [showForm, setShowForm] = useState(false);
-  const [nama, setNama] = useState('');
-  const [kota, setKota] = useState('');
-  const [pekerjaan, setPekerjaan] = useState('');
-  const [tahunLahir, setTahunLahir] = useState<number | ''>('');
-  const [phone, setPhone] = useState('');
-  const [kategori, setKategori] = useState('Pola Asuh');
-  const [keteranganBarang, setKeteranganBarang] = useState('');
-  const [harga, setHarga] = useState('');
-  const [expiresAt, setExpiresAt] = useState('');
+    useEffect(() => {
+      const opts = siteConfig?.classified_categories ? siteConfig.classified_categories.split(',').map(s => s.trim()).filter(Boolean) : ['Pola Asuh', 'Tumbuh Kembang', 'Kesehatan & Gizi', 'Balita', 'Psikologi Ibu', 'Umum'];
+      if (opts.length > 0 && (!kategori || !opts.includes(kategori))) {
+        setKategori(opts[0]);
+      }
+    }, [siteConfig?.classified_categories]);
   const [turnstileToken, setTurnstileToken] = useState('');
   const [turnstileLoadFailed, setTurnstileLoadFailed] = useState(false);
   const [websiteUrlHp, setWebsiteUrlHp] = useState('');

@@ -2101,13 +2101,28 @@ app.post('/api/iklan-baris', async (req, res) => {
       }
     }
 
-    // 4. Input Validation
+    // 4. Input Validation & Category Enforcement against Admin Config
     if (!kategori || !keteranganBarang || !harga || !nama || !kota || !pekerjaan || !tahunLahir || !phone) {
       return res.status(400).json({ error: 'Seluruh kolom isian formulir iklan baris wajib diisi.' });
     }
 
     // 5. Anti-XSS & URL to Plain Text Sanitization
     const cleanKategori = cleanTextAndStripUrls(String(kategori));
+    let allowedCategories = ['Pola Asuh', 'Tumbuh Kembang', 'Kesehatan & Gizi', 'Balita', 'Psikologi Ibu', 'Umum'];
+    try {
+      const configPath = path.join(process.cwd(), 'public', 'site_config.json');
+      if (fs.existsSync(configPath)) {
+        const parsed = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+        if (parsed.classified_categories) {
+          allowedCategories = parsed.classified_categories.split(',').map((s: string) => s.trim()).filter(Boolean);
+        }
+      }
+    } catch (e) {}
+
+    if (!allowedCategories.includes(cleanKategori)) {
+      return res.status(400).json({ error: `Kategori iklan baris tidak valid. Harap pilih kategori resmi yang ditentukan admin: ${allowedCategories.join(', ')}` });
+    }
+
     const cleanKet = cleanTextAndStripUrls(String(keteranganBarang));
     const cleanHarga = cleanTextAndStripUrls(String(harga));
     const cleanNama = cleanTextAndStripUrls(String(nama));
