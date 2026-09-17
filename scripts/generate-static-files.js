@@ -10,9 +10,9 @@ dotenv.config();
 const rootDir = typeof __dirname !== 'undefined' ? path.resolve(__dirname, '..') : (typeof import.meta !== 'undefined' && import.meta.url ? path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..') : process.cwd());
 
 export function getSiteConfig() {
-  let siteName = process.env.SITE_NAME || 'Modern Edge Blog';
-  let siteDescription = process.env.SITE_DESCRIPTION || 'Portal informasi dan panduan terpercaya.';
-  let SITE_URL = process.env.SITE_URL || 'https://example.com';
+  let siteName = process.env.SITE_NAME || 'Parenting.my.id';
+  let siteDescription = process.env.SITE_DESCRIPTION || 'Portal informasi dan panduan pengasuhan anak modern, nutrisi balita, serta kesehatan keluarga Indonesia.';
+  let SITE_URL = process.env.SITE_URL || 'https://parenting.my.id';
 
   try {
     const configPath = path.join(rootDir, 'public', 'site_config.json');
@@ -21,7 +21,7 @@ export function getSiteConfig() {
       const parsed = JSON.parse(fileData);
       siteName = parsed.site_name || siteName;
       siteDescription = parsed.site_description || siteDescription;
-      if (parsed.site_url) {
+      if (parsed.site_url && parsed.site_url !== 'https://example.com' && parsed.site_url !== 'https://domain.com') {
         SITE_URL = parsed.site_url;
       } else if (parsed.site_domain) {
         SITE_URL = `https://${parsed.site_domain}`;
@@ -29,6 +29,10 @@ export function getSiteConfig() {
     }
   } catch (err) {
     console.error('Error loading config in getSiteConfig:', err);
+  }
+
+  if (!SITE_URL || SITE_URL === 'https://example.com' || SITE_URL === 'https://domain.com') {
+    SITE_URL = 'https://parenting.my.id';
   }
 
   return {
@@ -108,14 +112,15 @@ export function escapeCdata(text) {
  * Generate feed.xml (RSS 2.0) string
  * CRITICAL: Tag <?xml version="1.0" encoding="UTF-8"?> MUST be at index 0 (character 0).
  */
-export function generateFeedXml(posts) {
+export function generateFeedXml(posts, overrideBaseUrl) {
   const { siteName, siteDescription, SITE_URL } = getSiteConfig();
+  const baseUrl = overrideBaseUrl || (SITE_URL && SITE_URL !== 'https://example.com' && SITE_URL !== 'https://domain.com' ? SITE_URL : 'https://parenting.my.id');
   const publishedPosts = (posts || []).filter((p) => p.status === 'published');
 
   const items = publishedPosts
     .map((p) => {
       const pubDate = p.createdAt ? new Date(p.createdAt).toUTCString() : (p.updatedAt ? new Date(p.updatedAt).toUTCString() : new Date().toUTCString());
-      const link = escapeXml(`${SITE_URL}/baca/${encodeURIComponent(p.slug)}`);
+      const link = escapeXml(`${baseUrl}/baca/${encodeURIComponent(p.slug)}`);
       const titleClean = escapeXml(p.title || '');
       const descClean = escapeXml(p.excerpt || '');
       return `    <item>
@@ -132,7 +137,7 @@ export function generateFeedXml(posts) {
 <rss version="2.0">
   <channel>
     <title>${escapeXml(siteName)}</title>
-    <link>${escapeXml(SITE_URL)}</link>
+    <link>${escapeXml(baseUrl)}</link>
     <description>${escapeXml(siteDescription)}</description>
     <language>id-id</language>
 ${items}
@@ -186,8 +191,9 @@ function sanitizeLlmsText(text) {
 /**
  * Generate llms.txt string taken directly from feed.xml items (Summary index format)
  */
-export function generateLlmsTxt(posts, feedXmlContent) {
+export function generateLlmsTxt(posts, feedXmlContent, overrideBaseUrl) {
   const { siteName, siteDescription, SITE_URL } = getSiteConfig();
+  const baseUrl = overrideBaseUrl || (SITE_URL && SITE_URL !== 'https://example.com' && SITE_URL !== 'https://domain.com' ? SITE_URL : 'https://parenting.my.id');
   let items = [];
 
   if (feedXmlContent) {
@@ -199,22 +205,26 @@ export function generateLlmsTxt(posts, feedXmlContent) {
     const publishedPosts = (posts || []).filter((p) => p.status === 'published');
     items = publishedPosts.map((p) => ({
       title: p.title,
-      link: `${SITE_URL}/baca/${p.slug}`,
+      link: `${baseUrl}/baca/${p.slug}`,
       description: p.excerpt || '',
     }));
   }
 
   let articleLinks = items
     .map((item) => {
+      let itemLink = item.link;
+      if (itemLink && (itemLink.includes('example.com') || itemLink.includes('domain.com'))) {
+        itemLink = itemLink.replace(/https?:\/\/[^\/]+/, baseUrl);
+      }
       const cleanTitle = sanitizeLlmsText(item.title || '').replace(/[\[\]]/g, '').trim();
       const cleanDesc = sanitizeLlmsText(item.description || '');
-      return `- [${cleanTitle}](${item.link})${cleanDesc ? `: ${cleanDesc}` : ''}`;
+      return `- [${cleanTitle}](${itemLink})${cleanDesc ? `: ${cleanDesc}` : ''}`;
     })
     .join('\n');
 
   // Fallback item to ensure H2 section is never empty
   if (!articleLinks.trim()) {
-    articleLinks = `- [Beranda](${SITE_URL}): ${siteDescription}`;
+    articleLinks = `- [Beranda](${baseUrl}): ${siteDescription}`;
   }
 
   return `# ${siteName}
@@ -227,9 +237,9 @@ ${articleLinks}
 
 ## Optional
 
-- [Konten Lengkap LLMs](${SITE_URL}/llms-full.txt): Kumpulan teks lengkap artikel untuk konsumsi dan inferensi model bahasa (LLM).
-- [Sitemap XML](${SITE_URL}/sitemap.xml): Peta situs terstruktur untuk crawler.
-- [RSS Feed](${SITE_URL}/feed.xml): Umpan sindikasi artikel terbaru.
+- [Konten Lengkap LLMs](${baseUrl}/llms-full.txt): Kumpulan teks lengkap artikel untuk konsumsi dan inferensi model bahasa (LLM).
+- [Sitemap XML](${baseUrl}/sitemap.xml): Peta situs terstruktur untuk crawler.
+- [RSS Feed](${baseUrl}/feed.xml): Umpan sindikasi artikel terbaru.
 `.trim();
 }
 
@@ -238,7 +248,7 @@ ${articleLinks}
  */
 export function generateLlmsFullTxt(posts, customSiteUrl, customSiteName) {
   const { siteName, SITE_URL } = getSiteConfig();
-  const activeSiteUrl = customSiteUrl || SITE_URL;
+  const activeSiteUrl = customSiteUrl || (SITE_URL && SITE_URL !== 'https://example.com' && SITE_URL !== 'https://domain.com' ? SITE_URL : 'https://parenting.my.id');
   const activeSiteName = customSiteName || siteName;
   const publishedPosts = (posts || []).filter((p) => p.status === 'published');
 
@@ -275,7 +285,7 @@ ${fullArticles}
  */
 export function generateSitemapXml(posts, overrideBaseUrl) {
   const { SITE_URL } = getSiteConfig();
-  const baseUrl = overrideBaseUrl || (SITE_URL && SITE_URL !== 'https://domain.com' ? SITE_URL : 'https://parenting.my.id');
+  const baseUrl = overrideBaseUrl || (SITE_URL && SITE_URL !== 'https://example.com' && SITE_URL !== 'https://domain.com' ? SITE_URL : 'https://parenting.my.id');
   const publishedPosts = (posts || []).filter((p) => p.status === 'published');
 
   const urls = publishedPosts
@@ -286,7 +296,21 @@ export function generateSitemapXml(posts, overrideBaseUrl) {
     })
     .join('');
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${escapeXml(baseUrl)}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>${urls}</urlset>`;
+  const staticPages = [
+    { url: `${baseUrl}/privacy`, priority: '0.5' },
+    { url: `${baseUrl}/about`, priority: '0.6' },
+    { url: `${baseUrl}/contact`, priority: '0.6' },
+    { url: `${baseUrl}/disclaimer`, priority: '0.5' },
+    { url: `${baseUrl}/terms`, priority: '0.5' },
+  ];
+
+  const staticUrls = staticPages
+    .map(
+      (p) => `<url><loc>${escapeXml(p.url)}</loc><changefreq>monthly</changefreq><priority>${escapeXml(p.priority)}</priority></url>`
+    )
+    .join('');
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${escapeXml(baseUrl)}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>${staticUrls}${urls}</urlset>`;
 
   return xml.trim();
 }

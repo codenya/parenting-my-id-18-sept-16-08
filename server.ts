@@ -3699,7 +3699,8 @@ app.get(['/sitemap.xml', '/sitemapper.xml'], (req, res) => {
 
 // 7. DYNAMIC RSS FEED.XML & RSS.XML
 app.get(['/feed.xml', '/rss.xml'], (req, res) => {
-  const rss = generateFeedXml(mockPosts);
+  const dynamicBaseUrl = getBaseUrl(req);
+  const rss = generateFeedXml(mockPosts, dynamicBaseUrl);
 
   res.setHeader('Content-Type', 'application/xml; charset=utf-8');
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
@@ -3742,8 +3743,9 @@ app.get(['/admin', '/admin/'], (req, res) => {
 
 // 7.A. DYNAMIC LLMS.TXT & LLMS-FULL.TXT ENDPOINTS (SYNCHRONIZED WITH FEED.XML ITEMS)
 app.get('/llms.txt', (req, res) => {
-  const feedXmlContent = generateFeedXml(mockPosts);
-  const content = generateLlmsTxt(mockPosts, feedXmlContent);
+  const dynamicBaseUrl = getBaseUrl(req);
+  const feedXmlContent = generateFeedXml(mockPosts, dynamicBaseUrl);
+  const content = generateLlmsTxt(mockPosts, feedXmlContent, dynamicBaseUrl);
 
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
@@ -4975,8 +4977,11 @@ app.get(['/kategori/:category', '/kategori/:category/'], (req, res, next) => {
 // Explicit Robots.txt with Content-Signal directives and Sitemap pointer
 app.get('/robots.txt', (req, res) => {
   const protocol = req.get('x-forwarded-proto') || req.protocol || 'https';
-  const host = req.get('host');
-  const baseUrl = `${protocol}://${host}`;
+  const host = req.get('host') || 'parenting.my.id';
+  let baseUrl = `${protocol}://${host}`;
+  if (host.includes('example.com') || host.includes('domain.com')) {
+    baseUrl = 'https://parenting.my.id';
+  }
 
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
   res.setHeader('Cache-Control', 'public, max-age=86400');
