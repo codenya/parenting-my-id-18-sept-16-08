@@ -2685,6 +2685,20 @@ app.post('/api/autolinks/:id/click', (req, res) => {
   res.json({ success: true });
 });
 
+// Force Regenerate Public Static SEO Files (sitemap.xml, feed.xml, robots.txt, llms.txt)
+app.post('/api/admin/regenerate-static', requireAuth(['admin']), (req, res) => {
+  try {
+    const result = generateStaticFiles(mockPosts);
+    res.json({
+      success: true,
+      message: 'Berhasil meregenerasi ulang sitemap.xml, feed.xml, robots.txt, dan llms.txt secara fisik!',
+      filesUpdated: ['sitemap.xml', 'feed.xml', 'robots.txt', 'llms.txt', 'llms-full.txt'],
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: 'Gagal meregenerasi berkas statis: ' + err.message });
+  }
+});
+
 // ==========================================
 // DATABASE BACKUP & SCHEMA EXPORT ENDPOINTS (ADMIN ONLY)
 // ==========================================
