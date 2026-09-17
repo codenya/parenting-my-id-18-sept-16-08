@@ -12,7 +12,33 @@ interface DatabaseBackupManagerProps {
 }
 
 export default function DatabaseBackupManager({ siteConfig }: DatabaseBackupManagerProps) {
-  const [subTab, setSubTab] = useState<'dump' | 'schema_only' | 'queries'>('dump');
+  const [subTab, setSubTab] = useState<'dump' | 'schema_only' | 'queries' | 'static_files'>('dump');
+  
+  // Static files regeneration state
+  const [isRegeneratingStatic, setIsRegeneratingStatic] = useState(false);
+  const [staticRegenResult, setStaticRegenResult] = useState<{ success: boolean; message: string; filesUpdated?: string[] } | null>(null);
+
+  const handleRegenerateStaticFiles = async () => {
+    setIsRegeneratingStatic(true);
+    setStaticRegenResult(null);
+    try {
+      const res = await fetch('/api/admin/regenerate-static', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `HTTP ${res.status}: Gagal meregenerasi berkas statis`);
+      }
+      const data = await res.json();
+      setStaticRegenResult(data);
+    } catch (err: any) {
+      console.error('Error regenerating static files:', err);
+      alert(`Gagal meregenerasi berkas statis: ${err.message}`);
+    } finally {
+      setIsRegeneratingStatic(false);
+    }
+  };
   
   // Table states
   const [tables, setTables] = useState<DatabaseTableInfo[]>([]);
@@ -288,6 +314,18 @@ export default function DatabaseBackupManager({ siteConfig }: DatabaseBackupMana
         >
           <Terminal className="w-4 h-4" />
           <span>Panduan Query Explore Data D1</span>
+        </button>
+
+        <button
+          onClick={() => setSubTab('static_files')}
+          className={`px-4 py-2 text-xs font-bold rounded-t-xl transition-colors flex items-center gap-2 shrink-0 ${
+            subTab === 'static_files'
+              ? 'bg-rose-600 text-white shadow-sm'
+              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+          }`}
+        >
+          <RefreshCw className="w-4 h-4" />
+          <span>Regenerasi Berkas Publik (Sitemap, RSS, LLMs)</span>
         </button>
       </div>
 
@@ -761,6 +799,62 @@ export default function DatabaseBackupManager({ siteConfig }: DatabaseBackupMana
                 Ganti <code className="font-mono text-indigo-600 dark:text-indigo-400">&lt;DATABASE_NAME&gt;</code> dengan nama database D1 Anda di Cloudflare (misal: <code className="font-mono">parenting_db</code>) untuk memulihkan seluruh struktur dan data secara instan.
               </p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* SUBTAB 4: REGENERATE PUBLIC STATIC FILES (SITEMAP, RSS, LLMS, ROBOTS) */}
+      {subTab === 'static_files' && (
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+          <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div>
+              <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-rose-600" />
+                <span>Regenerasi Berkas Publik & SEO (Sitemap, RSS, LLMs)</span>
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Tekan tombol di bawah untuk memaksa sistem menyusun ulang berkas output publik (<code className="font-mono text-rose-500">sitemap.xml</code>, <code className="font-mono text-rose-500">feed.xml</code>, <code className="font-mono text-rose-500">robots.txt</code>, <code className="font-mono text-rose-500">llms.txt</code>, &amp; <code className="font-mono text-rose-500">llms-full.txt</code>) berdasarkan data postingan dan domain aktif terbaru.
+              </p>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="font-bold text-xs text-slate-800 dark:text-slate-200">
+                  Target Berkas Publik yang Diperbarui:
+                </div>
+                <ul className="text-xs text-slate-600 dark:text-slate-400 space-y-1 list-disc pl-4 font-mono">
+                  <li>/sitemap.xml (Peta situs crawler Googlebot)</li>
+                  <li>/feed.xml (RSS 2.0 Syndication Feed)</li>
+                  <li>/robots.txt (Direktif crawler &amp; sitemap pointer)</li>
+                  <li>/llms.txt &amp; /llms-full.txt (Indeks dokumen AI)</li>
+                </ul>
+              </div>
+
+              <button
+                onClick={handleRegenerateStaticFiles}
+                disabled={isRegeneratingStatic}
+                className="px-5 py-3 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-md transition-all flex items-center gap-2 disabled:opacity-50 shrink-0"
+              >
+                <RefreshCw className={`w-4 h-4 ${isRegeneratingStatic ? 'animate-spin' : ''}`} />
+                <span>{isRegeneratingStatic ? 'Sedang Meregenerasi...' : '🚀 Regenerasi Berkas Publik Sekarang'}</span>
+              </button>
+            </div>
+
+            {staticRegenResult && (
+              <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/60 text-emerald-900 dark:text-emerald-200 text-xs space-y-2">
+                <div className="font-bold flex items-center gap-1.5">
+                  <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <span>{staticRegenResult.message}</span>
+                </div>
+                {staticRegenResult.filesUpdated && (
+                  <div className="text-[11px] text-emerald-700 dark:text-emerald-300 font-mono">
+                    Berhasil memperbarui: {staticRegenResult.filesUpdated.join(', ')}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}

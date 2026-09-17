@@ -265,7 +265,7 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
 
   // Dynamic JSON-LD Structured Data Schema for Googlebot Crawling & Indexing
   const jsonLdData = useMemo(() => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : (siteConfig?.site_url || 'https://example.com');
+    const origin = typeof window !== 'undefined' ? window.location.origin : (siteConfig?.site_url || 'https://parenting.my.id');
     const pageUrl = `${origin}/iklan-baris?page=${currentPage}${selectedKategori !== 'Semua' ? `&kategori=${encodeURIComponent(selectedKategori)}` : ''}`;
 
     // Ensure ads are deduplicated by id to strictly avoid duplicate ItemList entries in Google validator
