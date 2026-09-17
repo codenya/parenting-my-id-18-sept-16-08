@@ -1343,7 +1343,7 @@ export default function RichPostEditor({
       {/* ------------------------------------------------------------- */}
       <div className={`sticky top-0 z-30 flex flex-col gap-2.5 p-3 sm:p-4 rounded-2xl md:rounded-3xl shadow-sm border transition-colors ${
         userRole === 'writer'
-          ? 'bg-[#FAF9F6]/95 dark:bg-slate-900/95 backdrop-blur-md text-slate-800 dark:text-slate-100 border-[#E5E3DC] dark:border-slate-800'
+          ? 'bg-white/95 dark:bg-slate-900/95 backdrop-blur-md text-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-800'
           : 'bg-slate-900/95 backdrop-blur-md text-white border-slate-800 shadow-md'
       }`}>
         
@@ -1600,7 +1600,7 @@ export default function RichPostEditor({
         <div className="w-full space-y-4">
           <div className={`rounded-3xl p-5 sm:p-7 border transition-colors ${
             userRole === 'writer'
-              ? 'bg-[#FAF9F6] dark:bg-slate-900 border-[#E5E3DC] dark:border-slate-800 shadow-xs text-[#2D3748] dark:text-slate-100'
+              ? 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-800 shadow-xs text-slate-900 dark:text-slate-100'
               : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm'
           } space-y-5`}>
             
@@ -1616,7 +1616,7 @@ export default function RichPostEditor({
                 placeholder="Contoh: Panduan Lengkap & Strategi Terbaru..."
                 className={`w-full px-4 py-3.5 rounded-2xl border text-lg font-extrabold transition-colors placeholder:font-normal placeholder:text-slate-400 focus:outline-none focus:ring-2 ${
                   userRole === 'writer'
-                    ? 'bg-[#FAF9F6] dark:bg-slate-900 border-[#E2E0D8] dark:border-slate-800 text-[#2D3748] dark:text-white focus:ring-emerald-500/50'
+                    ? 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-500 focus:ring-emerald-500/50'
                     : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white focus:ring-rose-500'
                 }`}
               />
@@ -1651,7 +1651,7 @@ export default function RichPostEditor({
                   placeholder="Ketik atau pilih kategori (cth: Berita, Edukasi...)"
                   className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-bold focus:outline-none focus:ring-2 ${
                     userRole === 'writer'
-                      ? 'bg-[#FAF9F6] dark:bg-slate-800 border-[#E2E0D8] dark:border-slate-700 text-[#2D3748] dark:text-slate-100 focus:ring-emerald-500/50'
+                      ? 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 focus:ring-emerald-500/50'
                       : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 focus:ring-rose-500'
                   }`}
                 />
@@ -4642,7 +4642,7 @@ export default function RichPostEditor({
                     placeholder="Tulis artikel lengkap dengan format markdown di sini..."
                     className={`w-full p-4 sm:p-6 rounded-2xl border font-mono text-sm leading-relaxed focus:outline-none focus:ring-2 ${
                       userRole === 'writer'
-                        ? 'bg-[#FAF9F6] dark:bg-slate-900/90 border-[#E2E0D8] dark:border-slate-800 text-[#2D3748] dark:text-slate-100 focus:ring-emerald-500/50'
+                        ? 'bg-white dark:bg-slate-900/90 border-slate-300 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 focus:ring-emerald-500/50'
                         : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 focus:ring-rose-500'
                     }`}
                   />
@@ -4676,7 +4676,7 @@ export default function RichPostEditor({
                       placeholder="Tulis konten artikel di sini..."
                       className={`w-full p-4 rounded-2xl border font-mono text-xs leading-relaxed focus:outline-none focus:ring-2 ${
                         userRole === 'writer'
-                          ? 'bg-[#FAF9F6] dark:bg-slate-900/90 border-[#E2E0D8] dark:border-slate-800 text-[#2D3748] dark:text-slate-100 focus:ring-emerald-500/50'
+                          ? 'bg-white dark:bg-slate-900/90 border-slate-300 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 focus:ring-emerald-500/50'
                           : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 focus:ring-rose-500'
                       }`}
                     />
