@@ -42,7 +42,10 @@ const INITIAL_POSTS = [
 export const onRequest: PagesFunction<Env> = async (context) => {
   const { env } = context;
   const requestUrl = new URL(context.request.url);
-  const siteUrl = (env.SITE_URL || requestUrl.origin).replace(/\/$/, '');
+  let rawSiteUrl = env.SITE_URL || '';
+  if (!rawSiteUrl || rawSiteUrl.includes('example.com') || rawSiteUrl.includes('domain.com')) {
+    rawSiteUrl = requestUrl.origin;
+  }
 
   let siteName = requestUrl.hostname.replace('www.', '') || 'Blog Engine';
   let siteDescription = 'Portal berita & informasi terpercaya.';
@@ -51,7 +54,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   if (env.DB) {
     try {
       // Fetch site config
-      const configRes = await env.DB.prepare("SELECT key, value FROM configs WHERE key IN ('site_name', 'site_description', 'seo_meta_title', 'seo_meta_description')").all();
+      const configRes = await env.DB.prepare("SELECT key, value FROM configs WHERE key IN ('site_name', 'site_description', 'seo_meta_title', 'seo_meta_description', 'site_url')").all();
       const configMap: Record<string, string> = {};
       if (configRes && configRes.results) {
         for (const row of configRes.results) {
@@ -61,6 +64,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
             configMap[row.key] = row.value;
           }
         }
+      }
+      if (configMap.site_url && !configMap.site_url.includes('example.com') && !configMap.site_url.includes('domain.com')) {
+        rawSiteUrl = configMap.site_url;
       }
       siteName = configMap.site_name || configMap.seo_meta_title || siteName;
       siteDescription = configMap.site_description || configMap.seo_meta_description || siteDescription;
@@ -80,6 +86,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       console.error('Error fetching data for RSS feed:', e);
     }
   }
+
+  const siteUrl = rawSiteUrl.replace(/\/$/, '');
 
   const items = posts
     .map(

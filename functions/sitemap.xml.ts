@@ -22,7 +22,10 @@ const INITIAL_SLUGS = [
 export const onRequest: PagesFunction<Env> = async (context) => {
   const { env } = context;
   const requestUrl = new URL(context.request.url);
-  const siteUrl = (env.SITE_URL || requestUrl.origin).replace(/\/$/, '');
+  let rawSiteUrl = env.SITE_URL || '';
+  if (!rawSiteUrl || rawSiteUrl.includes('example.com') || rawSiteUrl.includes('domain.com')) {
+    rawSiteUrl = requestUrl.origin;
+  }
 
   let posts: { slug: string; updatedAt: string }[] = INITIAL_SLUGS;
   let products: { slug: string; updatedAt: string }[] = [];
@@ -30,6 +33,15 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   if (env.DB) {
     try {
+      const dbUrlRow = await env.DB.prepare("SELECT value FROM configs WHERE key = 'site_url'").first<string>('value');
+      if (dbUrlRow) {
+        let cleanDbUrl = dbUrlRow;
+        try { cleanDbUrl = JSON.parse(dbUrlRow); } catch {}
+        if (cleanDbUrl && typeof cleanDbUrl === 'string' && !cleanDbUrl.includes('example.com') && !cleanDbUrl.includes('domain.com')) {
+          rawSiteUrl = cleanDbUrl;
+        }
+      }
+
       const { results } = await env.DB.prepare(
         "SELECT slug, updated_at as updatedAt FROM posts WHERE status = 'published' ORDER BY id DESC"
       ).all();
@@ -58,6 +70,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       console.error('Error fetching posts or products for sitemap:', e);
     }
   }
+
+  const siteUrl = rawSiteUrl.replace(/\/$/, '');
 
   const urls = posts
     .map(

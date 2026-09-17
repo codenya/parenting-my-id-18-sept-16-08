@@ -1,13 +1,31 @@
 interface Env {
+  DB?: any;
   SITE_URL?: string;
 }
 
 export const onRequest: PagesFunction<Env> = async (context) => {
+  const { env } = context;
   const requestUrl = new URL(context.request.url);
-  let rawSiteUrl = context.env.SITE_URL || requestUrl.origin;
+  let rawSiteUrl = env.SITE_URL || '';
   if (!rawSiteUrl || rawSiteUrl.includes('example.com') || rawSiteUrl.includes('domain.com')) {
-    rawSiteUrl = 'https://parenting.my.id';
+    rawSiteUrl = requestUrl.origin;
   }
+
+  if (env.DB) {
+    try {
+      const dbUrlRow = await env.DB.prepare("SELECT value FROM configs WHERE key = 'site_url'").first<string>('value');
+      if (dbUrlRow) {
+        let cleanDbUrl = dbUrlRow;
+        try { cleanDbUrl = JSON.parse(dbUrlRow); } catch {}
+        if (cleanDbUrl && typeof cleanDbUrl === 'string' && !cleanDbUrl.includes('example.com') && !cleanDbUrl.includes('domain.com')) {
+          rawSiteUrl = cleanDbUrl;
+        }
+      }
+    } catch (e) {
+      console.error('Error fetching site_url in robots.txt:', e);
+    }
+  }
+
   const siteUrl = rawSiteUrl.replace(/\/$/, '');
   const txt = `User-agent: *
 Allow: /

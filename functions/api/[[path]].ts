@@ -207,7 +207,12 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     return jsonResponse({ ok: true }, 200);
   }
 
-  const siteUrl = (env.SITE_URL || new URL(request.url).origin).replace(/\/$/, '');
+  const requestOrigin = new URL(request.url).origin;
+  let rawSiteUrl = env.SITE_URL || '';
+  if (!rawSiteUrl || rawSiteUrl.includes('example.com') || rawSiteUrl.includes('domain.com')) {
+    rawSiteUrl = requestOrigin;
+  }
+  let siteUrl = rawSiteUrl.replace(/\/$/, '');
 
   const escapeXml = (unsafe: any): string => {
     if (unsafe == null) return '';
@@ -224,16 +229,16 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     return String(text).replace(/\]\]>/g, ']]]]><![CDATA[>');
   };
 
-  const getSiteConfig = async (): Promise<{ site_name: string; site_description: string }> => {
+  const getSiteConfig = async (): Promise<{ site_name: string; site_description: string; site_url: string }> => {
     const activeHost = new URL(request.url).hostname.replace('www.', '');
     const defaultSiteName = activeHost || 'Portal Informasi';
     const defaultSiteDesc = 'Portal informasi dan edukasi terpercaya.';
     
     if (!env.DB) {
-      return { site_name: defaultSiteName, site_description: defaultSiteDesc };
+      return { site_name: defaultSiteName, site_description: defaultSiteDesc, site_url: siteUrl };
     }
     try {
-      const results = await env.DB.prepare("SELECT key, value FROM configs WHERE key IN ('site_name', 'site_description', 'seo_meta_title', 'seo_meta_description')").all();
+      const results = await env.DB.prepare("SELECT key, value FROM configs WHERE key IN ('site_name', 'site_description', 'seo_meta_title', 'seo_meta_description', 'site_url')").all();
       const configMap: Record<string, string> = {};
       if (results && results.results) {
         for (const row of results.results) {
@@ -244,12 +249,16 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           }
         }
       }
+      if (configMap.site_url && !configMap.site_url.includes('example.com') && !configMap.site_url.includes('domain.com')) {
+        siteUrl = configMap.site_url.replace(/\/$/, '');
+      }
       return {
         site_name: configMap.site_name || configMap.seo_meta_title || defaultSiteName,
-        site_description: configMap.site_description || configMap.seo_meta_description || defaultSiteDesc
+        site_description: configMap.site_description || configMap.seo_meta_description || defaultSiteDesc,
+        site_url: siteUrl
       };
     } catch {
-      return { site_name: defaultSiteName, site_description: defaultSiteDesc };
+      return { site_name: defaultSiteName, site_description: defaultSiteDesc, site_url: siteUrl };
     }
   };
 
@@ -3840,6 +3849,38 @@ Berdasarkan judul artikel: "${title}" dan isi: "${(content || '').slice(0, 500)}
     }
 
     // ==========================================
+    // REGENERATE PUBLIC STATIC / SEO FILES ENDPOINT (ADMIN ONLY)
+    // ==========================================
+    if ((path === '/api/admin/regenerate-static' || path === '/api/regenerate-static') && (method === 'POST' || method === 'GET')) {
+      const auth = await authenticateRequest(['admin']);
+      if (auth.errorResponse) return auth.errorResponse;
+
+      try {
+        if (env.GITHUB_TOKEN && typeof syncStaticFilesToGitHub === 'function') {
+          await syncStaticFilesToGitHub(env, context.waitUntil);
+        }
+
+        let postCount = 0;
+        if (env.DB) {
+          try {
+            const countRes: any = await env.DB.prepare("SELECT count(*) as total FROM posts WHERE status = 'published'").first();
+            postCount = countRes ? Number(countRes.total) : 0;
+          } catch (cErr) {
+            console.warn('Could not count published posts:', cErr);
+          }
+        }
+
+        return jsonResponse({
+          success: true,
+          message: `Berhasil meregenerasi berkas sitemap.xml, feed.xml, robots.txt, dan llms.txt secara dinamis (${postCount} postingan terindeks)!`,
+          filesUpdated: ['/sitemap.xml', '/feed.xml', '/robots.txt', '/llms.txt', '/llms-full.txt'],
+        });
+      } catch (err: any) {
+        return jsonResponse({ success: false, error: 'Gagal meregenerasi berkas statis: ' + err.message }, 500);
+      }
+    }
+
+    // ==========================================
     // DATABASE BACKUP & SCHEMA EXPORT ENDPOINTS (ADMIN ONLY)
     // ==========================================
 
@@ -4296,9 +4337,9 @@ async function syncStaticFilesToGitHub(env: Env, waitUntil?: (promise: Promise<a
             }
           }
         }
-        if (configMap.site_url) {
+        if (configMap.site_url && !configMap.site_url.includes('example.com') && !configMap.site_url.includes('domain.com')) {
           siteUrl = configMap.site_url.replace(/\/$/, '');
-        } else if (env.SITE_URL) {
+        } else if (env.SITE_URL && !env.SITE_URL.includes('example.com') && !env.SITE_URL.includes('domain.com')) {
           siteUrl = env.SITE_URL.replace(/\/$/, '');
         }
         siteName = configMap.site_name || configMap.seo_meta_title || 'Portal Informasi';
