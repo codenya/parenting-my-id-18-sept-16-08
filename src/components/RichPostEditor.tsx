@@ -4300,7 +4300,7 @@ export default function RichPostEditor({
             {/* ------------------------------------------------------------- */}
             
             {/* MOBILE FLOATING / TOUCH-FRIENDLY TOOLBAR (< MD) */}
-            <div className="md:hidden border border-[#E2E0D8] dark:border-slate-800 rounded-2xl bg-[#F4F2EB] dark:bg-slate-800/80 p-1.5 flex items-center justify-between gap-1 overflow-x-auto shadow-xs">
+            <div className="md:hidden border border-slate-300 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-900 p-1.5 flex items-center justify-between gap-1 overflow-x-auto shadow-sm">
               <button
                 type="button"
                 onClick={() => applyFormatting('**', '**', 'teks tebal')}
@@ -4391,11 +4391,11 @@ export default function RichPostEditor({
             </div>
 
             {/* DESKTOP FULL TOOLBAR (>= MD) */}
-            <div className="hidden md:block border border-[#E2E0D8] dark:border-slate-800 rounded-2xl bg-[#F4F2EB] dark:bg-slate-800/60 p-2 space-y-2">
-              <div className="flex flex-wrap items-center justify-between gap-1 border-b border-[#E2E0D8] dark:border-slate-700 pb-2">
+            <div className="hidden md:block border border-slate-300 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-900 p-2 space-y-2 shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-1 border-b border-slate-200 dark:border-slate-700 pb-2">
                 
                 {/* TEXT FORMATTING GROUP */}
-                <div className="flex items-center gap-0.5 pr-2 border-r border-[#E2E0D8] dark:border-slate-700">
+                <div className="flex items-center gap-0.5 pr-2 border-r border-slate-200 dark:border-slate-700">
                   <button
                     type="button"
                     onClick={() => applyFormatting('**', '**', 'teks tebal')}
@@ -4431,7 +4431,7 @@ export default function RichPostEditor({
                 </div>
 
                 {/* HEADINGS GROUP (H1 otomatis diset oleh sistem untuk judul artikel) */}
-                <div className="flex items-center gap-0.5 px-2 border-r border-[#E2E0D8] dark:border-slate-700">
+                <div className="flex items-center gap-0.5 px-2 border-r border-slate-200 dark:border-slate-700">
                   <button
                     type="button"
                     onClick={() => applyFormatting('## ', '', 'Subjudul Bagian (H2)')}
@@ -4451,7 +4451,7 @@ export default function RichPostEditor({
                 </div>
 
                 {/* LISTS GROUP */}
-                <div className="flex items-center gap-0.5 px-2 border-r border-[#E2E0D8] dark:border-slate-700">
+                <div className="flex items-center gap-0.5 px-2 border-r border-slate-200 dark:border-slate-700">
                   <button
                     type="button"
                     onClick={() => applyFormatting('- ', '', 'Poin item')}
@@ -4479,7 +4479,7 @@ export default function RichPostEditor({
                 </div>
 
                 {/* BLOCKS & STRUCTURE GROUP */}
-                <div className="flex items-center gap-0.5 px-2 border-r border-[#E2E0D8] dark:border-slate-700">
+                <div className="flex items-center gap-0.5 px-2 border-r border-slate-200 dark:border-slate-700">
                   <button
                     type="button"
                     onClick={() => applyFormatting('> ', '', 'Kutipan mutiara atau inspirasi')}
@@ -4575,7 +4575,7 @@ export default function RichPostEditor({
                 </div>
 
                 {/* HISTORY UNDO/REDO & CLEAR */}
-                <div className="flex items-center gap-1 border-l border-[#E2E0D8] dark:border-slate-700 pl-2">
+                <div className="flex items-center gap-1 border-l border-slate-200 dark:border-slate-700 pl-2">
                   <button
                     type="button"
                     onClick={handleUndo}
