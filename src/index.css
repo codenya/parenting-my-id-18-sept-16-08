@@ -133,12 +133,30 @@ html {
   }
 
   /* Lists & Blockquotes within article body */
-  .article-body ul,
+  .article-body ul {
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    margin-bottom: 1.125rem;
+    padding-left: 1.5rem;
+    list-style-type: disc !important;
+  }
+
   .article-body ol {
     font-size: 1.0625rem;
     line-height: 1.6;
     margin-bottom: 1.125rem;
     padding-left: 1.5rem;
+    list-style-type: decimal !important;
+  }
+
+  .article-body ul ul {
+    list-style-type: circle !important;
+    margin-bottom: 0.25rem;
+  }
+
+  .article-body ol ol {
+    list-style-type: lower-alpha !important;
+    margin-bottom: 0.25rem;
   }
 
   .article-body li {

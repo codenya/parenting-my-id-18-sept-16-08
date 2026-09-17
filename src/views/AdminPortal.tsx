@@ -517,6 +517,8 @@ export default function AdminPortal({
   const [cfgPaginationType, setCfgPaginationType] = useState<'load_more' | 'infinite_scroll' | 'numbered'>(siteConfig?.pagination_type || 'load_more');
   const [cfgCommentEngineMode, setCfgCommentEngineMode] = useState<'both' | 'native' | 'cusdis' | 'none'>(siteConfig?.comment_engine_mode || 'both');
   const [cfgEnableCommentTurnstile, setCfgEnableCommentTurnstile] = useState(siteConfig?.enable_comment_turnstile ?? true);
+  const [cfgHistoryMinTimeMinutes, setCfgHistoryMinTimeMinutes] = useState(siteConfig?.history_min_time_minutes ?? 3);
+  const [cfgHistoryMinCharDiff, setCfgHistoryMinCharDiff] = useState(siteConfig?.history_min_char_diff ?? 25);
 
   const [cfgShowSidebar, setCfgShowSidebar] = useState(siteConfig?.show_sidebar ?? true);
   const [cfgPopularPostsCount, setCfgPopularPostsCount] = useState(siteConfig?.popular_posts_count || 5);
@@ -829,6 +831,8 @@ export default function AdminPortal({
       setCfgPaginationType(siteConfig.pagination_type || 'load_more');
       setCfgCommentEngineMode(siteConfig.comment_engine_mode || 'both');
       setCfgEnableCommentTurnstile(siteConfig.enable_comment_turnstile ?? true);
+      setCfgHistoryMinTimeMinutes(siteConfig.history_min_time_minutes ?? 3);
+      setCfgHistoryMinCharDiff(siteConfig.history_min_char_diff ?? 25);
 
       setCfgShowSidebar(siteConfig.show_sidebar ?? true);
       setCfgPopularPostsCount(siteConfig.popular_posts_count || 5);
@@ -1071,6 +1075,8 @@ export default function AdminPortal({
         pagination_type: cfgPaginationType,
         comment_engine_mode: cfgCommentEngineMode,
         enable_comment_turnstile: cfgEnableCommentTurnstile,
+        history_min_time_minutes: Number(cfgHistoryMinTimeMinutes),
+        history_min_char_diff: Number(cfgHistoryMinCharDiff),
         show_sidebar: cfgShowSidebar,
         popular_posts_count: Number(cfgPopularPostsCount),
         categories_widget_limit: Number(cfgCategoriesWidgetLimit),
@@ -1247,7 +1253,7 @@ export default function AdminPortal({
     cfgMetric2Value, cfgMetric2Label, cfgMetric2AnimType, cfgMetric2StartVal, cfgMetric2EndVal, cfgMetric2Duration, cfgMetric2Unit,
     cfgMetric3Value, cfgMetric3Label, cfgMetric3AnimType, cfgMetric3StartVal, cfgMetric3EndVal, cfgMetric3Duration, cfgMetric3Unit,
     cfgPostsPerPage, cfgEnableFeaturedPost,
-    cfgPaginationType, cfgCommentEngineMode, cfgShowSidebar, cfgPopularPostsCount,
+    cfgPaginationType, cfgCommentEngineMode, cfgHistoryMinTimeMinutes, cfgHistoryMinCharDiff, cfgShowSidebar, cfgPopularPostsCount,
     cfgCategoriesWidgetLimit, cfgSidebarBannerCode, cfgFooterAboutText, cfgFooterCopyrightText,
     cfgSocialFacebook, cfgSocialInstagram, cfgSocialTwitter, cfgFooterMenuLinksArray,
     cfgFooterCategoryLinksArray, cfgAdminLoginTitle, cfgAdminLoginSubtitle, cfgAdminLoginBtnText,
@@ -1474,6 +1480,8 @@ export default function AdminPortal({
         pagination_type: cfgPaginationType,
         comment_engine_mode: cfgCommentEngineMode,
         enable_comment_turnstile: cfgEnableCommentTurnstile,
+        history_min_time_minutes: Number(cfgHistoryMinTimeMinutes),
+        history_min_char_diff: Number(cfgHistoryMinCharDiff),
 
         show_sidebar: cfgShowSidebar,
         popular_posts_count: Number(cfgPopularPostsCount),
@@ -3148,6 +3156,7 @@ export default function AdminPortal({
           setCustomDisclaimerText={setEditorCustomDisclaimerText}
           isZenMode={isZenMode}
           setIsZenMode={setIsZenMode}
+          siteConfig={siteConfig}
         />
       )}
 
@@ -7291,6 +7300,38 @@ export default function AdminPortal({
                     />
                     <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Tampilkan Artikel Pilihan (enable_featured_post)</span>
                   </label>
+                </div>
+              </div>
+
+              {/* PENGATURAN HISTORY & ROLLBACK PENULIS */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-900/50">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    ⏱️ Jeda Waktu Minimal History (Menit) [history_min_time_minutes]
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="60"
+                    value={cfgHistoryMinTimeMinutes}
+                    onChange={(e) => setCfgHistoryMinTimeMinutes(e.target.value)}
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-xs font-semibold focus:ring-2 focus:ring-amber-500"
+                  />
+                  <p className="text-[10px] text-slate-500 mt-1">Durasi waktu minimal (menit) sebelum snapshot history baru disimpan otomatis.</p>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    📊 Minimal Selisih Karakter Signifikan [history_min_char_diff]
+                  </label>
+                  <input
+                    type="number"
+                    min="5"
+                    max="500"
+                    value={cfgHistoryMinCharDiff}
+                    onChange={(e) => setCfgHistoryMinCharDiff(e.target.value)}
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-xs font-semibold focus:ring-2 focus:ring-amber-500"
+                  />
+                  <p className="text-[10px] text-slate-500 mt-1">Batas perubahan jumlah karakter teks untuk langsung memicu snapshot history baru.</p>
                 </div>
               </div>
 

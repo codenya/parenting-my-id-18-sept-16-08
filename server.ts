@@ -3685,7 +3685,10 @@ Berdasarkan judul artikel: "${title}" dan isi: "${(content || '').slice(0, 500)}
 
 // 6. DYNAMIC SITEMAP.XML (Clean index 0 with escapeXml)
 app.get(['/sitemap.xml', '/sitemapper.xml'], (req, res) => {
-  const xml = generateSitemapXml(mockPosts);
+  const protocol = req.get('x-forwarded-proto') || req.protocol || 'https';
+  const host = req.get('host');
+  const dynamicBaseUrl = `${protocol}://${host}`;
+  const xml = generateSitemapXml(mockPosts, dynamicBaseUrl);
 
   res.setHeader('Content-Type', 'application/xml; charset=utf-8');
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
@@ -4969,14 +4972,20 @@ app.get(['/kategori/:category', '/kategori/:category/'], (req, res, next) => {
   }
 });
 
-// Explicit Robots.txt with Content-Signal directives
+// Explicit Robots.txt with Content-Signal directives and Sitemap pointer
 app.get('/robots.txt', (req, res) => {
+  const protocol = req.get('x-forwarded-proto') || req.protocol || 'https';
+  const host = req.get('host');
+  const baseUrl = `${protocol}://${host}`;
+
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
   res.setHeader('Cache-Control', 'public, max-age=86400');
   res.setHeader('Access-Control-Allow-Origin', '*');
   return res.send(`User-agent: *
 Allow: /
 Content-Signal: ai-train=no, search=yes, ai-input=no
+
+Sitemap: ${baseUrl}/sitemap.xml
 `);
 });
 

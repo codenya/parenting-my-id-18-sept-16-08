@@ -138,6 +138,8 @@ export interface SiteConfig {
   font_override_mode?: 'system' | 'inter' | 'plus-jakarta-sans' | 'theme';
   site_domain?: string;
   site_url?: string;
+  history_min_time_minutes?: number;
+  history_min_char_diff?: number;
   default_theme_mode?: 'light' | 'dark' | 'auto';
   font_density_scale?: 'compact' | 'standard' | 'spacious';
   font_size_scale?: 'small' | 'normal' | 'large' | 'xlarge';
