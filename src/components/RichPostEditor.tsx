@@ -1600,8 +1600,8 @@ export default function RichPostEditor({
         <div className="w-full space-y-4">
           <div className={`rounded-3xl p-5 sm:p-7 border transition-colors ${
             userRole === 'writer'
-              ? 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-800 shadow-xs text-slate-900 dark:text-slate-100'
-              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm'
+              ? 'bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-800 shadow-sm text-slate-900 dark:text-slate-100'
+              : 'bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-800 shadow-sm'
           } space-y-5`}>
             
             {/* TITLE FIELD */}
@@ -4391,226 +4391,216 @@ export default function RichPostEditor({
             </div>
 
             {/* DESKTOP FULL TOOLBAR (>= MD) */}
-            <div className="hidden md:block border border-slate-300 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-900 p-2 space-y-2 shadow-sm">
-              <div className="flex flex-wrap items-center justify-between gap-1 border-b border-slate-200 dark:border-slate-700 pb-2">
-                
-                {/* TEXT FORMATTING GROUP */}
-                <div className="flex items-center gap-0.5 pr-2 border-r border-slate-200 dark:border-slate-700">
-                  <button
-                    type="button"
-                    onClick={() => applyFormatting('**', '**', 'teks tebal')}
-                    className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors"
-                    title="Cetak Tebal / Bold (**teks**)"
-                  >
-                    <Bold className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => applyFormatting('*', '*', 'teks miring')}
-                    className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors"
-                    title="Cetak Miring / Italic (*teks*)"
-                  >
-                    <Italic className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => applyFormatting('~~', '~~', 'teks dicoret')}
-                    className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors"
-                    title="Coret / Strikethrough (~~teks~~)"
-                  >
-                    <Strikethrough className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleFlyingClearFormatting}
-                    className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors"
-                    title="Hapus Semua Format (Normal Teks Tanpa Markup)"
-                  >
-                    <RemoveFormatting className="w-4 h-4" />
-                  </button>
-                </div>
+            <div className="flex flex-wrap items-center justify-between gap-1 border-b-2 border-slate-400 dark:border-slate-600 pb-2 bg-slate-200 dark:bg-slate-900 p-2 rounded-t-lg shadow-sm">
+              {/* Group 1: Text Formatting */}
+              <div className="flex items-center gap-0.5 pr-2 border-r-2 border-slate-300 dark:border-slate-600">
+                <button
+                  type="button"
+                  onClick={() => applyFormatting('**', '**', 'teks tebal')}
+                  className="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-bold transition-colors shadow-2xs"
+                  title="Cetak Tebal / Bold (**teks**)"
+                >
+                  <Bold className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applyFormatting('*', '*', 'teks miring')}
+                  className="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-bold transition-colors shadow-2xs"
+                  title="Cetak Miring / Italic (*teks*)"
+                >
+                  <Italic className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applyFormatting('~~', '~~', 'teks dicoret')}
+                  className="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-bold transition-colors shadow-2xs"
+                  title="Coret / Strikethrough (~~teks~~)"
+                >
+                  <Strikethrough className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleFlyingClearFormatting}
+                  className="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-bold transition-colors shadow-2xs"
+                  title="Hapus Semua Format (Normal Teks Tanpa Markup)"
+                >
+                  <RemoveFormatting className="w-4 h-4" />
+                </button>
+              </div>
 
-                {/* HEADINGS GROUP (H1 otomatis diset oleh sistem untuk judul artikel) */}
-                <div className="flex items-center gap-0.5 px-2 border-r border-slate-200 dark:border-slate-700">
-                  <button
-                    type="button"
-                    onClick={() => applyFormatting('## ', '', 'Subjudul Bagian (H2)')}
-                    className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors text-xs font-bold"
-                    title="Subjudul Bagian (H2)"
-                  >
-                    <Heading2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => applyFormatting('### ', '', 'Subjudul Kecil (H3)')}
-                    className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors text-xs font-bold"
-                    title="Subjudul Kecil (H3)"
-                  >
-                    <Heading3 className="w-4 h-4" />
-                  </button>
-                </div>
+              {/* Group 2: Headings */}
+              <div className="flex items-center gap-0.5 px-2 border-r-2 border-slate-300 dark:border-slate-600">
+                <button
+                  type="button"
+                  onClick={() => applyFormatting('## ', '', 'Subjudul Bagian (H2)')}
+                  className="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-extrabold transition-colors text-xs shadow-2xs"
+                  title="Subjudul Bagian (H2)"
+                >
+                  <Heading2 className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applyFormatting('### ', '', 'Subjudul Kecil (H3)')}
+                  className="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-extrabold transition-colors text-xs shadow-2xs"
+                  title="Subjudul Kecil (H3)"
+                >
+                  <Heading3 className="w-4 h-4" />
+                </button>
+              </div>
 
-                {/* LISTS GROUP */}
-                <div className="flex items-center gap-0.5 px-2 border-r border-slate-200 dark:border-slate-700">
-                  <button
-                    type="button"
-                    onClick={() => applyFormatting('- ', '', 'Poin item')}
-                    className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors"
-                    title="Daftar Poin / Bullet List (-)"
-                  >
-                    <List className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => applyFormatting('1. ', '', 'Langkah pertama')}
-                    className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors"
-                    title="Daftar Angka / Numbered List (1.)"
-                  >
-                    <ListOrdered className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => applyFormatting('- [ ] ', '', 'Tugas selesai')}
-                    className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors"
-                    title="Checklist (- [ ])"
-                  >
-                    <CheckSquare className="w-4 h-4" />
-                  </button>
-                </div>
+              {/* Group 3: Lists & Structuring */}
+              <div className="flex items-center gap-0.5 px-2 border-r-2 border-slate-300 dark:border-slate-600">
+                <button
+                  type="button"
+                  onClick={() => applyFormatting('- ', '', 'Poin item')}
+                  className="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-bold transition-colors shadow-2xs"
+                  title="Daftar Poin / Bullet List (-)"
+                >
+                  <List className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applyFormatting('1. ', '', 'Langkah pertama')}
+                  className="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-bold transition-colors shadow-2xs"
+                  title="Daftar Angka / Numbered List (1.)"
+                >
+                  <ListOrdered className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applyFormatting('- [ ] ', '', 'Tugas selesai')}
+                  className="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-bold transition-colors shadow-2xs"
+                  title="Checklist (- [ ])"
+                >
+                  <CheckSquare className="w-4 h-4" />
+                </button>
+              </div>
 
-                {/* BLOCKS & STRUCTURE GROUP */}
-                <div className="flex items-center gap-0.5 px-2 border-r border-slate-200 dark:border-slate-700">
-                  <button
-                    type="button"
-                    onClick={() => applyFormatting('> ', '', 'Kutipan mutiara atau inspirasi')}
-                    className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors"
-                    title="Kutipan / Blockquote (>)"
-                  >
-                    <Quote className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => applyFormatting('```\n', '\n```', 'kode_atau_skrip')}
-                    className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors"
-                    title="Blok Kode (```)"
-                  >
-                    <Code className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={insertTable}
-                    className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors"
-                    title="Sisipkan Tabel Markdown"
-                  >
-                    <Table className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => applyFormatting('\n\n---\n\n', '')}
-                    className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors"
-                    title="Garis Pemisah Horizontal (---)"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </button>
-                </div>
+              {/* Group 4: Insert Blocks */}
+              <div className="flex items-center gap-0.5 px-2 border-r-2 border-slate-300 dark:border-slate-600">
+                <button
+                  type="button"
+                  onClick={() => applyFormatting('> ', '', 'Kutipan mutiara atau inspirasi')}
+                  className="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-bold transition-colors shadow-2xs"
+                  title="Kutipan / Blockquote (>)"
+                >
+                  <Quote className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applyFormatting('```\n', '\n```', 'kode_atau_skrip')}
+                  className="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-bold transition-colors shadow-2xs"
+                  title="Blok Kode (```)"
+                >
+                  <Code className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={insertTable}
+                  className="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-bold transition-colors shadow-2xs"
+                  title="Sisipkan Tabel Markdown"
+                >
+                  <Table className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applyFormatting('\n\n---\n\n', '')}
+                  className="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-bold transition-colors shadow-2xs"
+                  title="Garis Pemisah Horizontal (---)"
+                >
+                  <Minus className="w-4 h-4" />
+                </button>
+              </div>
 
-                {/* MEDIA & LINK GROUP */}
-                <div className="flex items-center gap-1 pl-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (textareaRef.current) {
-                        const start = textareaRef.current.selectionStart;
-                        const end = textareaRef.current.selectionEnd;
-                        setLinkText(textareaRef.current.value.substring(start, end));
-                      }
-                      setShowLinkModal(true);
-                    }}
-                    className="px-2 py-1 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-300 font-bold text-xs hover:bg-rose-100 transition-colors flex items-center gap-1"
-                    title="Sisipkan Hyperlink Tautan"
-                  >
-                    <LinkIcon className="w-3.5 h-3.5" />
-                    <span>Tautan</span>
-                  </button>
+              {/* Group 5: Action Buttons (High Contrast Colors) */}
+              <div className="flex items-center gap-1 pl-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (textareaRef.current) {
+                      const start = textareaRef.current.selectionStart;
+                      const end = textareaRef.current.selectionEnd;
+                      setLinkText(textareaRef.current.value.substring(start, end));
+                    }
+                    setShowLinkModal(true);
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-sky-100 border border-sky-500 dark:bg-sky-950 dark:border-sky-600 text-sky-950 dark:text-sky-100 font-extrabold text-xs hover:bg-sky-200 transition-colors flex items-center gap-1 shadow-2xs"
+                  title="Sisipkan Hyperlink Tautan"
+                >
+                  <LinkIcon className="w-3.5 h-3.5" />
+                  <span>Tautan</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowImageModal(true)}
+                  className="px-2.5 py-1 rounded-lg bg-emerald-100 border border-emerald-500 dark:bg-emerald-950 dark:border-emerald-600 text-emerald-950 dark:text-emerald-100 font-extrabold text-xs hover:bg-emerald-200 transition-colors flex items-center gap-1 shadow-2xs"
+                  title="Sisipkan / Upload Gambar Artikel"
+                >
+                  <ImageIcon className="w-3.5 h-3.5" />
+                  <span>Gambar</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowVideoModal(true)}
+                  className="px-2.5 py-1 rounded-lg bg-purple-100 border border-purple-500 dark:bg-purple-950 dark:border-purple-600 text-purple-950 dark:text-purple-100 font-extrabold text-xs hover:bg-purple-200 transition-colors flex items-center gap-1 shadow-2xs"
+                  title="Sisipkan Video (YouTube, TikTok, Instagram)"
+                >
+                  <Video className="w-3.5 h-3.5" />
+                  <span>Video</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleOpenProductPicker}
+                  className="px-2.5 py-1 rounded-lg bg-blue-100 border border-blue-500 dark:bg-blue-950 dark:border-blue-600 text-blue-950 dark:text-blue-100 font-extrabold text-xs hover:bg-blue-200 transition-colors flex items-center gap-1 shadow-2xs"
+                  title="Sisipkan Kotak Produk Penawaran"
+                >
+                  <ShoppingBag className="w-3.5 h-3.5" />
+                  <span>Produk</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleOpenRefModal}
+                  className="px-2.5 py-1 rounded-lg bg-amber-200 border border-amber-600 dark:bg-amber-900 dark:border-amber-500 text-amber-950 dark:text-amber-100 font-extrabold text-xs hover:bg-amber-300 transition-colors flex items-center gap-1 shadow-2xs"
+                  title="💡 Tips Sitasi / Referensi: Tulis [ref: Nama Penulis, Judul Artikel, Nama Jurnal, Tahun] atau tambahkan URL/DOI di akhir jika ada."
+                >
+                  <span>📚</span>
+                  <span>Referensi</span>
+                </button>
+              </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setShowImageModal(true)}
-                    className="px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-300 font-bold text-xs hover:bg-emerald-100 transition-colors flex items-center gap-1"
-                    title="Sisipkan / Upload Gambar Artikel"
-                  >
-                    <ImageIcon className="w-3.5 h-3.5" />
-                    <span>Gambar</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setShowVideoModal(true)}
-                    className="px-2 py-1 rounded-lg bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-300 font-bold text-xs hover:bg-purple-100 transition-colors flex items-center gap-1"
-                    title="Sisipkan Video (YouTube, TikTok, Instagram)"
-                  >
-                    <Video className="w-3.5 h-3.5" />
-                    <span>Video</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleOpenProductPicker}
-                    className="px-2 py-1 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-300 font-bold text-xs hover:bg-rose-100 transition-colors flex items-center gap-1"
-                    title="Sisipkan Kotak Produk Penawaran"
-                  >
-                    <ShoppingBag className="w-3.5 h-3.5" />
-                    <span>Produk</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleOpenRefModal}
-                    className="px-2 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-300 font-bold text-xs hover:bg-amber-100 transition-colors flex items-center gap-1"
-                    title="💡 Tips Sitasi / Referensi: Tulis [ref: Nama Penulis, Judul Artikel, Nama Jurnal, Tahun] atau tambahkan URL/DOI di akhir jika ada. Tautan dan nomor catatan kaki [1] akan dibuat otomatis!"
-                  >
-                    <span>📚</span>
-                    <span>Referensi</span>
-                  </button>
-                </div>
-
-                {/* HISTORY UNDO/REDO & CLEAR */}
-                <div className="flex items-center gap-1 border-l border-slate-200 dark:border-slate-700 pl-2">
-                  <button
-                    type="button"
-                    onClick={handleUndo}
-                    className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400"
-                    title="Undo (Urungkan)"
-                  >
-                    <Undo className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleRedo}
-                    className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400"
-                    title="Redo (Ulangi)"
-                  >
-                    <Redo className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={cleanFormatting}
-                    className="px-2 py-1 text-[10px] font-bold text-slate-500 hover:text-rose-600 rounded"
-                    title="Bersihkan Format pada Teks Terpilih"
-                  >
-                    Bersihkan
-                  </button>
-
-                  {/* FLYING TOOLBAR INDICATOR (MEDIUM STYLE) */}
-                  <span
-                    id="flying-toolbar-status-badge"
-                    className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-2xs"
-                    title="Sorot (highlight) teks apa pun di editor untuk memunculkan Flying Toolbar ala Medium!"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>Flying Toolbar Aktif</span>
-                  </span>
-                </div>
+              {/* Group 6: History & Status */}
+              <div className="flex items-center gap-1 border-l-2 border-slate-300 dark:border-slate-600 pl-2">
+                <button
+                  type="button"
+                  onClick={handleUndo}
+                  className="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-bold"
+                  title="Undo (Urungkan)"
+                >
+                  <Undo className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRedo}
+                  className="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-bold"
+                  title="Redo (Ulangi)"
+                >
+                  <Redo className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleFlyingClearFormatting}
+                  className="px-2 py-1 text-xs font-extrabold text-slate-800 dark:text-slate-200 hover:text-rose-700 bg-slate-300 dark:bg-slate-700 rounded border border-slate-400 dark:border-slate-600"
+                  title="Bersihkan Format pada Teks Terpilih"
+                >
+                  Bersihkan
+                </button>
+                <span
+                  id="flying-toolbar-status-badge"
+                  className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-950 dark:bg-emerald-950 dark:text-emerald-100 border border-emerald-500 shadow-2xs"
+                >
+                  <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+                  <span>Flying Toolbar Aktif</span>
+                </span>
               </div>
             </div>
 
