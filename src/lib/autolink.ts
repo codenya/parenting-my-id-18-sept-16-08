@@ -197,8 +197,8 @@ export function renderProductEmbeds(html: string, products: any[]): string {
             <div class="text-rose-600 dark:text-rose-400 font-black text-base sm:text-lg">
               Rp ${Number(product.price).toLocaleString('id-ID')}
             </div>
-            <a href="/produk/${product.slug}" class="px-5 py-3 rounded-xl bg-slate-900 hover:bg-rose-700 dark:bg-rose-600 dark:hover:bg-rose-500 text-white font-black text-xs sm:text-sm tracking-wide shadow-md flex items-center gap-2 transition-all transform hover:scale-[1.02]">
-              <span>Lihat &amp; Pesan Sekarang</span> <span class="text-base">→</span>
+            <a href="/produk/${product.slug}" class="px-6 py-3.5 rounded-xl bg-slate-950 hover:bg-rose-600 text-white font-black text-sm tracking-wide shadow-xl border-2 border-rose-500 hover:border-rose-400 flex items-center gap-2.5 transition-all transform hover:scale-105 active:scale-95">
+              <span>Lihat &amp; Pesan Sekarang</span> <span class="text-lg font-black">→</span>
             </a>
           </div>
         </div>
