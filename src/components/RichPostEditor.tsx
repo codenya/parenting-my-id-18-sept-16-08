@@ -3,7 +3,7 @@ import { marked } from 'marked';
 import { applyAutoLinks, calculateReadTime, preprocessMarkdownLineBreaks, renderResponsiveVideoEmbeds } from '../lib/autolink';
 import { sanitizeAndOptimizeImageUrl, sanitizeMarkdownImageUrls, getOptimizedImageUrl, getOptimizedAvatarUrl } from '../lib/imageUtils';
 import { parseAndRenderReferences } from '../lib/referenceParser';
-import { AutoLink, User, PostRevision, UserRole, PostStatus } from '../types';
+import { AutoLink, User, PostRevision, UserRole, PostStatus, SiteConfig } from '../types';
 import SeoAuditWidget from './SeoAuditWidget';
 import { 
   Bold, Italic, Strikethrough, Heading2, Heading3, 
@@ -77,6 +77,7 @@ interface RichPostEditorProps {
   setCustomDisclaimerText?: (val: string) => void;
   isZenMode?: boolean;
   setIsZenMode?: (val: boolean) => void;
+  siteConfig?: SiteConfig;
 }
 
 export default function RichPostEditor({
@@ -142,6 +143,7 @@ export default function RichPostEditor({
   setCustomDisclaimerText,
   isZenMode = false,
   setIsZenMode,
+  siteConfig,
 }: RichPostEditorProps) {
   // Rejection modal state
   const [showRejectModal, setShowRejectModal] = useState(false);
@@ -322,18 +324,34 @@ export default function RichPostEditor({
     { label: 'Kesehatan & Medis', url: 'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=800&q=65&fm=webp' },
   ];
 
-  // Undo / Redo History Stack
+  // Undo / Redo History Stack with 3-minute / significance threshold
   const historyRef = useRef<string[]>([markdown]);
   const historyIndexRef = useRef<number>(0);
+  const lastHistoryTimeRef = useRef<number>(Date.now());
 
   // Update undo stack
-  const updateMarkdownWithHistory = (newVal: string) => {
+  const updateMarkdownWithHistory = (newVal: string, forceCheckpoint: boolean = false) => {
     setMarkdown(newVal);
-    // Push to history stack if different
-    if (historyRef.current[historyIndexRef.current] !== newVal) {
+    const lastVal = historyRef.current[historyIndexRef.current];
+    if (lastVal === newVal) return;
+
+    const now = Date.now();
+    const elapsed = now - lastHistoryTimeRef.current;
+    const minTimeMinutes = siteConfig?.history_min_time_minutes ?? 3;
+    const minCharDiff = siteConfig?.history_min_char_diff ?? 25;
+    const intervalMs = minTimeMinutes * 60 * 1000;
+    
+    const lengthDiff = Math.abs(newVal.length - lastVal.length);
+    const hasNewlineChange = (newVal.match(/\n/g) || []).length !== (lastVal.match(/\n/g) || []).length;
+    const isSignificant = forceCheckpoint || lengthDiff > minCharDiff || hasNewlineChange || elapsed >= intervalMs;
+
+    if (isSignificant) {
       historyRef.current = historyRef.current.slice(0, historyIndexRef.current + 1);
       historyRef.current.push(newVal);
       historyIndexRef.current = historyRef.current.length - 1;
+      lastHistoryTimeRef.current = now;
+    } else {
+      historyRef.current[historyIndexRef.current] = newVal;
     }
   };
 
@@ -767,44 +785,6 @@ export default function RichPostEditor({
     }, 10);
   };
 
-  // Humanize AI Shortcut Function
-  const handleFlyingHumanize = () => {
-    if (!textareaRef.current) return;
-    const ta = textareaRef.current;
-    const s = ta.selectionStart;
-    const e = ta.selectionEnd;
-    const text = ta.value.substring(s, e);
-    if (!text) return;
-
-    let humanized = text
-      .replace(/oleh karena itu/gi, 'sehingga')
-      .replace(/sebagaimana telah disebutkan/gi, 'seperti yang dibahas')
-      .replace(/dengan demikian/gi, 'jadi')
-      .replace(/hal ini disebabkan karena/gi, 'ini karena')
-      .replace(/merupakan suatu hal yang/gi, 'adalah hal yang')
-      .trim();
-
-    if (!humanized.endsWith('.') && !humanized.endsWith('?') && !humanized.endsWith('!')) {
-      humanized += '.';
-    }
-    humanized = humanized.charAt(0).toUpperCase() + humanized.slice(1);
-
-    const replacement = humanized;
-    const newEnd = s + replacement.length;
-
-    const updated = ta.value.substring(0, s) + replacement + ta.value.substring(e);
-    updateMarkdownWithHistory(updated);
-
-    setFlyingToolbar(prev => ({ ...prev, visible: false }));
-
-    setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.focus();
-        textareaRef.current.setSelectionRange(s, newEnd);
-      }
-    }, 10);
-  };
-
   // 2. Tombol i (Italic)
   const handleFlyingItalic = () => {
     if (!textareaRef.current) return;
@@ -1173,20 +1153,6 @@ export default function RichPostEditor({
               >
                 <LinkIcon className="w-3.5 h-3.5" />
               </button>
-
-              {/* Humanize AI Shortcut */}
-              <button
-                type="button"
-                id="flying-btn-humanize"
-                onClick={handleFlyingHumanize}
-                className="px-2 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold text-xs transition-colors flex items-center gap-1"
-                title="✨ Humanize Kalimat (Buat lebih natural, mengalir, dan ramah pembaca)"
-              >
-                <span>✨ Humanize</span>
-              </button>
-
-              {/* Divider */}
-              <span className="w-px h-5 bg-white/20 mx-1"></span>
 
               {/* H Besar (H2) */}
               <button

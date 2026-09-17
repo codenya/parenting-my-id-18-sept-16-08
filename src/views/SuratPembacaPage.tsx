@@ -120,8 +120,37 @@ export default function SuratPembacaPage({ siteConfig, onNavigate }: SuratPembac
     return age > 0 ? `${age} thn` : '';
   };
 
+  const jsonLdData = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": siteConfig?.surat_pembaca_title || `Kanal Surat Pembaca ${siteName}`,
+    "description": siteConfig?.surat_pembaca_subtitle || 'Wadah aspirasi, kritik membangun, saran, dan pengalaman pembaca.',
+    "url": typeof window !== 'undefined' ? window.location.href : '',
+    "mainEntity": {
+      "@type": "ItemList",
+      "itemListElement": letters.map((item, idx) => ({
+        "@type": "ListItem",
+        "position": idx + 1,
+        "item": {
+          "@type": "DiscussionForumPosting",
+          "headline": item.judul,
+          "text": item.isi,
+          "author": {
+            "@type": "Person",
+            "name": item.nama
+          },
+          "datePublished": item.createdAt
+        }
+      }))
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 py-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }}
+      />
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         
         {/* HEADER HERO */}

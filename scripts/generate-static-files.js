@@ -273,19 +273,20 @@ ${fullArticles}
  * Generate sitemap.xml string
  * CRITICAL: Tag <?xml version="1.0" encoding="UTF-8"?> MUST be at index 0 (character 0).
  */
-export function generateSitemapXml(posts) {
+export function generateSitemapXml(posts, overrideBaseUrl) {
   const { SITE_URL } = getSiteConfig();
+  const baseUrl = overrideBaseUrl || (SITE_URL && SITE_URL !== 'https://domain.com' ? SITE_URL : 'https://parenting.my.id');
   const publishedPosts = (posts || []).filter((p) => p.status === 'published');
 
   const urls = publishedPosts
     .map((p) => {
       const lastMod = p.updatedAt ? p.updatedAt.split('T')[0] : new Date().toISOString().split('T')[0];
-      const safeLoc = escapeXml(`${SITE_URL}/baca/${encodeURIComponent(p.slug)}`);
+      const safeLoc = escapeXml(`${baseUrl}/baca/${encodeURIComponent(p.slug)}`);
       return `<url><loc>${safeLoc}</loc><lastmod>${lastMod}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>`;
     })
     .join('');
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${escapeXml(SITE_URL)}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>${urls}</urlset>`;
+  const xml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${escapeXml(baseUrl)}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>${urls}</urlset>`;
 
   return xml.trim();
 }
