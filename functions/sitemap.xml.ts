@@ -22,10 +22,17 @@ const INITIAL_SLUGS = [
 export const onRequest: PagesFunction<Env> = async (context) => {
   const { env } = context;
   const requestUrl = new URL(context.request.url);
-  let rawSiteUrl = env.SITE_URL || '';
-  if (!rawSiteUrl || rawSiteUrl.includes('example.com') || rawSiteUrl.includes('domain.com')) {
-    rawSiteUrl = requestUrl.origin;
+
+  // Perbaikan: abaikan SITE_URL yang masih berisi example.com / domain.com
+  let rawSiteUrl = env.SITE_URL || requestUrl.origin;
+  if (
+    !rawSiteUrl ||
+    rawSiteUrl.includes('example.com') ||
+    rawSiteUrl.includes('domain.com')
+  ) {
+    rawSiteUrl = requestUrl.origin || 'https://parenting.my.id';
   }
+  const siteUrl = rawSiteUrl.replace(/\/$/, '');
 
   let posts: { slug: string; updatedAt: string }[] = INITIAL_SLUGS;
   let products: { slug: string; updatedAt: string }[] = [];
@@ -33,22 +40,15 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   if (env.DB) {
     try {
-      const dbUrlRow = await env.DB.prepare("SELECT value FROM configs WHERE key = 'site_url'").first<string>('value');
-      if (dbUrlRow) {
-        let cleanDbUrl = dbUrlRow;
-        try { cleanDbUrl = JSON.parse(dbUrlRow); } catch {}
-        if (cleanDbUrl && typeof cleanDbUrl === 'string' && !cleanDbUrl.includes('example.com') && !cleanDbUrl.includes('domain.com')) {
-          rawSiteUrl = cleanDbUrl;
-        }
-      }
-
       const { results } = await env.DB.prepare(
         "SELECT slug, updated_at as updatedAt FROM posts WHERE status = 'published' ORDER BY id DESC"
       ).all();
       if (results && results.length > 0) {
         posts = results.map((r: any) => ({
           slug: r.slug,
-          updatedAt: r.updatedAt ? r.updatedAt.split('T')[0] : new Date().toISOString().split('T')[0],
+          updatedAt: r.updatedAt
+            ? r.updatedAt.split('T')[0]
+            : new Date().toISOString().split('T')[0],
         }));
       }
 
@@ -58,11 +58,15 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       if (prodRes?.results && prodRes.results.length > 0) {
         products = prodRes.results.map((r: any) => ({
           slug: r.slug,
-          updatedAt: r.updatedAt ? r.updatedAt.split('T')[0] : new Date().toISOString().split('T')[0],
+          updatedAt: r.updatedAt
+            ? r.updatedAt.split('T')[0]
+            : new Date().toISOString().split('T')[0],
         }));
       }
 
-      const pathRow = await env.DB.prepare("SELECT value FROM configs WHERE key = 'products_nav_path'").first<string>('value');
+      const pathRow = await env.DB.prepare(
+        "SELECT value FROM configs WHERE key = 'products_nav_path'"
+      ).first<string>('value');
       if (pathRow) {
         productsNavPath = pathRow.startsWith('/') ? pathRow : `/${pathRow}`;
       }
@@ -70,8 +74,6 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       console.error('Error fetching posts or products for sitemap:', e);
     }
   }
-
-  const siteUrl = rawSiteUrl.replace(/\/$/, '');
 
   const urls = posts
     .map(
