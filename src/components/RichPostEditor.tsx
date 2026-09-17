@@ -767,6 +767,44 @@ export default function RichPostEditor({
     }, 10);
   };
 
+  // Humanize AI Shortcut Function
+  const handleFlyingHumanize = () => {
+    if (!textareaRef.current) return;
+    const ta = textareaRef.current;
+    const s = ta.selectionStart;
+    const e = ta.selectionEnd;
+    const text = ta.value.substring(s, e);
+    if (!text) return;
+
+    let humanized = text
+      .replace(/oleh karena itu/gi, 'sehingga')
+      .replace(/sebagaimana telah disebutkan/gi, 'seperti yang dibahas')
+      .replace(/dengan demikian/gi, 'jadi')
+      .replace(/hal ini disebabkan karena/gi, 'ini karena')
+      .replace(/merupakan suatu hal yang/gi, 'adalah hal yang')
+      .trim();
+
+    if (!humanized.endsWith('.') && !humanized.endsWith('?') && !humanized.endsWith('!')) {
+      humanized += '.';
+    }
+    humanized = humanized.charAt(0).toUpperCase() + humanized.slice(1);
+
+    const replacement = humanized;
+    const newEnd = s + replacement.length;
+
+    const updated = ta.value.substring(0, s) + replacement + ta.value.substring(e);
+    updateMarkdownWithHistory(updated);
+
+    setFlyingToolbar(prev => ({ ...prev, visible: false }));
+
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(s, newEnd);
+      }
+    }, 10);
+  };
+
   // 2. Tombol i (Italic)
   const handleFlyingItalic = () => {
     if (!textareaRef.current) return;
@@ -1136,6 +1174,17 @@ export default function RichPostEditor({
                 <LinkIcon className="w-3.5 h-3.5" />
               </button>
 
+              {/* Humanize AI Shortcut */}
+              <button
+                type="button"
+                id="flying-btn-humanize"
+                onClick={handleFlyingHumanize}
+                className="px-2 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold text-xs transition-colors flex items-center gap-1"
+                title="✨ Humanize Kalimat (Buat lebih natural, mengalir, dan ramah pembaca)"
+              >
+                <span>✨ Humanize</span>
+              </button>
+
               {/* Divider */}
               <span className="w-px h-5 bg-white/20 mx-1"></span>
 
@@ -1319,9 +1368,9 @@ export default function RichPostEditor({
                   {isZenMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                 </button>
               )}
-              {autoSaveStatus === 'saved' && (
-                <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/80 px-3 py-1 rounded-full">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> <span className="truncate">{userRole === 'writer' ? 'Draf Tersimpan' : 'Draf Tersimpan di D1'}</span>
+              {autoSaveStatus === 'saved' && (editingPostId || (title && title.trim().length > 0)) && (
+                <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/80 px-3 py-1 rounded-full truncate max-w-[260px]" title={title ? `Draf Tersimpan: "${title}"` : 'Draf Tersimpan'}>
+                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> <span className="truncate">Draf Tersimpan{title ? `: "${title}"` : ''}</span>
                 </span>
               )}
               {autoSaveStatus === 'saving' && (
@@ -4327,7 +4376,7 @@ export default function RichPostEditor({
                 type="button"
                 onClick={handleOpenRefModal}
                 className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 font-bold shadow-xs active:bg-amber-200 shrink-0"
-                title="💡 Tips Referensi E-E-A-T: Tulis [ref: Nama Penulis, Judul Artikel, Nama Jurnal, Tahun] atau tambahkan URL/DOI di akhir jika ada. Tautan dan nomor catatan kaki [1] akan dibuat otomatis!"
+                title="💡 Tips Sitasi / Referensi: Tulis [ref: Nama Penulis, Judul Artikel, Nama Jurnal, Tahun] atau tambahkan URL/DOI di akhir jika ada. Tautan dan nomor catatan kaki [1] akan dibuat otomatis!"
               >
                 <span className="text-base">📚</span>
               </button>
@@ -4518,7 +4567,7 @@ export default function RichPostEditor({
                     type="button"
                     onClick={handleOpenRefModal}
                     className="px-2 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-300 font-bold text-xs hover:bg-amber-100 transition-colors flex items-center gap-1"
-                    title="💡 Tips Referensi E-E-A-T: Tulis [ref: Nama Penulis, Judul Artikel, Nama Jurnal, Tahun] atau tambahkan URL/DOI di akhir jika ada. Tautan dan nomor catatan kaki [1] akan dibuat otomatis!"
+                    title="💡 Tips Sitasi / Referensi: Tulis [ref: Nama Penulis, Judul Artikel, Nama Jurnal, Tahun] atau tambahkan URL/DOI di akhir jika ada. Tautan dan nomor catatan kaki [1] akan dibuat otomatis!"
                   >
                     <span>📚</span>
                     <span>Referensi</span>
@@ -4705,7 +4754,7 @@ export default function RichPostEditor({
               <div className="flex items-start gap-2.5">
                 <span className="text-base shrink-0">💡</span>
                 <div className="space-y-1">
-                  <span className="font-extrabold block text-amber-950 dark:text-amber-100">Tips Referensi E-E-A-T:</span>
+                  <span className="font-extrabold block text-amber-950 dark:text-amber-100">Tips Sitasi / Referensi:</span>
                   <p className="leading-relaxed font-medium">
                     Tulis <code className="px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/50 font-mono text-[11px] text-amber-950 dark:text-amber-200 font-bold">[ref: Nama Penulis, Judul Artikel, Nama Jurnal, Tahun]</code> atau tambahkan URL/DOI di akhir jika ada. Tautan dan nomor catatan kaki [1] akan dibuat otomatis!
                   </p>
@@ -4790,7 +4839,7 @@ export default function RichPostEditor({
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400">
-                  URL Gambar Sampul (Featured Image)
+                  URL Gambar Sampul (Featured Image) {userRole === 'writer' && <span className="text-[10px] font-normal text-slate-400 ml-1">(opsional)</span>}
                 </label>
                 <button
                   type="button"
@@ -4838,7 +4887,7 @@ export default function RichPostEditor({
             {/* EXCERPT */}
             <div>
               <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
-                Ringkasan Artikel (Excerpt)
+                Ringkasan Artikel (Excerpt) {userRole === 'writer' && <span className="text-[10px] font-normal text-slate-400 ml-1">(opsional)</span>}
               </label>
               <textarea
                 rows={3}
@@ -4883,7 +4932,7 @@ export default function RichPostEditor({
             {/* TAGS */}
             <div>
               <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
-                Topik / Tag (Pisahkan dengan koma)
+                Topik / Tag (Pisahkan dengan koma) {userRole === 'writer' && <span className="text-[10px] font-normal text-slate-400 ml-1">(opsional)</span>}
               </label>
               <input
                 type="text"
@@ -4897,7 +4946,7 @@ export default function RichPostEditor({
             {/* PENGATURAN DISCLAIMER (E-E-A-T COMPLIANT) */}
             <div className="pt-3 border-t border-slate-100 dark:border-slate-800/50">
               <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
-                Disclaimer Penegasan Konten (E-E-A-T)
+                Disclaimer Penegasan Konten {userRole === 'writer' && <span className="text-[10px] font-normal text-slate-400 ml-1">(opsional)</span>}
               </label>
               <select
                 value={disclaimerType}
@@ -4972,7 +5021,7 @@ export default function RichPostEditor({
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
             <h4 className="font-extrabold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
               <Users className="w-4 h-4 text-rose-600" />
-              <span>Tim Editorial & Penulis Bersama</span>
+              <span>Menulis Bersama (Co-Author) <span className="text-[10px] font-normal text-slate-400 ml-1">(opsional)</span></span>
             </h4>
 
             {/* PRIMARY AUTHOR */}
@@ -5005,7 +5054,7 @@ export default function RichPostEditor({
             {setCoAuthorIds && writers.length > 1 && (
               <details className="group pt-2 border-t border-slate-100 dark:border-slate-800">
                 <summary className="text-[11px] font-bold text-slate-600 dark:text-slate-400 cursor-pointer flex items-center justify-between hover:text-rose-600 transition-colors">
-                  <span>👥 Tambah Penulis Bersama / Co-Author</span>
+                  <span>👥 Tambah Penulis Bersama / Co-Author <span className="text-[10px] font-normal text-slate-400 ml-1">(opsional)</span></span>
                   <span className="text-[10px] text-slate-400 group-open:rotate-180 transition-transform">▼</span>
                 </summary>
                 <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1 mt-3">
@@ -5061,7 +5110,7 @@ export default function RichPostEditor({
             <div className="flex items-center justify-between">
               <h4 className="font-extrabold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
                 <History className="w-4 h-4 text-amber-500" />
-                <span>Histori Revisi & Rollback</span>
+                <span>Versi Tulisan Sebelumnya dan Pulihkan {userRole === 'writer' && <span className="text-[10px] font-normal text-slate-400 ml-1">(opsional)</span>}</span>
               </h4>
               <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 text-[10px] font-extrabold">
                 {revisions.length}/3 Versi
@@ -5120,30 +5169,14 @@ export default function RichPostEditor({
       </div>
 
       {/* BOTTOM ACTION BAR FOR CONVENIENT SAVING / PUBLISHING */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg">
-        <div className="flex items-center justify-between sm:justify-start gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
-              Status Artikel:
-            </span>
-            <span className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold uppercase ${
-              currentStatus === 'published' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' :
-              currentStatus === 'pending_approval' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' :
-              currentStatus === 'rejected' ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300' :
-              'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
-            }`}>
-              {currentStatus === 'published' ? 'Terbit ✅' :
-               currentStatus === 'pending_approval' ? 'Menunggu Ditinjau ⏳' :
-               currentStatus === 'rejected' ? 'Perlu Revisi ❌' : 'Draf 📝'}
-            </span>
-          </div>
-
+      <div className="flex flex-col gap-4 p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           {/* Quick Tulis & Pratinjau toggle at bottom bar */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 w-full sm:w-auto justify-center">
             <button
               type="button"
               onClick={() => setViewMode('write')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
                 viewMode === 'write'
                   ? 'bg-rose-600 text-white shadow-xs'
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -5155,7 +5188,7 @@ export default function RichPostEditor({
             <button
               type="button"
               onClick={() => setViewMode('preview')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
                 viewMode === 'preview'
                   ? 'bg-rose-600 text-white shadow-xs'
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -5165,53 +5198,70 @@ export default function RichPostEditor({
               <span>Pratinjau</span>
             </button>
           </div>
-        </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-          {/* Simpan Draf */}
-          <button
-            type="button"
-            onClick={() => onPublishSubmit('draft')}
-            className="w-full sm:w-auto justify-center px-4 py-2.5 rounded-2xl bg-slate-200 hover:bg-slate-300 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-100 text-xs font-bold transition-colors flex items-center gap-2"
-          >
-            <FileText className="w-4 h-4 text-slate-500" />
-            <span>Simpan Draf</span>
-          </button>
-
-          {/* Writer Specific Action */}
-          {userRole === 'writer' && (
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+            {/* Simpan Draf */}
             <button
               type="button"
-              onClick={() => onPublishSubmit('pending_approval')}
-              className="w-full sm:w-auto justify-center px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition-colors flex items-center gap-2"
+              onClick={() => onPublishSubmit('draft')}
+              className="w-full sm:w-auto justify-center px-4 py-2.5 rounded-2xl bg-slate-200 hover:bg-slate-300 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-100 text-xs font-bold transition-colors flex items-center gap-2"
             >
-              <Send className="w-4 h-4" />
-              <span>Kirim untuk Ditinjau 🚀</span>
+              <FileText className="w-4 h-4 text-slate-500" />
+              <span>Simpan Draf</span>
             </button>
-          )}
 
-          {/* Editor & Admin Actions */}
-          {(userRole === 'editor' || userRole === 'admin') && (
-            <>
+            {/* Writer Specific Action */}
+            {userRole === 'writer' && (
               <button
                 type="button"
-                onClick={() => setShowRejectModal(true)}
-                className="w-full sm:w-auto justify-center px-4 py-2.5 rounded-2xl bg-rose-950/40 text-rose-300 hover:bg-rose-900/60 text-xs font-bold border border-rose-800/60 flex items-center gap-2"
+                onClick={() => onPublishSubmit('pending_approval')}
+                className="w-full sm:w-auto justify-center px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition-colors flex items-center gap-2"
               >
-                <XCircle className="w-4 h-4" />
-                <span>Tolak / Minta Revisi</span>
+                <Send className="w-4 h-4" />
+                <span>Kirim untuk Ditinjau 🚀</span>
               </button>
+            )}
 
-              <button
-                type="button"
-                onClick={() => onPublishSubmit('published')}
-                className="w-full sm:w-auto justify-center px-5 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-extrabold shadow-lg transition-colors flex items-center gap-2"
-              >
-                <ThumbsUp className="w-4 h-4" />
-                <span>Setujui & Terbitkan ✅</span>
-              </button>
-            </>
-          )}
+            {/* Editor & Admin Actions */}
+            {(userRole === 'editor' || userRole === 'admin') && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setShowRejectModal(true)}
+                  className="w-full sm:w-auto justify-center px-4 py-2.5 rounded-2xl bg-rose-950/40 text-rose-300 hover:bg-rose-900/60 text-xs font-bold border border-rose-800/60 flex items-center gap-2"
+                >
+                  <XCircle className="w-4 h-4" />
+                  <span>Tolak / Minta Revisi</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onPublishSubmit('published')}
+                  className="w-full sm:w-auto justify-center px-5 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-extrabold shadow-lg transition-colors flex items-center gap-2"
+                >
+                  <ThumbsUp className="w-4 h-4" />
+                  <span>Setujui & Terbitkan ✅</span>
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Status Artikel at the very bottom after all buttons */}
+        <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+          <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
+            Status Artikel:
+          </span>
+          <span className={`px-3 py-1 rounded-full text-xs font-extrabold uppercase ${
+            currentStatus === 'published' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' :
+            currentStatus === 'pending_approval' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' :
+            currentStatus === 'rejected' ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300' :
+            'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+          }`}>
+            {currentStatus === 'published' ? 'Terbit ✅' :
+             currentStatus === 'pending_approval' ? 'Menunggu Ditinjau ⏳' :
+             currentStatus === 'rejected' ? 'Perlu Revisi ❌' : 'Draf 📝'}
+          </span>
         </div>
       </div>
 
@@ -5307,7 +5357,7 @@ export default function RichPostEditor({
             <div className="p-3 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/40 text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2">
               <span className="text-sm shrink-0">💡</span>
               <p className="leading-relaxed font-medium">
-                <strong>Tips Referensi E-E-A-T:</strong> Tulis <code>[ref: Nama Penulis, Judul Artikel, Nama Jurnal, Tahun]</code> atau tambahkan URL/DOI di akhir jika ada. Tautan dan nomor catatan kaki [1] akan dibuat otomatis!
+                <strong>Tips Sitasi / Referensi:</strong> Tulis <code>[ref: Nama Penulis, Judul Artikel, Nama Jurnal, Tahun]</code> atau tambahkan URL/DOI di akhir jika ada. Tautan dan nomor catatan kaki [1] akan dibuat otomatis!
               </p>
             </div>
 
