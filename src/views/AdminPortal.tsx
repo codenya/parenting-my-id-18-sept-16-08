@@ -2187,51 +2187,53 @@ export default function AdminPortal({
     <div className="space-y-8 pb-16">
       
       {/* HEADER STATUS BAR */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <img
-            src={getOptimizedAvatarUrl(currentUser.avatar, 48, 60)}
-            alt={currentUser.name}
-            width={48}
-            height={48}
-            loading="lazy"
-            decoding="async"
-            className="w-12 h-12 rounded-2xl object-cover border-2 border-rose-500 shadow-md"
-          />
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                {currentUser.name}
-              </h2>
-              <span className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase ${
-                currentUser.role === 'admin' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-700'
-              }`}>
-                {currentUser.role}
-              </span>
-              <span className="relative flex h-2 w-2" title="Database D1 Connected">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
+      {!(isZenMode && activeTab === 'editor') && (
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <img
+              src={getOptimizedAvatarUrl(currentUser.avatar, 48, 60)}
+              alt={currentUser.name}
+              width={48}
+              height={48}
+              loading="lazy"
+              decoding="async"
+              className="w-12 h-12 rounded-2xl object-cover border-2 border-rose-500 shadow-md"
+            />
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                  {currentUser.name}
+                </h2>
+                <span className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase ${
+                  currentUser.role === 'admin' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-700'
+                }`}>
+                  {currentUser.role}
+                </span>
+                <span className="relative flex h-2 w-2" title="Database D1 Connected">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+              </div>
+              <p className="text-xs text-slate-500">{currentUser.email}</p>
             </div>
-            <p className="text-xs text-slate-500">{currentUser.email}</p>
           </div>
-        </div>
 
-        <button
-          onClick={handleCreateNewPost}
-          className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md transition-colors flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Tulis Artikel Baru</span>
-        </button>
-      </div>
+          <button
+            onClick={handleCreateNewPost}
+            className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md transition-colors flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Tulis Artikel Baru</span>
+          </button>
+        </div>
+      )}
 
       {/* TWO-COLUMN LAYOUT: SIDEBAR + MAIN CONTENT */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 items-start">
         
-        {/* MOBILE NAVIGATION BAR (< LG): SEBARIS KALIMAT MENU NAVIGASI DENGAN DROPDOWN PENUH SAAT DIKLIK */}
-        {!isZenMode && (
-          <div className="lg:hidden col-span-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden mb-2">
+        {/* MOBILE NAVIGATION BAR (< MD): SEBARIS KALIMAT MENU NAVIGASI DENGAN DROPDOWN PENUH SAAT DIKLIK */}
+        {!(isZenMode && activeTab === 'editor') && (
+          <div className="md:hidden col-span-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden mb-2">
             <button
               type="button"
               id="mobile-nav-toggle-btn"
@@ -2509,14 +2511,14 @@ export default function AdminPortal({
           </div>
         )}
 
-        {/* LEFT COLUMN: THE GORGEOUS SIDEBAR NAVIGATION (DESKTOP >= LG) */}
-        <div className={`hidden lg:block ${
+        {/* LEFT COLUMN: THE GORGEOUS SIDEBAR NAVIGATION (TABLET & DESKTOP >= MD) */}
+        <div className={`hidden md:block ${
           isZenMode && activeTab === 'editor'
             ? 'hidden'
             : isSidebarCollapsed
-              ? 'lg:col-span-1 p-3 text-center'
-              : 'lg:col-span-3 p-5'
-        } bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 lg:sticky lg:top-8 transition-all duration-300`}>
+              ? 'md:col-span-1 p-3 text-center'
+              : 'md:col-span-4 lg:col-span-3 p-5'
+        } bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 md:sticky md:top-8 transition-all duration-300`}>
           
           <div className={`px-3 py-1.5 border-b border-slate-100 dark:border-slate-800/60 pb-3 flex items-center ${isSidebarCollapsed ? 'justify-center' : 'justify-between'}`}>
             {!isSidebarCollapsed && (
@@ -2834,10 +2836,10 @@ export default function AdminPortal({
         {/* RIGHT COLUMN: MAIN CONTENT FOR ACTIVE TAB */}
         <div className={`${
           isZenMode && activeTab === 'editor'
-            ? 'lg:col-span-12'
+            ? 'md:col-span-12'
             : isSidebarCollapsed
-              ? 'lg:col-span-11'
-              : 'lg:col-span-9'
+              ? 'md:col-span-11'
+              : 'md:col-span-8 lg:col-span-9'
         } space-y-8 transition-all duration-300`}>
 
       {/* ------------------------------------------------------------- */}
