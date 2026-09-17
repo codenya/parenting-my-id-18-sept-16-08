@@ -1368,7 +1368,7 @@ export default function RichPostEditor({
                   {isZenMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                 </button>
               )}
-              {autoSaveStatus === 'saved' && (editingPostId || (title && title.trim().length > 0)) && (
+              {autoSaveStatus === 'saved' && (title && title.trim().length > 0) && (
                 <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/80 px-3 py-1 rounded-full truncate max-w-[260px]" title={title ? `Draf Tersimpan: "${title}"` : 'Draf Tersimpan'}>
                   <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> <span className="truncate">Draf Tersimpan{title ? `: "${title}"` : ''}</span>
                 </span>
@@ -5248,7 +5248,7 @@ export default function RichPostEditor({
         </div>
 
         {/* Status Artikel at the very bottom after all buttons */}
-        <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+        <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-start gap-3">
           <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
             Status Artikel:
           </span>
