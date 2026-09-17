@@ -2867,8 +2867,9 @@ export default function AdminPortal({
                     ✍️
                   </div>
                   <div>
-                    <h4 className="font-extrabold text-slate-900 dark:text-white">Khusus Penulis (Distraction-Free)</h4>
-                    <p className="text-[11px] text-slate-500">Tulis draf artikel Anda, sertakan gambar &amp; ringkasan, lalu klik <strong>"Kirim untuk Ditinjau"</strong> agar diperiksa oleh Tim Redaksi/Editor.</p>
+                    <p className="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-relaxed">
+                      Tulis draf artikel Anda, sertakan gambar &amp; ringkasan, lalu klik <strong>"Kirim untuk Ditinjau"</strong> agar diperiksa oleh Tim Redaksi/Editor.
+                    </p>
                   </div>
                 </div>
               </div>
