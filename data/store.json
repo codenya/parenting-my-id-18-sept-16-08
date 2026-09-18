@@ -144,6 +144,384 @@
         "verdictTitle": "Putusan Rekomendasi Redaksi & Ahli Nutrisi Anak",
         "verdictContent": "Tidak ada metode yang mutlak benar untuk setiap anak. Ikatan Dokter Anak Indonesia (IDAI) dan WHO merekomendasikan Responsive Feeding (Metode Kombinasi): berikan makanan bertekstur halus padat gizi menggunakan sendok untuk menjamin asupan zat besi dan kalori harian, sembari memberikan potongan finger food lunak agar bayi tetap dapat melatih motorik dan merasakan sensasi makan mandiri."
       }
+    },
+    {
+      "id": 6,
+      "title": "Kalkulator Cerdas Pola Tidur & Screen Time Anak: Temukan Durasi Sehat Sesuai Usia",
+      "slug": "kalkulator-pola-tidur-dan-screen-time-anak",
+      "contentMarkdown": "## Mengapa Keseimbangan Tidur & Waktu Layar (*Screen Time*) Sangat Krusial?\n\nDi era serba digital, dua tantangan harian terbesar bagi hampir setiap orang tua adalah: **memastikan anak cukup tidur** dan **mengatur batas waktu menatap layar gadget (*screen time*)**.\n\nBanyak anak balita dan usia sekolah yang mengalami *tantrum* di sore hari, sulit konsentrasi saat belajar, atau susah tidur malam bukan karena sifatnya yang nakal, melainkan karena **kurang tidur kronis** atau **kelelahan stimulasi visual (*overstimulation*)** akibat paparan gawai yang berlebihan.\n\n---\n\n## Rekomendasi Resmi IDAI & American Academy of Pediatrics (AAP)\n\nOrganisasi kesehatan anak dunia dan IDAI memberikan panduan baku durasi tidur dan batas layar berdasarkan tahapan usia biologis anak:\n\n1. **Bayi & Batita (0 - 2 Tahun):**\n   - **Kebutuhan Tidur:** 12 - 16 jam per hari (termasuk tidur siang).\n   - **Batas Waktu Layar:** **0 jam (Nol menit)**, kecuali panggilan video (*video call*) keluarga dengan pendampingan interaktif orang tua.\n2. **Balita & Prasekolah (3 - 5 Tahun):**\n   - **Kebutuhan Tidur:** 10 - 13 jam per hari.\n   - **Batas Waktu Layar:** Maksimal **1 jam per hari**, program edukatif bermutu tinggi didampingi orang tua.\n3. **Usia Sekolah (6 - 12 Tahun):**\n   - **Kebutuhan Tidur:** 9 - 12 jam per malam.\n   - **Batas Waktu Layar:** Maksimal **1.5 - 2 jam per hari** untuk hiburan di luar tugas sekolah.\n4. **Remaja (13 - 17 Tahun):**\n   - **Kebutuhan Tidur:** 8 - 10 jam per malam.\n   - **Batas Waktu Layar:** Disiplin mandiri teratur, mematikan layar minimal 60 menit sebelum waktu tidur.\n\n---\n\n## Gunakan Kalkulator Interaktif di Bawah Ini\n\nUntuk mendapatkan panduan praktis yang dipersonalisasi sesuai kondisi harian anak Anda, silakan pilih 3 kriteria sederhana berikut pada widget interaktif di bawah:\n- **Rentang Usia Anak**\n- **Kebiasaan Gadget Saat Ini**\n- **Waktu Mulai Tidur Malam**",
+      "excerpt": "Gunakan kalkulator interaktif sederhana ini untuk mengetahui kebutuhan durasi tidur ideal, batasan aman screen time (gadget), dan panduan rutinitas malam si kecil yang mudah diterapkan di rumah.",
+      "featuredImage": "https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=800&q=75&fm=webp",
+      "category": "Pola Asuh",
+      "readTimeMinutes": 5,
+      "authorId": 1,
+      "authorName": "Dr. Ratna Sari, M.Psi",
+      "authorAvatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=80&q=50&fm=webp",
+      "authorRole": "admin",
+      "authorTitle": "Senior Psychologist & Education Consultant",
+      "authorBio": "Psikolog & konsultan edukasi terkemuka di Indonesia dengan pengalaman klinis 12+ tahun.",
+      "authorSocials": {
+        "instagram": "https://instagram.com/ratnasari.mpsi",
+        "linkedin": "https://linkedin.com/in/ratnasari-mpsi",
+        "website": "https://domain.com"
+      },
+      "status": "published",
+      "metaTitle": "Kalkulator Pola Tidur & Batas Screen Time Anak | Panduan Parenting",
+      "metaDescription": "Hitung durasi tidur ideal dan batas aman waktu layar (gadget) anak berdasarkan usia dan waktu tidur malam dengan kalkulator interaktif ramah keluarga.",
+      "tags": "kalkulator parenting, screen time anak, pola tidur bayi, balita, gadget anak, kesehatan tidur",
+      "views": 320,
+      "createdAt": "2026-09-12T09:00:00.000Z",
+      "updatedAt": "2026-09-12T09:00:00.000Z",
+      "postType": "interactive_configurator",
+      "disclaimerType": "medical_psychology",
+      "customDisclaimerText": "",
+      "interactiveConfigurator": {
+        "title": "🎛️ Kalkulator Kebutuhan Tidur & Batas Layar Gadget Anak",
+        "description": "Pilih rentang usia, durasi pemakaian gawai harian, dan jam tidur anak untuk mendapatkan jadwal sehat serta tips langkah nyata.",
+        "criteria": [
+          {
+            "id": "usia",
+            "name": "Usia Anak",
+            "placeholder": "Pilih rentang usia anak...",
+            "options": [
+              "Balita (1 - 3 Tahun)",
+              "Prasekolah (4 - 6 Tahun)",
+              "Usia Sekolah (7 - 12 Tahun)"
+            ]
+          },
+          {
+            "id": "gadget",
+            "name": "Waktu Layar (Gadget)",
+            "placeholder": "Berapa lama main HP/TV sehari?",
+            "options": [
+              "Kurang dari 1 Jam",
+              "1 - 2 Jam Sehari",
+              "Lebih dari 2 Jam Sehari"
+            ]
+          },
+          {
+            "id": "jam_tidur",
+            "name": "Jam Tidur Malam",
+            "placeholder": "Jam berapa anak mulai tidur?",
+            "options": [
+              "Tepat Waktu (Sebelum 20.30)",
+              "Larut Malam (Setelah 21.30)"
+            ]
+          }
+        ],
+        "recommendations": [
+          {
+            "usia": "Balita (1 - 3 Tahun)",
+            "gadget": "Kurang dari 1 Jam",
+            "jam_tidur": "Tepat Waktu (Sebelum 20.30)",
+            "category": "Sangat Sehat & Ideal",
+            "title": "Pola Emas Tumbuh Kembang: Pertahankan Rutinitas!",
+            "recommendation": "Target tidur anak usia 1-3 tahun adalah 12-14 jam per hari (termasuk 1-2 jam tidur siang). Rutinitas tidur sebelum jam 20.30 dengan minim paparan gadget memicu pelepasan hormon pertumbuhan (HGH) optimal di jam 22.00 - 02.00."
+          },
+          {
+            "usia": "Balita (1 - 3 Tahun)",
+            "gadget": "Lebih dari 2 Jam Sehari",
+            "jam_tidur": "Larut Malam (Setelah 21.30)",
+            "category": "Perlu Penyesuaian Segera",
+            "title": "Detoksifikasi Layar: Risiko Speech Delay & Tantrum Malam",
+            "recommendation": "Menurut IDAI, balita di bawah usia 2 tahun sebaiknya 0 jam screen time. Paparan lebih dari 2 jam disertai tidur larut malam memicu overstimulasi visual. Terapkan aturan bebas gawai 2 jam sebelum tidur dan ganti dengan dongeng atau sensory play bersuara tenang."
+          },
+          {
+            "usia": "Balita (1 - 3 Tahun)",
+            "gadget": "1 - 2 Jam Sehari",
+            "jam_tidur": "Tepat Waktu (Sebelum 20.30)",
+            "category": "Kategori Baik",
+            "title": "Seimbangkan Interaksi Fisik & Kurangi Layar Menjelang Sore",
+            "recommendation": "Jadwal tidur malam sudah sangat baik. Upayakan mengurangi durasi layar menjadi di bawah 1 jam dan pastikan konten selalu ditonton bersama orang tua (co-viewing) secara aktif, bukan pasif."
+          },
+          {
+            "usia": "Balita (1 - 3 Tahun)",
+            "gadget": "1 - 2 Jam Sehari",
+            "jam_tidur": "Larut Malam (Setelah 21.30)",
+            "category": "Perhatian Khusus",
+            "title": "Majukan Jam Tidur & Matikan Gadget Setelah Jam 18.00",
+            "recommendation": "Anak balita yang tidur setelah jam 21.30 berisiko kekurangan jam tidur biologis. Majukan ritual mandi sore dan matikan televisi atau HP setelah jam 18.00 agar hormon melatonin dapat bekerja secara alami."
+          },
+          {
+            "usia": "Prasekolah (4 - 6 Tahun)",
+            "gadget": "Kurang dari 1 Jam",
+            "jam_tidur": "Tepat Waktu (Sebelum 20.30)",
+            "category": "Sangat Sehat & Seimbang",
+            "title": "Fokus & Regulasi Emosi Luar Biasa!",
+            "recommendation": "Anak mendapatkan hak tidur 10-13 jam per malam dengan stimulasi digital terkendali. Pola asuh ini terbukti meningkatkan daya ingat kosakata, imajinasi kreatif, dan kemandirian sosial saat masuk TK/SD."
+          },
+          {
+            "usia": "Prasekolah (4 - 6 Tahun)",
+            "gadget": "Lebih dari 2 Jam Sehari",
+            "jam_tidur": "Larut Malam (Setelah 21.30)",
+            "category": "Rencana Pembenahan Rutinitas",
+            "title": "Batasi 1 Jam Sehari & Hadirkan Aktivitas Sensori Malam",
+            "recommendation": "Cahaya biru (blue light) dari HP menekan produksi melatonin hingga 90 menit. Batasi gadget maksimal 1 jam di siang hari dan buat kamar tidur remang-remang dengan ritual membaca buku cerita bersama orang tua."
+          },
+          {
+            "usia": "Prasekolah (4 - 6 Tahun)",
+            "gadget": "1 - 2 Jam Sehari",
+            "jam_tidur": "Tepat Waktu (Sebelum 20.30)",
+            "category": "Kategori Cukup Baik",
+            "title": "Pertahankan Jam Tidur, Arahkan Gadget ke Konten Edukatif Interaktif",
+            "recommendation": "Jam tidur anak sudah ideal. Pastikan durasi gadget 1-2 jam tersebut tidak mengorbankan waktu bermain fisik di luar ruangan (minimal 60 menit sehari)."
+          },
+          {
+            "usia": "Prasekolah (4 - 6 Tahun)",
+            "gadget": "1 - 2 Jam Sehari",
+            "jam_tidur": "Larut Malam (Setelah 21.30)",
+            "category": "Perlu Penyesuaian",
+            "title": "Perbaiki Suasana Menjelang Tidur (Bedtime Routine)",
+            "recommendation": "Buat ritual tidur 3B: Bersih-bersih gigi dan tubuh, Baca buku 15 menit, dan Berdoa/Peluk santai di tempat tidur tanpa gadget."
+          },
+          {
+            "usia": "Usia Sekolah (7 - 12 Tahun)",
+            "gadget": "Kurang dari 1 Jam",
+            "jam_tidur": "Tepat Waktu (Sebelum 20.30)",
+            "category": "Kebugaran Otak Maksimal",
+            "title": "Daya Tangkap & Konsentrasi Belajar Sangat Prima!",
+            "recommendation": "Target tidur 9-11 jam terpenuhi sempurna. Anak memiliki daya tahan mental yang stabil menghadapi tugas sekolah serta kesehatan mata yang terjaga prima."
+          },
+          {
+            "usia": "Usia Sekolah (7 - 12 Tahun)",
+            "gadget": "Lebih dari 2 Jam Sehari",
+            "jam_tidur": "Larut Malam (Setelah 21.30)",
+            "category": "Waspada Kelelahan Belajar",
+            "title": "Aturan Wadah Charging di Luar Kamar Tidur",
+            "recommendation": "Anak usia sekolah membutuhkan tidur nyenyak 9-10 jam. Terapkan aturan tegas: semua gawai dicas di ruang keluarga (bukan di dalam kamar anak) mulai pukul 20.00 untuk mencegah begadang terselubung."
+          },
+          {
+            "usia": "Usia Sekolah (7 - 12 Tahun)",
+            "gadget": "1 - 2 Jam Sehari",
+            "jam_tidur": "Tepat Waktu (Sebelum 20.30)",
+            "category": "Sehat & Terkontrol",
+            "title": "Keseimbangan Akademik & Hiburan Terpelihara Baik",
+            "recommendation": "Anak dapat memanfaatkan gadget untuk edukasi atau relaksasi tanpa mengganggu ritme sirkadian tubuhnya. Terus dampingi minat digitalnya dengan diskusi sehat."
+          },
+          {
+            "usia": "Usia Sekolah (7 - 12 Tahun)",
+            "gadget": "1 - 2 Jam Sehari",
+            "jam_tidur": "Larut Malam (Setelah 21.30)",
+            "category": "Perhatian Waktu Istirahat",
+            "title": "Evaluasi Beban Tugas & Kurangi Layar Malam",
+            "recommendation": "Periksa apakah anak tidur larut karena tugas atau keasyikan berselancar di internet. Pindahkan jadwal belajar ke sore hari dan hentikan layar 1 jam sebelum lampu kamar dimatikan."
+          }
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "title": "5 Pilar Bahasa Kasih Sayang Anak: Panduan Praktis Membangun Ikatan Emosional yang Hangat",
+      "slug": "5-pilar-bahasa-kasih-sayang-anak-panduan-praktis",
+      "contentMarkdown": "## Mengapa Setiap Anak Membutuhkan Cara Dicintai yang Berbeda?\n\nBanyak orang tua merasa sudah memberikan segalanya untuk sang buah hati—membelikan mainan terbaik, menyediakan makanan bergizi, hingga memenuhi segala kebutuhan fisik. Namun, mengapa anak terkadang masih merasa kurang diperhatikan atau sering mencari perhatian (*attention-seeking*) dengan cara merajuk?\n\nJawabannya terletak pada konsep **\"Tangki Emosional Anak\"** (*The Emotional Tank*). Setiap anak dilahirkan dengan \"bahasa kasih\" utama yang berbeda-beda. Ketika orang tua berbicara menggunakan bahasa kasih yang sesuai dengan kepribadian unik anak, rasa aman dan percaya diri anak akan berkembang pesat.\n\n---\n\n## Memahami 5 Bahasa Kasih Menurut Psikologi Keluarga\n\nDr. Ross Campbell dan Gary Chapman mengidentifikasi 5 cara universal bagaimana anak merasakan dan mengekspresikan kasih sayang:\n\n1. **Sentuhan Fisik (*Physical Touch*):** Pelukan hangat, tepukan di pundak, dan gandengan tangan.\n2. **Kata-Kata Penguatan (*Words of Affirmation*):** Pujian tulus, apresiasi proses, dan ucapan terima kasih.\n3. **Waktu Berkualitas (*Quality Time*):** Kehadiran utuh tanpa gawai saat mendengarkan dan bermain bersama.\n4. **Hadiah Bermakna (*Receiving Gifts*):** Simbol perhatian nyata yang diberikan dengan penuh kehangatan.\n5. **Tindakan Melayani (*Acts of Service*):** Bantuan tulus saat anak membutuhkan pertolongan tanpa mengabaikan kemandiriannya.\n\n---\n\n## Jelajahi Panduan Interaktif di Bawah Ini\n\nKlik masing-masing pilar pada galeri interaktif di bawah untuk melihat ciri khas anak, tantangan harian orang tua, serta contoh kalimat praktis yang bisa langsung Anda ucapkan di rumah.",
+      "excerpt": "Kenali 5 bahasa cinta utama anak (Sentuhan Fisik, Kata Penguatan, Waktu Berkualitas, Hadiah, dan Bantuan Nyata) melalui galeri showcase interaktif untuk mengisi tangki emosi si kecil setiap hari.",
+      "featuredImage": "https://images.unsplash.com/photo-1476703993599-0035a21b17a9?auto=format&fit=crop&w=800&q=75&fm=webp",
+      "category": "Pola Asuh",
+      "readTimeMinutes": 6,
+      "authorId": 1,
+      "authorName": "Dr. Ratna Sari, M.Psi",
+      "authorAvatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=80&q=50&fm=webp",
+      "authorRole": "admin",
+      "authorTitle": "Senior Psychologist & Education Consultant",
+      "authorBio": "Psikolog & konsultan edukasi terkemuka di Indonesia dengan pengalaman klinis 12+ tahun.",
+      "authorSocials": {
+        "instagram": "https://instagram.com/ratnasari.mpsi",
+        "linkedin": "https://linkedin.com/in/ratnasari-mpsi",
+        "website": "https://domain.com"
+      },
+      "status": "published",
+      "metaTitle": "5 Pilar Bahasa Kasih Sayang Anak: Panduan Interaktif Emosi Anak",
+      "metaDescription": "Pelajari 5 pilar bahasa cinta anak untuk membangun kelekatan emosional (bonding) yang kuat dan sehat melalui showcase galeri interaktif yang mudah dipahami.",
+      "tags": "bahasa cinta anak, parenting hangat, emosi anak, bonding orang tua anak, psikologi anak, kasih sayang",
+      "views": 285,
+      "createdAt": "2026-09-13T10:00:00.000Z",
+      "updatedAt": "2026-09-13T10:00:00.000Z",
+      "postType": "interactive_showcase",
+      "disclaimerType": "medical_psychology",
+      "customDisclaimerText": "",
+      "interactiveShowcase": {
+        "title": "Galeri Interaktif: 5 Pilar Bahasa Kasih Sayang Anak",
+        "description": "Klik salah satu pilar di sebelah kiri untuk melihat karakteristik anak, fokus aksi nyata harian, dan tips sederhana yang bisa dipraktikkan hari ini.",
+        "pillars": [
+          {
+            "id": "sentuhan-fisik",
+            "title": "Sentuhan Fisik (Physical Touch)",
+            "icon": "HeartHandshake",
+            "desc": "Pelukan erat, usapan lembut di kepala, dan gandengan tangan yang menenangkan.",
+            "longDesc": "Bagi anak dengan bahasa kasih ini, sentuhan fisik adalah bukti nyata bahwa mereka aman, diterima, dan dicintai. Ketika merasa sedih atau cemas, pelukan tulus dari orang tua seringkali jauh lebih menyembuhkan daripada nasihat panjang lebar.",
+            "challengeTitle": "TANTANGAN HARIAN ORANG TUA",
+            "challenge": "Berikan pelukan hangat minimal 20 detik saat anak baru bangun tidur di pagi hari dan sebelum tidur malam.",
+            "tips": [
+              "Genggam tangannya dengan lembut saat sedang berjalan bersama atau menyeberang jalan.",
+              "Beri usapan di punggung atau kepalanya saat ia sedang duduk mengerjakan tugas atau menggambar.",
+              "Hindari hukuman fisik dalam bentuk apa pun karena dampaknya akan jauh lebih melukai batin anak bertipe ini."
+            ]
+          },
+          {
+            "id": "kata-penguatan",
+            "title": "Kata-Kata Penguatan (Words of Affirmation)",
+            "icon": "MessageSquareHeart",
+            "desc": "Kalimat pujian tulus, apresiasi proses belajar, dan ucapan terima kasih.",
+            "longDesc": "Kata-kata memiliki kekuatan luar biasa bagi anak bertipe ini. Kalimat pujian pada usaha (bukan hanya hasil akhir) akan menjadi bahan bakar kepercayaan diri mereka sepanjang hari, sedangkan bentakan kasar akan membekas lama di ingatannya.",
+            "challengeTitle": "TANTANGAN HARIAN ORANG TUA",
+            "challenge": "Ucapkan 1 pujian spesifik terhadap proses usahanya hari ini (misal: \"Ayah bangga kamu pantang menyerah merapikan balok tadi!\").",
+            "tips": [
+              "Puji ketekunan dan proses belajarnya, bukan sekadar kepintaran bawaan.",
+              "Sisipkan pesan kecil berisi kata penyemangat di dalam kotak bekal sekolahnya.",
+              "Selalu katakan \"Terima kasih sudah membantu Ibu hari ini ya, Nak\" setelah ia melakukan kebaikan kecil."
+            ]
+          },
+          {
+            "id": "waktu-berkualitas",
+            "title": "Waktu Berkualitas (Quality Time)",
+            "icon": "Clock",
+            "desc": "Kehadiran utuh tanpa distraksi ponsel saat mendengarkan dan bermain bersama.",
+            "longDesc": "Bagi anak bertipe ini, yang terpenting bukanlah seberapa mahal tempat jalan-jalan keluarga, melainkan kehadiran penuh perhatian (mindful presence) orang tua. Menatap mata anak saat dia bercerita membuat mereka merasa sangat berharga.",
+            "challengeTitle": "TANTANGAN HARIAN ORANG TUA",
+            "challenge": "Luangkan 15 menit \"Special Time\" setiap hari dengan meletakkan ponsel jauh-jauh dan biarkan anak memimpin permainan.",
+            "tips": [
+              "Dengarkan ceritanya dengan kontak mata hangat tanpa memotong pembicaraan.",
+              "Ajak jalan santai sore di sekitar rumah sambil mengobrol ringan tentang apa yang membuatnya senang hari ini.",
+              "Hindari multitasking atau bermain ponsel saat anak sedang menunjukkan karya gambarnya."
+            ]
+          },
+          {
+            "id": "hadiah-bermakna",
+            "title": "Hadiah Bermakna (Receiving Gifts)",
+            "icon": "Gift",
+            "desc": "Simbol perhatian nyata yang diberikan dengan ketulusan dan penuh kehangatan.",
+            "longDesc": "Hadiah bagi anak bukan diukur dari nominal harganya, melainkan dari bukti bahwa orang tua mengingatnya saat sedang tidak bersama. Sebuah batu kerikil berbentuk unik dari perjalanan atau stiker lucu kesukaannya dapat menjadi harta karun berharga bagi mereka.",
+            "challengeTitle": "TANTANGAN HARIAN ORANG TUA",
+            "challenge": "Bawakan kejutan kecil sederhana tanpa alasan khusus untuk menunjukkan bahwa Anda selalu mengingatnya.",
+            "tips": [
+              "Bungkus hadiah kecil dengan kertas warna-warni agar ada sensasi kejutan yang menggembirakan.",
+              "Jangan gunakan hadiah sebagai alat suap (bribe) agar anak mau menuruti perintah.",
+              "Ajarkan juga indahnya memberi hadiah kepada teman atau saudara agar tangki empatinya terasah."
+            ]
+          },
+          {
+            "id": "tindakan-melayani",
+            "title": "Tindakan Melayani (Acts of Service)",
+            "icon": "Sparkles",
+            "desc": "Bantuan tulus dan penuh kasih saat anak membutuhkan pertolongan nyata.",
+            "longDesc": "Anak merasa sangat disayangi ketika orang tua membantunya menyelesaikan hal yang terasa sulit baginya tanpa mengeluh atau meremehkan. Tindakan pelayanan orang tua menjadi teladan empati dan kepedulian sosial bagi anak di masa depan.",
+            "challengeTitle": "TANTANGAN HARIAN ORANG TUA",
+            "challenge": "Bantu anak merapikan mainannya bersama-sama dengan nada gembira dan lagu ceria.",
+            "tips": [
+              "Bantu ikat tali sepatunya saat ia sedang terburu-buru tanpa memarahinya.",
+              "Siapkan makanan kesukaannya saat ia sedang lelah sepulang sekolah atau les.",
+              "Pastikan tetap melatih kemandirian anak secara bertahap agar tidak menciptakan ketergantungan."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "title": "Etalase Mainan Edukasi & Stimulasi Sensori Anak: Dari Bayi Hingga Usia Sekolah",
+      "slug": "etalase-mainan-edukasi-stimulasi-sensori-anak",
+      "contentMarkdown": "## Mengapa Mainan Edukasi Tidak Harus Mahal atau Rumit?\n\nBagi anak-anak dari balita hingga usia sekolah dasar, **bermain adalah cara utama otak mereka belajar**. Namun, sering kali orang tua, paman, bibi, atau kakek-nenek merasa bingung saat memilihkan mainan: *\"Mainan apa yang benar-benar bermanfaat untuk melatih kecerdasan dan motorik, bukan hanya sekadar bikin berisik atau cepat membuat anak bosan?\"*\n\nKuncinya adalah memilih mainan dengan prinsip **\"Open-Ended Play\"** (permainan terbuka) dan **stimulasi panca indra** (penglihatan, pendengaran, sentuhan, dan keseimbangan motorik).\n\n---\n\n## 4 Manfaat Bermain Sensori Bagi Semua Usia Anak:\n1. **Melatih Kekuatan Otot Tangan & Jemari:** Sangat krusial sebagai fondasi awal sebelum anak lancar memegang pensil dan menulis di sekolah.\n2. **Menenangkan Emosi & Meredakan Tantrum:** Kegiatan memeras, menyentuh tekstur, atau menyusun balok memiliki efek regulasi saraf sensorik yang menenangkan.\n3. **Mengasah Logika & Pemecahan Masalah (*Problem Solving*):** Anak belajar hukum sebab-akibat sederhana secara alami tanpa tekanan.\n4. **Waktu Kebersamaan Lintas Generasi:** Mainan jenis ini bisa dimainkan bersama saudara, orang tua, maupun kakek-nenek dengan sangat santai dan menyenangkan.\n\n---\n\n## Jelajahi Etalase Interaktif di Bawah Ini\n\nKlik kartu mainan pada menu sebelah kiri untuk melihat detail manfaat kecerdasan, cara bermain sederhana di rumah, dan tips keselamatan bermain bagi si kecil!",
+      "excerpt": "Panduan etalase showcase interaktif memilih mainan edukatif dan stimulasi sensori terbaik (Balok Kayu, Sensory Bin, Playdough, hingga Puzzle) yang mudah dimainkan bersama keluarga.",
+      "featuredImage": "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&w=800&q=75&fm=webp",
+      "category": "Aktivitas Anak",
+      "readTimeMinutes": 5,
+      "authorId": 1,
+      "authorName": "Dr. Ratna Sari, M.Psi",
+      "authorAvatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=80&q=50&fm=webp",
+      "authorRole": "admin",
+      "authorTitle": "Senior Psychologist & Education Consultant",
+      "authorBio": "Psikolog & konsultan edukasi terkemuka di Indonesia dengan pengalaman klinis 12+ tahun.",
+      "authorSocials": {
+        "instagram": "https://instagram.com/ratnasari.mpsi",
+        "linkedin": "https://linkedin.com/in/ratnasari-mpsi",
+        "website": "https://domain.com"
+      },
+      "status": "published",
+      "metaTitle": "Etalase Mainan Edukasi & Stimulasi Sensori Anak | Galeri Interaktif",
+      "metaDescription": "Temukan rekomendasi mainan edukatif sensori terbaik untuk mengasah motorik dan kreativitas anak dengan showcase galeri interaktif yang mudah dipahami.",
+      "tags": "mainan edukasi, sensory play anak, motorik halus balita, mainan montessori, aktivitas keluarga, kreativitas anak",
+      "views": 210,
+      "createdAt": "2026-09-14T08:30:00.000Z",
+      "updatedAt": "2026-09-14T08:30:00.000Z",
+      "postType": "interactive_showcase",
+      "disclaimerType": "medical_psychology",
+      "customDisclaimerText": "",
+      "interactiveShowcase": {
+        "title": "🖼️ Etalase Pilihan: 5 Mainan Edukasi Sensori Esensial",
+        "description": "Pilih jenis mainan di sisi kiri untuk melihat manfaat tumbuh kembang, ide bermain seru di rumah, dan tips keamanan.",
+        "pillars": [
+          {
+            "id": "balok-kayu",
+            "title": "Balok Kayu Susun (Wooden Building Blocks)",
+            "icon": "Boxes",
+            "desc": "Mainan klasik tanpa baterai yang melatih arsitektur imajinasi dan hukum gravitasi.",
+            "longDesc": "Balok kayu polos atau aneka warna adalah investasi mainan terbaik sepanjang masa. Tanpa suara elektronik atau instruksi kaku, anak bebas berimajinasi membangun istana, jembatan, menara tinggi, atau lintasan mobil. Ketika menara roboh, anak belajar tentang keseimbangan, ketabahan, dan memulai kembali tanpa rasa takut gagal.",
+            "challengeTitle": "IDE MAIN SERU BERSAMA KELUARGA",
+            "challenge": "Ajak anak membuat \"Menara Tertinggi\" bersama-sama bergantian menaruh 1 balok setiap giliran tanpa membuatnya jatuh.",
+            "tips": [
+              "Pilih balok berbahan kayu halus dengan cat berbasis air (non-toxic water-based paint) yang aman jika digigit balita.",
+              "Biarkan anak menghancurkan menara buatannya sendiri; ini adalah tahapan normal eksplorasi sebab-akibat.",
+              "Gunakan balok untuk belajar mengenal bentuk geometri dasar (kubus, silinder, segitiga) dan hitungan sederhana."
+            ]
+          },
+          {
+            "id": "playdough-homemade",
+            "title": "Lilin Mainan Alami (Homemade Playdough)",
+            "icon": "Palette",
+            "desc": "Adonan lembut beraroma menenangkan untuk memperkuat otot jari jemari tangan.",
+            "longDesc": "Memilin, meremas, menggulung, dan memotong adonan playdough adalah latihan pra-menulis terbaik bagi anak usia 2 hingga 7 tahun. Latihan ini memperkuat otot intrisik telapak tangan yang nantinya digunakan untuk memegang sendok, gunting, dan pensil. Selain itu, tekstur lentur adonan terbukti secara ilmiah membantu meredakan kecemasan pada anak.",
+            "challengeTitle": "IDE MAIN SERU BERSAMA KELUARGA",
+            "challenge": "Buat adonan playdough sendiri di dapur menggunakan tepung terigu, minyak sayur, garam, dan pewarna makanan alami.",
+            "tips": [
+              "Sediakan cetakan kue kering, garpu plastik, dan penggilas kayu mini untuk menambah variasi ketangkasan jemari.",
+              "Simpan di wadah kedap udara di dalam kulkas agar playdough tetap lembut dan tahan hingga beberapa bulan.",
+              "Bagi balita yang masih fase oral, pastikan bahan adonan 100% aman jika tidak sengaja tertelan (food-grade)."
+            ]
+          },
+          {
+            "id": "sensory-bin-beras",
+            "title": "Kotak Raba Sensori (Rainbow Rice Sensory Bin)",
+            "icon": "Sparkles",
+            "desc": "Wadah eksplorasi takaran, bunyi butiran, dan koordinasi sendok-corong.",
+            "longDesc": "Sensory bin adalah wadah besar berisi material butiran bertekstur (seperti beras warna-warni, kacang hijau, atau biji jagung) yang dilengkapi berbagai alat takar, sekop mini, dan corong. Aktivitas menuang dan menyaring butiran melatih koordinasi mata-tangan dan memberikan stimulasi taktil (rabaan kulit) yang menenangkan sistem saraf anak.",
+            "challengeTitle": "IDE MAIN SERU BERSAMA KELUARGA",
+            "challenge": "Sembunyikan 5 miniatur hewan atau kelereng di dalam timbunan beras, lalu ajak anak menjadi detektif untuk mencarinya.",
+            "tips": [
+              "Gelar kain sprei atau tikar plastik lebar di bawah wadah agar butiran yang tumpah dapat dibereskan dalam sekali angkat.",
+              "Ajak anak mendengarkan suara butiran beras saat dijatuhkan dari cangkir ke wadah kaleng untuk melatih kepekaan auditori.",
+              "Selalu dampingi anak di bawah usia 3 tahun agar butiran kecil tidak dimasukkan ke dalam hidung atau mulut."
+            ]
+          },
+          {
+            "id": "puzzle-kayu",
+            "title": "Puzzle Kenop & Tangram (Knobbed Wooden Puzzle)",
+            "icon": "Layers",
+            "desc": "Asah ketajaman spasial, daya ingat visual, dan genggaman jemari.",
+            "longDesc": "Puzzle dengan pegangan kenop kecil melatih anak menggunakan pegangan \"pincer grasp\" (ujung ibu jari dan telunjuk), yaitu gerakan tangan yang identik dengan cara memegang pena saat menulis. Memasangkan kepingan gambar melatih ketelitian anak mencocokkan bentuk dan membedakan ruang spasial kiri-kanan.",
+            "challengeTitle": "IDE MAIN SERU BERSAMA KELUARGA",
+            "challenge": "Mulai dari puzzle 3-4 keping sederhana, lalu beri tepuk tangan meriah saat anak berhasil memasang kepingan terakhir sendiri.",
+            "tips": [
+              "Untuk usia 1-2 tahun pilih puzzle kenop bergambar binatang dengan 1 objek per lubang kepingan.",
+              "Untuk usia 4 tahun ke atas, beralihlah ke puzzle lantai 24-48 keping atau balok tangram geometris.",
+              "Hindari langsung membantu saat anak salah posisi; berikan petunjuk verbal lembut seperti: \"Coba putar sedikit ke arah kanan ya, Nak\"."
+            ]
+          },
+          {
+            "id": "busy-board",
+            "title": "Papan Ketangkasan Hidup (Montessori Busy Board)",
+            "icon": "SlidersHorizontal",
+            "desc": "Papan pengait, resleting, saklar, dan kancing untuk kemandirian sehari-hari.",
+            "longDesc": "Papan ini merangkum benda-benda praktis rumah tangga yang sering membuat anak penasaran: grendel pintu, saklar lampu, roda putar, kancing baju, dan resleting. Daripada melarang anak menyentuh benda di rumah, papan ini memberikan media aman untuk memuaskan rasa ingin tahu mereka sekaligus melatih kemandirian berpakaian sendiri.",
+            "challengeTitle": "IDE MAIN SERU BERSAMA KELUARGA",
+            "challenge": "Ajak kakek atau ayah membuat papan ketangkasan sederhana menggunakan sisa papan tripleks dan perlengkapan dari toko bangunan.",
+            "tips": [
+              "Pastikan semua sudut papan telah diamplas halus tanpa ada serpihan kayu yang tajam.",
+              "Pasang perlengkapan yang kokoh dengan sekrup terbenam agar tidak mudah lepas saat ditarik anak.",
+              "Bagus sekali dibawa saat bepergian jauh dengan mobil atau kereta agar anak tidak bosan di perjalanan."
+            ]
+          }
+        ]
+      }
     }
   ],
   "users": [

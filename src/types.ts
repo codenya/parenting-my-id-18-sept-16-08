@@ -532,14 +532,32 @@ export interface InteractiveRecommendation {
   visual_hex_color: string;
 }
 
+export interface InteractiveConfiguratorCriterion {
+  id: string;
+  name: string;
+  placeholder?: string;
+  options: string[];
+}
+
+export interface InteractiveConfiguratorRecommendation {
+  title: string;
+  category?: string;
+  recommendation: string;
+  [key: string]: any;
+}
+
 export interface InteractiveConfiguratorData {
-  criterion1Name: string;
-  criterion1Options: string[];
-  criterion2Name: string;
-  criterion2Options: string[];
-  criterion3Name: string;
-  criterion3Options: string[];
-  recommendations: Record<string, InteractiveRecommendation>; // Key format: "option1_option2_option3"
+  title?: string;
+  description?: string;
+  criteria: InteractiveConfiguratorCriterion[];
+  recommendations: InteractiveConfiguratorRecommendation[] | any;
+  // Backwards compatibility legacy fields
+  criterion1Name?: string;
+  criterion1Options?: string[];
+  criterion2Name?: string;
+  criterion2Options?: string[];
+  criterion3Name?: string;
+  criterion3Options?: string[];
 }
 
 export interface CorePillar {
@@ -557,6 +575,8 @@ export interface CorePillar {
 }
 
 export interface InteractiveShowcaseData {
+  title?: string;
+  description?: string;
   pillars: CorePillar[];
 }
 
