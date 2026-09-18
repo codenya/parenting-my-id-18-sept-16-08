@@ -6,6 +6,13 @@
     <description>Portal informasi dan panduan pengasuhan anak modern.</description>
     <language>id-id</language>
     <item>
+      <title><![CDATA[Webinar Sample saja]]></title>
+      <link>https://example.com/baca/webinar-sample</link>
+      <guid>https://example.com/baca/webinar-sample</guid>
+      <description><![CDATA[Contoh webinar...]]></description>
+      <pubDate>Fri, 18 Sep 2026 09:36:15 GMT</pubDate>
+    </item>
+    <item>
       <title><![CDATA[Menulis di Website Parenting]]></title>
       <link>https://example.com/baca/menulis-di-website-parenting</link>
       <guid>https://example.com/baca/menulis-di-website-parenting</guid>
