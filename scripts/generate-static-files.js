@@ -296,6 +296,43 @@ export function generateSitemapXml(posts, overrideBaseUrl) {
     })
     .join('');
 
+  // Categories derived from posts or fallbacks
+  const FALLBACK_CATEGORIES = ['pola-asuh', 'tumbuh-kembang', 'kesehatan-gizi', 'balita'];
+  const distinctCats = Array.from(
+    new Set(
+      publishedPosts
+        .map((p) =>
+          (p.category || '')
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, '-')
+            .replace(/[^a-z0-9\-]/g, '')
+            .replace(/-+/g, '-')
+        )
+        .filter(Boolean)
+    )
+  );
+  const catList = distinctCats.length > 0 ? distinctCats : FALLBACK_CATEGORIES;
+  const categoryUrls = catList
+    .map(
+      (slug) =>
+        `<url><loc>${escapeXml(`${baseUrl}/kategori/${encodeURIComponent(slug)}`)}</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>`
+    )
+    .join('');
+
+  // Listing pages
+  const listingPages = [
+    { path: '/iklan-baris', priority: '0.7', changefreq: 'daily' },
+    { path: '/surat-pembaca', priority: '0.7', changefreq: 'daily' },
+    { path: '/balita', priority: '0.6', changefreq: 'weekly' },
+  ];
+  const listingUrls = listingPages
+    .map(
+      (p) =>
+        `<url><loc>${escapeXml(`${baseUrl}${p.path}`)}</loc><changefreq>${p.changefreq}</changefreq><priority>${p.priority}</priority></url>`
+    )
+    .join('');
+
   const staticPages = [
     { url: `${baseUrl}/privacy`, priority: '0.5' },
     { url: `${baseUrl}/about`, priority: '0.6' },
@@ -310,7 +347,7 @@ export function generateSitemapXml(posts, overrideBaseUrl) {
     )
     .join('');
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${escapeXml(baseUrl)}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>${staticUrls}${urls}</urlset>`;
+  const xml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${escapeXml(baseUrl)}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>${staticUrls}${listingUrls}${categoryUrls}${urls}</urlset>`;
 
   return xml.trim();
 }
