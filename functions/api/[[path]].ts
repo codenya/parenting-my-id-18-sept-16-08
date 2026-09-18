@@ -335,7 +335,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           const initialSeed = [
             {
               id: 1,
-              email: 'admin@parenting.my.id',
+              email: 'admin@domain.com',
               password: 'admin123',
               name: 'Dr. Ratna Sari, M.Psi',
               role: 'admin',
@@ -344,11 +344,11 @@ export const onRequest: PagesFunction<Env> = async (context) => {
               bio: 'Psikolog anak dan praktisi parenting terkemuka di Indonesia.',
               instagram: 'https://instagram.com/ratnasari.mpsi',
               linkedin: 'https://linkedin.com/in/ratnasari-mpsi',
-              website: 'https://parenting.my.id'
+              website: ''
             },
             {
               id: 2,
-              email: 'editor@parenting.my.id',
+              email: 'editor@domain.com',
               password: 'editor123',
               name: 'Maya Putri, S.Psi',
               role: 'editor',
@@ -357,11 +357,11 @@ export const onRequest: PagesFunction<Env> = async (context) => {
               bio: 'Editor konten kesehatan dan pengasuhan anak dengan sertifikasi jurnalistik edukasi keluarga.',
               instagram: 'https://instagram.com/mayaputri.editor',
               linkedin: 'https://linkedin.com/in/maya-putri-editor',
-              website: 'https://parenting.my.id'
+              website: ''
             },
             {
               id: 3,
-              email: 'penulis@parenting.my.id',
+              email: 'penulis@domain.com',
               password: 'writer123',
               name: 'Ahmad Zulkarnain, S.Ked',
               role: 'writer',
@@ -396,12 +396,12 @@ export const onRequest: PagesFunction<Env> = async (context) => {
               await db.prepare(`
                 INSERT INTO users (email, password, password_hash, name, role, title, avatar, bio, social_instagram, social_linkedin, social_website, created_at)
                 VALUES (?, ?, ?, ?, 'editor', ?, ?, ?, ?, ?, ?, ?)
-              `).bind('editor@parenting.my.id', 'editor123', 'editor123', 'Maya Putri, S.Psi', 'Senior Editor & Content Moderator', 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=80&q=50&fm=webp', 'Editor konten kesehatan dan pengasuhan anak dengan sertifikasi jurnalistik edukasi keluarga.', 'https://instagram.com/mayaputri.editor', 'https://linkedin.com/in/maya-putri-editor', 'https://parenting.my.id', now).run();
+              `).bind('editor@domain.com', 'editor123', 'editor123', 'Maya Putri, S.Psi', 'Senior Editor & Content Moderator', 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=80&q=50&fm=webp', 'Editor konten kesehatan dan pengasuhan anak dengan sertifikasi jurnalistik edukasi keluarga.', 'https://instagram.com/mayaputri.editor', 'https://linkedin.com/in/maya-putri-editor', '', now).run();
             } else {
               await db.prepare(`
                 INSERT INTO users (email, password, name, role, title, avatar, bio, social_instagram, social_linkedin, social_website, created_at)
                 VALUES (?, ?, ?, 'editor', ?, ?, ?, ?, ?, ?, ?)
-              `).bind('editor@parenting.my.id', 'editor123', 'Maya Putri, S.Psi', 'Senior Editor & Content Moderator', 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=80&q=50&fm=webp', 'Editor konten kesehatan dan pengasuhan anak dengan sertifikasi jurnalistik edukasi keluarga.', 'https://instagram.com/mayaputri.editor', 'https://linkedin.com/in/maya-putri-editor', 'https://parenting.my.id', now).run();
+              `).bind('editor@domain.com', 'editor123', 'Maya Putri, S.Psi', 'Senior Editor & Content Moderator', 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=80&q=50&fm=webp', 'Editor konten kesehatan dan pengasuhan anak dengan sertifikasi jurnalistik edukasi keluarga.', 'https://instagram.com/mayaputri.editor', 'https://linkedin.com/in/maya-putri-editor', '', now).run();
             }
           }
         }
@@ -457,6 +457,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         'interactive_habit_simulator TEXT',
         'interactive_qa_column TEXT',
         'interactive_event_listing TEXT',
+        'interactive_glossary_dictionary TEXT',
         'disclaimer_type TEXT DEFAULT \'none\'',
         'custom_disclaimer_text TEXT',
         'created_at TEXT',
@@ -980,7 +981,7 @@ Sitemap: ${siteUrl}/sitemap.xml
       const defaultUsers = [
         {
           id: 1,
-          email: 'admin@parenting.my.id',
+          email: 'admin@domain.com',
           name: 'Dr. Ratna Sari, M.Psi',
           role: 'admin',
           avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=100&q=75&fm=webp',
@@ -988,11 +989,11 @@ Sitemap: ${siteUrl}/sitemap.xml
           bio: 'Psikolog anak dan praktisi parenting terkemuka di Indonesia.',
           socialInstagram: 'https://instagram.com',
           socialLinkedin: 'https://linkedin.com',
-          socialWebsite: 'https://parenting.my.id'
+          socialWebsite: ''
         },
         {
           id: 2,
-          email: 'penulis@parenting.my.id',
+          email: 'penulis@domain.com',
           name: 'Ahmad Zulkarnain, S.Ked',
           role: 'writer',
           avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=75&fm=webp',
@@ -1143,6 +1144,48 @@ Sitemap: ${siteUrl}/sitemap.xml
     }
 
     // 1. GET /api/posts
+    if (path === '/api/glossary-terms' && method === 'GET') {
+      if (env.DB) {
+        try {
+          const { results } = await env.DB.prepare(`
+            SELECT id, slug, title, interactive_glossary_dictionary as data
+            FROM posts
+            WHERE status = 'published' AND post_type = 'interactive_glossary_dictionary'
+          `).all();
+
+          const allTerms: any[] = [];
+          if (results) {
+            for (const post of results as any[]) {
+              if (!post.data) continue;
+              try {
+                const parsed = typeof post.data === 'string' ? JSON.parse(post.data) : post.data;
+                if (parsed && Array.isArray(parsed.terms)) {
+                  for (const t of parsed.terms) {
+                    if (t.isPublished === false) continue;
+                    allTerms.push({
+                      id: t.id,
+                      term: t.term,
+                      slug: t.slug || t.id,
+                      shortDefinition: t.shortDefinition,
+                      aliases: t.aliases || [],
+                      category: t.category,
+                      postSlug: post.slug,
+                      postTitle: post.title,
+                      anchorUrl: `/baca/${post.slug}#term-${t.slug || t.id}`
+                    });
+                  }
+                }
+              } catch {}
+            }
+          }
+          return jsonResponse({ terms: allTerms });
+        } catch (e: any) {
+          return jsonResponse({ terms: [] });
+        }
+      }
+      return jsonResponse({ terms: [] });
+    }
+
     if (path === '/api/posts' && method === 'GET') {
       if (env.DB) {
         try {
@@ -1154,7 +1197,7 @@ Sitemap: ${siteUrl}/sitemap.xml
               p.author_id as authorId, p.co_author_ids as coAuthorIds, p.revisions, p.status, p.rejection_reason as rejectionReason, 
               p.meta_title as metaTitle, p.meta_description as metaDescription, p.tags, p.views, 
               p.post_type as postType, p.interactive_configurator as interactiveConfigurator, p.interactive_showcase as interactiveShowcase, p.interactive_radar as interactiveRadar, p.interactive_quiz as interactiveQuiz,
-              p.interactive_timeline_slider as interactiveTimelineSlider, p.interactive_battle_card as interactiveBattleCard, p.interactive_quiz_router as interactiveQuizRouter, p.interactive_habit_simulator as interactiveHabitSimulator, p.interactive_qa_column as interactiveQaColumn, p.interactive_event_listing as interactiveEventListing,
+              p.interactive_timeline_slider as interactiveTimelineSlider, p.interactive_battle_card as interactiveBattleCard, p.interactive_quiz_router as interactiveQuizRouter, p.interactive_habit_simulator as interactiveHabitSimulator, p.interactive_qa_column as interactiveQaColumn, p.interactive_event_listing as interactiveEventListing, p.interactive_glossary_dictionary as interactiveGlossaryDictionary,
               p.disclaimer_type as disclaimerType, p.custom_disclaimer_text as customDisclaimerText,
               p.created_at as createdAt, p.updated_at as updatedAt,
               u.name as authorName, u.avatar as authorAvatar, u.role as authorRole
@@ -1284,6 +1327,15 @@ Sitemap: ${siteUrl}/sitemap.xml
                 }
               }
 
+              // Parse interactiveGlossaryDictionary
+              if (typeof mapped.interactiveGlossaryDictionary === 'string') {
+                try {
+                  mapped.interactiveGlossaryDictionary = JSON.parse(mapped.interactiveGlossaryDictionary);
+                } catch {
+                  mapped.interactiveGlossaryDictionary = null;
+                }
+              }
+
               return mapped;
             });
 
@@ -1354,7 +1406,7 @@ Sitemap: ${siteUrl}/sitemap.xml
         id, title, slug, contentMarkdown, excerpt, featuredImage, category, readTimeMinutes, 
         authorId, coAuthorIds, status, rejectionReason, metaTitle, metaDescription, tags,
         postType, interactiveConfigurator, interactiveShowcase, interactiveRadar, interactiveQuiz,
-        interactiveTimelineSlider, interactiveBattleCard, interactiveQuizRouter, interactiveHabitSimulator, interactiveQaColumn, interactiveEventListing,
+        interactiveTimelineSlider, interactiveBattleCard, interactiveQuizRouter, interactiveHabitSimulator, interactiveQaColumn, interactiveEventListing, interactiveGlossaryDictionary,
         disclaimerType, customDisclaimerText
       } = body;
 
@@ -1387,6 +1439,8 @@ Sitemap: ${siteUrl}/sitemap.xml
       const interactiveQaColumnStr = interactiveQaColumn ? JSON.stringify(interactiveQaColumn) : null;
       const interactiveEventListingVal = interactiveEventListing || body.interactive_event_listing;
       const interactiveEventListingStr = interactiveEventListingVal ? JSON.stringify(interactiveEventListingVal) : null;
+      const interactiveGlossaryDictionaryVal = interactiveGlossaryDictionary || body.interactive_glossary_dictionary;
+      const interactiveGlossaryDictionaryStr = interactiveGlossaryDictionaryVal ? JSON.stringify(interactiveGlossaryDictionaryVal) : null;
       const disclaimerTypeVal = disclaimerType || 'none';
       const customDisclaimerTextVal = customDisclaimerText || null;
 
@@ -1449,7 +1503,7 @@ Sitemap: ${siteUrl}/sitemap.xml
                 category = ?, read_time_minutes = ?, status = ?, rejection_reason = ?, meta_title = ?, meta_description = ?,
                 tags = ?, co_author_ids = ?, revisions = ?, post_type = ?,
                 interactive_configurator = ?, interactive_showcase = ?, interactive_radar = ?, interactive_quiz = ?,
-                interactive_timeline_slider = ?, interactive_battle_card = ?, interactive_quiz_router = ?, interactive_habit_simulator = ?, interactive_qa_column = ?, interactive_event_listing = ?,
+                interactive_timeline_slider = ?, interactive_battle_card = ?, interactive_quiz_router = ?, interactive_habit_simulator = ?, interactive_qa_column = ?, interactive_event_listing = ?, interactive_glossary_dictionary = ?,
                 disclaimer_type = ?, custom_disclaimer_text = ?,
                 updated_at = ?
               WHERE (id IS NOT NULL AND (id = ? OR id = ?)) OR slug = ?
@@ -1458,7 +1512,7 @@ Sitemap: ${siteUrl}/sitemap.xml
               cat, readMin, postStatus, rejReason, mTitle, mDesc, 
               tagList, coAuthorsStr, updatedRevisionsStr, postTypeVal,
               interactiveConfiguratorStr, interactiveShowcaseStr, interactiveRadarStr, interactiveQuizStr,
-              interactiveTimelineSliderStr, interactiveBattleCardStr, interactiveQuizRouterStr, interactiveHabitSimulatorStr, interactiveQaColumnStr, interactiveEventListingStr,
+              interactiveTimelineSliderStr, interactiveBattleCardStr, interactiveQuizRouterStr, interactiveHabitSimulatorStr, interactiveQaColumnStr, interactiveEventListingStr, interactiveGlossaryDictionaryStr,
               disclaimerTypeVal, customDisclaimerTextVal,
               now, validNumId || -1, strId || '', generatedSlug
             ).run();
@@ -1485,6 +1539,7 @@ Sitemap: ${siteUrl}/sitemap.xml
                   interactiveHabitSimulator,
                   interactiveQaColumn,
                   interactiveEventListing: interactiveEventListingVal,
+                  interactiveGlossaryDictionary: interactiveGlossaryDictionaryVal,
                   disclaimerType: disclaimerTypeVal,
                   customDisclaimerText: customDisclaimerTextVal,
                   updatedAt: now
@@ -1500,17 +1555,17 @@ Sitemap: ${siteUrl}/sitemap.xml
               category, read_time_minutes, author_id, co_author_ids, revisions, status, 
               rejection_reason, meta_title, meta_description, tags, views, 
               post_type, interactive_configurator, interactive_showcase, interactive_radar, interactive_quiz,
-              interactive_timeline_slider, interactive_battle_card, interactive_quiz_router, interactive_habit_simulator, interactive_qa_column, interactive_event_listing,
+              interactive_timeline_slider, interactive_battle_card, interactive_quiz_router, interactive_habit_simulator, interactive_qa_column, interactive_event_listing, interactive_glossary_dictionary,
               disclaimer_type, custom_disclaimer_text,
               created_at, updated_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           `).bind(
             title, generatedSlug, contentMarkdown, postExcerpt, image, 
             cat, readMin, authorId || 1, coAuthorsStr, '[]', postStatus, 
             rejReason, mTitle, mDesc, tagList, 
             postTypeVal, interactiveConfiguratorStr, interactiveShowcaseStr, interactiveRadarStr, interactiveQuizStr,
-            interactiveTimelineSliderStr, interactiveBattleCardStr, interactiveQuizRouterStr, interactiveHabitSimulatorStr, interactiveQaColumnStr, interactiveEventListingStr,
+            interactiveTimelineSliderStr, interactiveBattleCardStr, interactiveQuizRouterStr, interactiveHabitSimulatorStr, interactiveQaColumnStr, interactiveEventListingStr, interactiveGlossaryDictionaryStr,
             disclaimerTypeVal, customDisclaimerTextVal,
             now, now
           ).run();
@@ -1550,6 +1605,7 @@ Sitemap: ${siteUrl}/sitemap.xml
               interactiveHabitSimulator,
               interactiveQaColumn,
               interactiveEventListing: interactiveEventListingVal,
+              interactiveGlossaryDictionary: interactiveGlossaryDictionaryVal,
               disclaimerType: disclaimerTypeVal,
               customDisclaimerText: customDisclaimerTextVal,
               createdAt: now,
@@ -1570,7 +1626,7 @@ Sitemap: ${siteUrl}/sitemap.xml
                     category = ?, read_time_minutes = ?, status = ?, rejection_reason = ?, meta_title = ?, meta_description = ?,
                     tags = ?, co_author_ids = ?, revisions = ?, post_type = ?,
                     interactive_configurator = ?, interactive_showcase = ?, interactive_radar = ?, interactive_quiz = ?,
-                    interactive_timeline_slider = ?, interactive_battle_card = ?, interactive_quiz_router = ?, interactive_habit_simulator = ?, interactive_qa_column = ?, interactive_event_listing = ?,
+                    interactive_timeline_slider = ?, interactive_battle_card = ?, interactive_quiz_router = ?, interactive_habit_simulator = ?, interactive_qa_column = ?, interactive_event_listing = ?, interactive_glossary_dictionary = ?,
                     updated_at = ?
                   WHERE (id IS NOT NULL AND (id = ? OR id = ?)) OR slug = ?
                 `).bind(
@@ -1578,7 +1634,7 @@ Sitemap: ${siteUrl}/sitemap.xml
                   cat, readMin, safeStatus, rejReason, mTitle, mDesc, 
                   tagList, coAuthorsStr, updatedRevisionsStr, postTypeVal,
                   interactiveConfiguratorStr, interactiveShowcaseStr, interactiveRadarStr, interactiveQuizStr,
-                  interactiveTimelineSliderStr, interactiveBattleCardStr, interactiveQuizRouterStr, interactiveHabitSimulatorStr, interactiveQaColumnStr, interactiveEventListingStr,
+                  interactiveTimelineSliderStr, interactiveBattleCardStr, interactiveQuizRouterStr, interactiveHabitSimulatorStr, interactiveQaColumnStr, interactiveEventListingStr, interactiveGlossaryDictionaryStr,
                   now, validNumId || -1, strId || '', generatedSlug
                 ).run();
 
@@ -1604,6 +1660,7 @@ Sitemap: ${siteUrl}/sitemap.xml
                       interactiveHabitSimulator,
                       interactiveQaColumn,
                       interactiveEventListing: interactiveEventListingVal,
+                      interactiveGlossaryDictionary: interactiveGlossaryDictionaryVal,
                       updatedAt: now
                     }
                   });
@@ -1616,16 +1673,16 @@ Sitemap: ${siteUrl}/sitemap.xml
                   category, read_time_minutes, author_id, co_author_ids, revisions, status, 
                   rejection_reason, meta_title, meta_description, tags, views, 
                   post_type, interactive_configurator, interactive_showcase, interactive_radar, interactive_quiz,
-                  interactive_timeline_slider, interactive_battle_card, interactive_quiz_router, interactive_habit_simulator, interactive_qa_column, interactive_event_listing,
+                  interactive_timeline_slider, interactive_battle_card, interactive_quiz_router, interactive_habit_simulator, interactive_qa_column, interactive_event_listing, interactive_glossary_dictionary,
                   created_at, updated_at
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               `).bind(
                 title, generatedSlug, contentMarkdown, postExcerpt, image, 
                 cat, readMin, authorId || 1, coAuthorsStr, '[]', safeStatus, 
                 rejReason, mTitle, mDesc, tagList, 
                 postTypeVal, interactiveConfiguratorStr, interactiveShowcaseStr, interactiveRadarStr, interactiveQuizStr,
-                interactiveTimelineSliderStr, interactiveBattleCardStr, interactiveQuizRouterStr, interactiveHabitSimulatorStr, interactiveQaColumnStr, interactiveEventListingStr,
+                interactiveTimelineSliderStr, interactiveBattleCardStr, interactiveQuizRouterStr, interactiveHabitSimulatorStr, interactiveQaColumnStr, interactiveEventListingStr, interactiveGlossaryDictionaryStr,
                 now, now
               ).run();
 
@@ -2144,7 +2201,7 @@ Sitemap: ${siteUrl}/sitemap.xml
           try {
             const cols = await syncAndPrepareUsersTable(env.DB);
 
-            const email = body.admin_email || 'admin@parenting.my.id';
+            const email = body.admin_email || 'admin@domain.com';
             const password = body.admin_password;
             const name = body.admin_name || 'Admin';
             const avatar = body.admin_avatar || '';
@@ -2503,12 +2560,8 @@ Sitemap: ${siteUrl}/sitemap.xml
         try {
           await syncAndPrepareUsersTable(env.DB);
 
-          // Support aliases between @parenting.my.id and @domain.com
-          const altEmail = cleanEmail.includes('@domain.com')
-            ? cleanEmail.replace('@domain.com', '@parenting.my.id')
-            : cleanEmail.includes('@parenting.my.id')
-            ? cleanEmail.replace('@parenting.my.id', '@domain.com')
-            : cleanEmail;
+          // Support email lookup
+          const altEmail = cleanEmail;
 
           // Query user by email (using COALESCE to check both password and password_hash)
           const user = await env.DB.prepare(`
@@ -2605,7 +2658,7 @@ Sitemap: ${siteUrl}/sitemap.xml
       }
 
       // Default initial login check
-      if (cleanEmail === 'admin@parenting.my.id' || cleanEmail.startsWith('admin@')) {
+      if (cleanEmail.startsWith('admin@')) {
         if (!cleanPass || cleanPass !== 'admin123') {
           const remaining = await handleFailedLogin();
           return jsonResponse({
@@ -2636,7 +2689,7 @@ Sitemap: ${siteUrl}/sitemap.xml
         }, 200, {
           'Set-Cookie': `cms_token=${token}; Path=/; Max-Age=${86400 * 7}; HttpOnly; SameSite=Lax; Secure`
         });
-      } else if (cleanEmail === 'editor@parenting.my.id' || cleanEmail.startsWith('editor@')) {
+      } else if (cleanEmail.startsWith('editor@')) {
         if (!cleanPass || cleanPass !== 'editor123') {
           const remaining = await handleFailedLogin();
           return jsonResponse({
@@ -2667,7 +2720,7 @@ Sitemap: ${siteUrl}/sitemap.xml
         }, 200, {
           'Set-Cookie': `cms_token=${token}; Path=/; Max-Age=${86400 * 7}; HttpOnly; SameSite=Lax; Secure`
         });
-      } else if (cleanEmail === 'penulis@parenting.my.id' || cleanEmail.startsWith('penulis@') || cleanEmail.startsWith('writer@')) {
+      } else if (cleanEmail.startsWith('penulis@') || cleanEmail.startsWith('writer@')) {
         if (!cleanPass || cleanPass !== 'writer123') {
           const remaining = await handleFailedLogin();
           return jsonResponse({
@@ -3828,7 +3881,7 @@ Berdasarkan judul artikel: "${title}" dan isi: "${(content || '').slice(0, 500)}
         status: 'online',
         success: true,
         message: 'Cusdis Webhook Endpoint Cloudflare Pages aktif dan siap menerima payload POST dari Cusdis!',
-        endpoint: 'https://parenting.my.id/api/webhooks/cusdis',
+        endpoint: `${siteUrl}/api/webhooks/cusdis`,
       });
     }
 

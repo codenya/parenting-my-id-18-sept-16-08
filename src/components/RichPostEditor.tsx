@@ -51,8 +51,8 @@ interface RichPostEditorProps {
   currentStatus?: PostStatus;
   rejectionReason?: string;
   currentLoggedInUserId?: number;
-  postType?: 'article' | 'interactive_configurator' | 'interactive_showcase' | 'interactive_radar' | 'interactive_quiz' | 'interactive_timeline_slider' | 'interactive_battle_card' | 'interactive_quiz_router' | 'interactive_habit_simulator' | 'interactive_qa_column' | 'interactive_event_listing';
-  setPostType?: (val: 'article' | 'interactive_configurator' | 'interactive_showcase' | 'interactive_radar' | 'interactive_quiz' | 'interactive_timeline_slider' | 'interactive_battle_card' | 'interactive_quiz_router' | 'interactive_habit_simulator' | 'interactive_qa_column' | 'interactive_event_listing') => void;
+  postType?: 'article' | 'interactive_configurator' | 'interactive_showcase' | 'interactive_radar' | 'interactive_quiz' | 'interactive_timeline_slider' | 'interactive_battle_card' | 'interactive_quiz_router' | 'interactive_habit_simulator' | 'interactive_qa_column' | 'interactive_event_listing' | 'interactive_glossary_dictionary';
+  setPostType?: (val: 'article' | 'interactive_configurator' | 'interactive_showcase' | 'interactive_radar' | 'interactive_quiz' | 'interactive_timeline_slider' | 'interactive_battle_card' | 'interactive_quiz_router' | 'interactive_habit_simulator' | 'interactive_qa_column' | 'interactive_event_listing' | 'interactive_glossary_dictionary') => void;
   interactiveConfigurator?: any;
   setInteractiveConfigurator?: (val: any) => void;
   interactiveShowcase?: any;
@@ -73,6 +73,8 @@ interface RichPostEditorProps {
   setInteractiveQaColumn?: (val: any) => void;
   interactiveEventListing?: any;
   setInteractiveEventListing?: (val: any) => void;
+  interactiveGlossaryDictionary?: any;
+  setInteractiveGlossaryDictionary?: (val: any) => void;
   disclaimerType?: 'none' | 'medical_psychology' | 'financial' | 'legal' | 'academic' | 'custom';
   setDisclaimerType?: (val: 'none' | 'medical_psychology' | 'financial' | 'legal' | 'academic' | 'custom') => void;
   customDisclaimerText?: string;
@@ -141,6 +143,8 @@ export default function RichPostEditor({
   setInteractiveQaColumn,
   interactiveEventListing,
   setInteractiveEventListing,
+  interactiveGlossaryDictionary,
+  setInteractiveGlossaryDictionary,
   disclaimerType = 'none',
   setDisclaimerType,
   customDisclaimerText = '',
@@ -318,6 +322,15 @@ export default function RichPostEditor({
     if (setInteractiveEventListing) {
       setInteractiveEventListing({
         ...interactiveEventListing,
+        ...updates
+      });
+    }
+  };
+
+  const handleUpdateGlossaryDictionary = (updates: any) => {
+    if (setInteractiveGlossaryDictionary) {
+      setInteractiveGlossaryDictionary({
+        ...interactiveGlossaryDictionary,
         ...updates
       });
     }
@@ -2341,6 +2354,61 @@ export default function RichPostEditor({
                       >
                         <div className="font-bold text-xs">📅 Acara & Agenda / Webinar</div>
                         <div className="text-[10px] opacity-75 mt-0.5">Countdown, Google/iCal calendar, pembicara, kuota, rundown & Google Event Schema.</div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (setPostType) setPostType('interactive_glossary_dictionary');
+                          setShowAllFormats(false);
+                          if (!interactiveGlossaryDictionary && setInteractiveGlossaryDictionary) {
+                            setInteractiveGlossaryDictionary({
+                              widgetTitle: title || 'Kamus Glosarium Istilah & Definisi A–Z',
+                              widgetDescription: 'Glosarium istilah penting, singkatan, dan pustaka definisi terverifikasi.',
+                              searchPlaceholder: 'Cari istilah, definisi, atau singkatan...',
+                              autoLinkMaxPerTerm: 2,
+                              minTermLength: 3,
+                              caseSensitive: false,
+                              categories: ['Umum', 'Medis & Kesehatan', 'Nutrisi', 'Psikologi'],
+                              terms: [
+                                {
+                                  id: 'term-stunting',
+                                  term: 'Stunting',
+                                  slug: 'stunting',
+                                  category: 'Medis & Kesehatan',
+                                  shortDefinition: 'Kondisi gagal tumbuh pada anak balita akibat kekurangan gizi kronis.',
+                                  longDefinition: 'Stunting adalah masalah gizi kronis yang disebabkan oleh kurangnya asupan gizi dalam jangka waktu yang lama, umumnya dimulai sejak masa kehamilan hingga anak berusia 2 tahun (1000 Hari Pertama Kehidupan).',
+                                  aliases: ['Gagal Tumbuh Balita', 'Gizi Kronis Anak'],
+                                  examples: ['Deteksi dini tinggi badan anak balita di posyandu.', 'Pencegahan stunting dengan pemberian ASI eksklusif dan MPASI tinggi protein.'],
+                                  sources: ['WHO Nutrition Guidelines', 'Kementerian Kesehatan RI'],
+                                  relatedTermIds: ['term-mpasi'],
+                                  isPublished: true
+                                },
+                                {
+                                  id: 'term-mpasi',
+                                  term: 'MPASI',
+                                  slug: 'mpasi',
+                                  category: 'Nutrisi',
+                                  shortDefinition: 'Makanan Pendamping Air Susu Ibu yang diberikan mulai usia 6 bulan.',
+                                  longDefinition: 'MPASI (Makanan Pendamping ASI) adalah makanan atau minuman yang mengandung zat gizi yang diberikan kepada bayi berusia 6–24 bulan guna memenuhi kebutuhan gizi selain dari ASI.',
+                                  aliases: ['Makanan Pendamping ASI'],
+                                  examples: ['Pemberian MPASI adekuat yang kaya zat besi sejak usia 6 bulan.'],
+                                  sources: ['Ikatan Dokter Anak Indonesia (IDAI)'],
+                                  relatedTermIds: ['term-stunting'],
+                                  isPublished: true
+                                }
+                              ]
+                            });
+                          }
+                        }}
+                        className={`p-3 rounded-xl border text-left transition-all ${
+                          postType === 'interactive_glossary_dictionary'
+                            ? 'border-rose-500 bg-rose-500/5 dark:bg-rose-500/10 text-rose-700 dark:text-rose-300 ring-1 ring-rose-500'
+                            : 'border-slate-200 dark:border-slate-800 bg-transparent text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'
+                        }`}
+                      >
+                        <div className="font-bold text-xs">📚 Kamus Glosarium & Istilah (A–Z)</div>
+                        <div className="text-[10px] opacity-75 mt-0.5">Indeks A–Z, pencarian instan, filter kategori, auto-linking artikel, & DefinedTermSet Schema.</div>
                       </button>
                     </div>
                   </>
@@ -4820,6 +4888,286 @@ export default function RichPostEditor({
                           >
                             ✕
                           </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* INTERACTIVE FORM PANEL: GLOSSARY DICTIONARY */}
+            {postType === 'interactive_glossary_dictionary' && interactiveGlossaryDictionary && (
+              <div className="p-5 rounded-2xl border border-indigo-100 dark:border-indigo-900/40 bg-indigo-500/[0.02] dark:bg-indigo-950/20 space-y-6">
+                <div className="flex items-center justify-between pb-3 border-b border-indigo-100 dark:border-indigo-900/40">
+                  <div className="flex items-center gap-2">
+                    <span className="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold text-sm">📚</span>
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">Konfigurasi Kamus Glosarium Istilah (A–Z)</h4>
+                      <p className="text-[11px] text-slate-500">Modul istilah A–Z interaktif, auto-linking otomatis di seluruh artikel, dan DefinedTermSet Schema.org.</p>
+                    </div>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold">
+                    ✓ DefinedTermSet Schema Active
+                  </span>
+                </div>
+
+                {/* GENERAL WIDGET CONFIG */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">Judul Modul Glosarium</label>
+                    <input
+                      type="text"
+                      value={interactiveGlossaryDictionary.widgetTitle || ''}
+                      onChange={(e) => handleUpdateGlossaryDictionary({ widgetTitle: e.target.value })}
+                      placeholder="e.g., Kamus Istilah & Definisi Terlengkap"
+                      className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">Placeholder Pencarian</label>
+                    <input
+                      type="text"
+                      value={interactiveGlossaryDictionary.searchPlaceholder || ''}
+                      onChange={(e) => handleUpdateGlossaryDictionary({ searchPlaceholder: e.target.value })}
+                      placeholder="e.g., Cari istilah, kata kunci, atau singkatan..."
+                      className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-900"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">Deskripsi Singkat Modul</label>
+                    <input
+                      type="text"
+                      value={interactiveGlossaryDictionary.widgetDescription || ''}
+                      onChange={(e) => handleUpdateGlossaryDictionary({ widgetDescription: e.target.value })}
+                      placeholder="e.g., Pustaka istilah medis, pengasuhan, dan kesehatan balita terverifikasi pakar."
+                      className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-900"
+                    />
+                  </div>
+                </div>
+
+                {/* AUTO-LINKING SETTINGS */}
+                <div className="p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-3">
+                  <h5 className="text-xs font-bold text-slate-700 dark:text-slate-300">Pengaturan Auto-Linking Situs (Auto Tooltip Ingestion)</h5>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-[10px] text-slate-500 font-medium mb-1">Maks. Link Per Istilah</label>
+                      <input
+                        type="number"
+                        min={1}
+                        max={10}
+                        value={interactiveGlossaryDictionary.autoLinkMaxPerTerm ?? 2}
+                        onChange={(e) => handleUpdateGlossaryDictionary({ autoLinkMaxPerTerm: parseInt(e.target.value) || 2 })}
+                        className="w-full p-2 border text-xs rounded-lg bg-slate-50 dark:bg-zinc-950"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-slate-500 font-medium mb-1">Min. Panjang Istilah (Karakter)</label>
+                      <input
+                        type="number"
+                        min={2}
+                        max={20}
+                        value={interactiveGlossaryDictionary.minTermLength ?? 3}
+                        onChange={(e) => handleUpdateGlossaryDictionary({ minTermLength: parseInt(e.target.value) || 3 })}
+                        className="w-full p-2 border text-xs rounded-lg bg-slate-50 dark:bg-zinc-950"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 pt-4">
+                      <input
+                        type="checkbox"
+                        id="caseSensitiveCheck"
+                        checked={!!interactiveGlossaryDictionary.caseSensitive}
+                        onChange={(e) => handleUpdateGlossaryDictionary({ caseSensitive: e.target.checked })}
+                        className="rounded text-indigo-600"
+                      />
+                      <label htmlFor="caseSensitiveCheck" className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                        Peka Huruf Besar/Kecil (Case Sensitive)
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* LIST OF TERMS */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h5 className="text-xs font-bold text-slate-800 dark:text-slate-200">Daftar Istilah ({interactiveGlossaryDictionary.terms?.length || 0})</h5>
+                      <p className="text-[10px] text-slate-500">Kelola definisi, sinonim/alias, contoh penggunaan, dan referensi rujukan.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newTerm = {
+                          id: `term-${Date.now()}`,
+                          term: '',
+                          slug: '',
+                          category: interactiveGlossaryDictionary.categories?.[0] || 'Umum',
+                          shortDefinition: '',
+                          longDefinition: '',
+                          aliases: [],
+                          examples: [],
+                          sources: [],
+                          isPublished: true
+                        };
+                        handleUpdateGlossaryDictionary({
+                          terms: [...(interactiveGlossaryDictionary.terms || []), newTerm]
+                        });
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition-colors flex items-center gap-1 shadow-sm"
+                    >
+                      + Tambah Istilah
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {(interactiveGlossaryDictionary.terms || []).map((t: any, tIdx: number) => (
+                      <div key={t.id || tIdx} className="p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-3 relative shadow-xs">
+                        <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-2">
+                          <span className="text-xs font-extrabold text-indigo-600 dark:text-indigo-400">
+                            #{tIdx + 1} {t.term ? t.term : '(Istilah Baru)'}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = (interactiveGlossaryDictionary.terms || []).filter((_: any, i: number) => i !== tIdx);
+                              handleUpdateGlossaryDictionary({ terms: updated });
+                            }}
+                            className="text-rose-500 hover:text-rose-700 text-xs font-bold px-2 py-1 rounded bg-rose-50 dark:bg-rose-950/40"
+                          >
+                            Hapus Istilah
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          <div>
+                            <label className="block text-[10px] text-slate-500 font-bold mb-1">Nama Istilah / Kata Kunci *</label>
+                            <input
+                              type="text"
+                              value={t.term || ''}
+                              onChange={(e) => {
+                                const terms = [...interactiveGlossaryDictionary.terms];
+                                const val = e.target.value;
+                                const slug = val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                                terms[tIdx] = { ...t, term: val, slug: t.slug || slug };
+                                handleUpdateGlossaryDictionary({ terms });
+                              }}
+                              placeholder="e.g., Stunting"
+                              className="w-full p-2 border text-xs rounded-lg bg-slate-50 dark:bg-zinc-950 font-bold"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[10px] text-slate-500 font-bold mb-1">Slug URL / Anchor ID</label>
+                            <input
+                              type="text"
+                              value={t.slug || ''}
+                              onChange={(e) => {
+                                const terms = [...interactiveGlossaryDictionary.terms];
+                                terms[tIdx] = { ...t, slug: e.target.value };
+                                handleUpdateGlossaryDictionary({ terms });
+                              }}
+                              placeholder="e.g., stunting"
+                              className="w-full p-2 border text-xs rounded-lg bg-slate-50 dark:bg-zinc-950"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[10px] text-slate-500 font-bold mb-1">Kategori</label>
+                            <input
+                              type="text"
+                              value={t.category || ''}
+                              onChange={(e) => {
+                                const terms = [...interactiveGlossaryDictionary.terms];
+                                terms[tIdx] = { ...t, category: e.target.value };
+                                handleUpdateGlossaryDictionary({ terms });
+                              }}
+                              placeholder="e.g., Medis & Kesehatan"
+                              className="w-full p-2 border text-xs rounded-lg bg-slate-50 dark:bg-zinc-950"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] text-slate-500 font-bold mb-1">Definisi Ringkas (Tooltip Text - Maks. 200 Karakter) *</label>
+                          <textarea
+                            rows={2}
+                            value={t.shortDefinition || ''}
+                            onChange={(e) => {
+                              const terms = [...interactiveGlossaryDictionary.terms];
+                              terms[tIdx] = { ...t, shortDefinition: e.target.value };
+                              handleUpdateGlossaryDictionary({ terms });
+                            }}
+                            placeholder="Kondisi gagal tumbuh pada anak balita akibat kekurangan gizi kronis..."
+                            className="w-full p-2 border text-xs rounded-lg bg-slate-50 dark:bg-zinc-950"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] text-slate-500 font-bold mb-1">Definisi Lengkap & Penjelasan Rinci</label>
+                          <textarea
+                            rows={3}
+                            value={t.longDefinition || ''}
+                            onChange={(e) => {
+                              const terms = [...interactiveGlossaryDictionary.terms];
+                              terms[tIdx] = { ...t, longDefinition: e.target.value };
+                              handleUpdateGlossaryDictionary({ terms });
+                            }}
+                            placeholder="Penjelasan mendalam, penyebab, pencegahan, dan fakta medis..."
+                            className="w-full p-2 border text-xs rounded-lg bg-slate-50 dark:bg-zinc-950"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-[10px] text-slate-500 font-bold mb-1">Sinonim / Alias (Pisahkan dengan koma)</label>
+                            <input
+                              type="text"
+                              value={(t.aliases || []).join(', ')}
+                              onChange={(e) => {
+                                const terms = [...interactiveGlossaryDictionary.terms];
+                                const aliases = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                                terms[tIdx] = { ...t, aliases };
+                                handleUpdateGlossaryDictionary({ terms });
+                              }}
+                              placeholder="Gagal Tumbuh, Gizi Kronis"
+                              className="w-full p-2 border text-xs rounded-lg bg-slate-50 dark:bg-zinc-950"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[10px] text-slate-500 font-bold mb-1">Sumber & Referensi Rujukan (Pisahkan dengan koma)</label>
+                            <input
+                              type="text"
+                              value={(t.sources || []).join(', ')}
+                              onChange={(e) => {
+                                const terms = [...interactiveGlossaryDictionary.terms];
+                                const sources = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                                terms[tIdx] = { ...t, sources };
+                                handleUpdateGlossaryDictionary({ terms });
+                              }}
+                              placeholder="WHO Nutrition, Kemenkes RI"
+                              className="w-full p-2 border text-xs rounded-lg bg-slate-50 dark:bg-zinc-950"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 pt-2">
+                          <input
+                            type="checkbox"
+                            id={`pub-${t.id || tIdx}`}
+                            checked={t.isPublished !== false}
+                            onChange={(e) => {
+                              const terms = [...interactiveGlossaryDictionary.terms];
+                              terms[tIdx] = { ...t, isPublished: e.target.checked };
+                              handleUpdateGlossaryDictionary({ terms });
+                            }}
+                            className="rounded text-indigo-600"
+                          />
+                          <label htmlFor={`pub-${t.id || tIdx}`} className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                            Publikasikan Istilah Ini (Tampilkan di Kamus & Auto-Linking)
+                          </label>
                         </div>
                       </div>
                     ))}

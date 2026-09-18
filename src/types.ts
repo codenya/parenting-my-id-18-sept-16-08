@@ -179,6 +179,9 @@ export interface SiteConfig {
   enable_interactive_quiz?: boolean;
   quiz_builder_title?: string;
 
+  enable_interactive_glossary?: boolean;
+  glossary_builder_title?: string;
+
   enable_interactive_timeline?: boolean;
 
   cusdis_app_id?: string;
@@ -429,7 +432,7 @@ export interface Post {
   views: number;
   createdAt: string;
   updatedAt: string;
-  postType?: 'article' | 'interactive_configurator' | 'interactive_showcase' | 'interactive_radar' | 'interactive_quiz' | 'interactive_timeline_slider' | 'interactive_battle_card' | 'interactive_quiz_router' | 'interactive_habit_simulator' | 'interactive_qa_column' | 'interactive_event_listing';
+  postType?: 'article' | 'interactive_configurator' | 'interactive_showcase' | 'interactive_radar' | 'interactive_quiz' | 'interactive_timeline_slider' | 'interactive_battle_card' | 'interactive_quiz_router' | 'interactive_habit_simulator' | 'interactive_qa_column' | 'interactive_event_listing' | 'interactive_glossary_dictionary';
   interactiveConfigurator?: InteractiveConfiguratorData;
   interactiveShowcase?: InteractiveShowcaseData;
   interactiveRadar?: RadarWidgetConfig;
@@ -440,6 +443,7 @@ export interface Post {
   interactiveHabitSimulator?: HabitSimulatorWidgetData;
   interactiveQaColumn?: InteractiveQAColumnData;
   interactiveEventListing?: InteractiveEventListingData;
+  interactiveGlossaryDictionary?: InteractiveGlossaryDictionaryData;
   disclaimerType?: 'none' | 'medical_psychology' | 'financial' | 'legal' | 'academic' | 'custom';
   customDisclaimerText?: string;
 }
@@ -743,4 +747,33 @@ export interface Product {
   thirdPartyCheckoutUrl?: string;
   status: 'available' | 'sold';
   createdAt?: string;
+}
+
+export interface GlossaryTerm {
+  id: string;
+  term: string;
+  slug: string;
+  letter: string;
+  shortDefinition: string;
+  longDefinition?: string;
+  aliases?: string[];
+  relatedTermIds?: string[];
+  category?: string;
+  examples?: string[];
+  sources?: string[];
+  seoKeywords?: string[];
+  isPublished?: boolean;
+}
+
+export interface InteractiveGlossaryDictionaryData {
+  widgetTitle: string;
+  widgetDescription: string;
+  emptyStateText?: string;
+  searchPlaceholder?: string;
+  tooltipEnabled?: boolean;
+  autoLinkEnabled?: boolean;
+  autoLinkMaxPerTerm?: number;
+  minTermLength?: number;
+  caseSensitive?: boolean;
+  terms: GlossaryTerm[];
 }

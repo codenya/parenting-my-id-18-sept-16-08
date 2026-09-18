@@ -294,7 +294,7 @@ export default function AdminPortal({
   const [editorTags, setEditorTags] = useState('informasi, artikel, kegiatan');
   const [editorAuthorId, setEditorAuthorId] = useState<number>(currentUser?.id || 1);
   const [editorCoAuthorIds, setEditorCoAuthorIds] = useState<number[]>([]);
-  const [editorPostType, setEditorPostType] = useState<'article' | 'interactive_configurator' | 'interactive_showcase' | 'interactive_radar' | 'interactive_quiz' | 'interactive_timeline_slider' | 'interactive_battle_card' | 'interactive_quiz_router' | 'interactive_habit_simulator' | 'interactive_qa_column' | 'interactive_event_listing'>('article');
+  const [editorPostType, setEditorPostType] = useState<'article' | 'interactive_configurator' | 'interactive_showcase' | 'interactive_radar' | 'interactive_quiz' | 'interactive_timeline_slider' | 'interactive_battle_card' | 'interactive_quiz_router' | 'interactive_habit_simulator' | 'interactive_qa_column' | 'interactive_event_listing' | 'interactive_glossary_dictionary'>('article');
   const [editorInteractiveConfigurator, setEditorInteractiveConfigurator] = useState<any>(null);
   const [editorInteractiveShowcase, setEditorInteractiveShowcase] = useState<any>(null);
   const [editorInteractiveRadar, setEditorInteractiveRadar] = useState<any>(null);
@@ -305,6 +305,7 @@ export default function AdminPortal({
   const [editorInteractiveHabitSimulator, setEditorInteractiveHabitSimulator] = useState<any>(null);
   const [editorInteractiveQaColumn, setEditorInteractiveQaColumn] = useState<any>(null);
   const [editorInteractiveEventListing, setEditorInteractiveEventListing] = useState<any>(null);
+  const [editorInteractiveGlossaryDictionary, setEditorInteractiveGlossaryDictionary] = useState<any>(null);
   const [editorDisclaimerType, setEditorDisclaimerType] = useState<'none' | 'medical_psychology' | 'financial' | 'legal' | 'academic' | 'custom'>('none');
   const [editorCustomDisclaimerText, setEditorCustomDisclaimerText] = useState('');
 
@@ -1661,6 +1662,7 @@ export default function AdminPortal({
     setEditorInteractiveHabitSimulator(post.interactiveHabitSimulator || null);
     setEditorInteractiveQaColumn(post.interactiveQaColumn || null);
     setEditorInteractiveEventListing(post.interactiveEventListing || null);
+    setEditorInteractiveGlossaryDictionary(post.interactiveGlossaryDictionary || null);
     setEditorDisclaimerType(post.disclaimerType || 'none');
     setEditorCustomDisclaimerText(post.customDisclaimerText || '');
     setActiveTab('editor');
@@ -1693,6 +1695,7 @@ export default function AdminPortal({
     setEditorInteractiveHabitSimulator(null);
     setEditorInteractiveQaColumn(null);
     setEditorInteractiveEventListing(null);
+    setEditorInteractiveGlossaryDictionary(null);
     setEditorDisclaimerType('none');
     setEditorCustomDisclaimerText('');
     setActiveTab('editor');
@@ -1747,6 +1750,7 @@ export default function AdminPortal({
           interactiveHabitSimulator: editorInteractiveHabitSimulator,
           interactiveQaColumn: editorInteractiveQaColumn,
           interactiveEventListing: editorInteractiveEventListing,
+          interactiveGlossaryDictionary: editorInteractiveGlossaryDictionary,
           disclaimerType: editorDisclaimerType,
           customDisclaimerText: editorCustomDisclaimerText,
         });
@@ -1892,6 +1896,7 @@ export default function AdminPortal({
         interactiveHabitSimulator: editorInteractiveHabitSimulator,
         interactiveQaColumn: editorInteractiveQaColumn,
         interactiveEventListing: editorInteractiveEventListing,
+        interactiveGlossaryDictionary: editorInteractiveGlossaryDictionary,
         disclaimerType: editorDisclaimerType,
         customDisclaimerText: editorCustomDisclaimerText,
       });
@@ -3157,6 +3162,8 @@ export default function AdminPortal({
           setInteractiveQaColumn={setEditorInteractiveQaColumn}
           interactiveEventListing={editorInteractiveEventListing}
           setInteractiveEventListing={setEditorInteractiveEventListing}
+          interactiveGlossaryDictionary={editorInteractiveGlossaryDictionary}
+          setInteractiveGlossaryDictionary={setEditorInteractiveGlossaryDictionary}
           disclaimerType={editorDisclaimerType}
           setDisclaimerType={setEditorDisclaimerType}
           customDisclaimerText={editorCustomDisclaimerText}
