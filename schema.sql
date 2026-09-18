@@ -67,6 +67,7 @@ CREATE TABLE IF NOT EXISTS  posts (
   interactive_quiz_router TEXT,
   interactive_habit_simulator TEXT,
   interactive_qa_column TEXT,
+  interactive_event_listing TEXT,
   disclaimer_type TEXT DEFAULT 'none',
   custom_disclaimer_text TEXT
 );
