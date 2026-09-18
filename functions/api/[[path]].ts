@@ -4483,6 +4483,67 @@ ${items}
       }
     } catch (_) {}
 
+    // Kategori dari tabel categories (slug / name)
+    const FALLBACK_CATEGORIES = ['pola-asuh', 'tumbuh-kembang', 'kesehatan-gizi', 'balita'];
+    let categoryList: { slug: string; updatedAt?: string }[] = FALLBACK_CATEGORIES.map((slug) => ({ slug }));
+    try {
+      const catRes = await env.DB.prepare(
+        "SELECT slug, name, updated_at as updatedAt FROM categories ORDER BY id ASC"
+      ).all();
+      if (catRes?.results && catRes.results.length > 0) {
+        categoryList = catRes.results
+          .map((r: any) => {
+            const slug = (r.slug || r.name || '')
+              .toString()
+              .trim()
+              .toLowerCase()
+              .replace(/\s+/g, '-')
+              .replace(/[^a-z0-9\-]/g, '')
+              .replace(/-+/g, '-');
+            return slug ? { slug, updatedAt: r.updatedAt ? String(r.updatedAt).split('T')[0] : undefined } : null;
+          })
+          .filter(Boolean) as { slug: string; updatedAt?: string }[];
+      }
+    } catch (_) {
+      try {
+        const dist = await env.DB.prepare(
+          "SELECT DISTINCT category FROM posts WHERE status = 'published' AND category IS NOT NULL AND category != ''"
+        ).all();
+        if (dist?.results?.length) {
+          categoryList = dist.results
+            .map((r: any) => {
+              const slug = String(r.category || '')
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, '-')
+                .replace(/[^a-z0-9\-]/g, '')
+                .replace(/-+/g, '-');
+              return slug ? { slug } : null;
+            })
+            .filter(Boolean) as { slug: string }[];
+        }
+      } catch (_) {}
+    }
+
+    const categoryUrls = categoryList
+      .map(
+        (c) =>
+          `<url><loc>${siteUrl}/kategori/${c.slug}</loc>${c.updatedAt ? `<lastmod>${c.updatedAt}</lastmod>` : ''}<changefreq>weekly</changefreq><priority>0.7</priority></url>`
+      )
+      .join('');
+
+    // Listing pages (iklan-baris, surat-pembaca, balita)
+    const listingUrls = [
+      { path: '/iklan-baris', priority: '0.7', changefreq: 'daily' },
+      { path: '/surat-pembaca', priority: '0.7', changefreq: 'daily' },
+      { path: '/balita', priority: '0.6', changefreq: 'weekly' },
+    ]
+      .map(
+        (p) =>
+          `<url><loc>${siteUrl}${p.path}</loc><changefreq>${p.changefreq}</changefreq><priority>${p.priority}</priority></url>`
+      )
+      .join('');
+
     const staticUrls = [
       ['privacy', '0.5'],
       ['about', '0.6'],
@@ -4496,7 +4557,7 @@ ${items}
       )
       .join('');
 
-    const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${siteUrl}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>${staticUrls}${postUrls}${productUrls}</urlset>`.trim();
+    const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${siteUrl}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>${staticUrls}${listingUrls}${categoryUrls}${postUrls}${productUrls}</urlset>`.trim();
 
     // 3. robots.txt
     const robotsTxt = `User-agent: *
