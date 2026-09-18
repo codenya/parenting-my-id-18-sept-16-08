@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Mail, Send, CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, MessageSquare, MapPin, Briefcase, Calendar, Phone, ShieldCheck } from 'lucide-react';
 import { SuratPembaca, SiteConfig } from '../types';
 import TurnstileWidget from '../components/TurnstileWidget';
+import SEOHelper from '../components/SEOHelper';
 
 interface SuratPembacaPageProps {
   siteConfig?: SiteConfig;
@@ -145,8 +146,25 @@ export default function SuratPembacaPage({ siteConfig, onNavigate }: SuratPembac
     }
   };
 
+  const origin = typeof window !== 'undefined' ? window.location.origin : (siteConfig?.site_url || 'https://parenting.my.id');
+  const seoTitle = siteConfig?.surat_pembaca_title
+    ? `${siteConfig.surat_pembaca_title} | ${siteName}`
+    : `Kanal Surat Pembaca | ${siteName}`;
+  const seoDesc = siteConfig?.surat_pembaca_subtitle
+    || `Wadah aspirasi, kritik membangun, saran, dan pengalaman orang tua di ${siteName}. Setiap surat ditinjau redaksi sebelum tayang.`;
+  const seoCanonical = currentPage > 1 ? `${origin}/surat-pembaca?page=${currentPage}` : `${origin}/surat-pembaca`;
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 py-10">
+      <SEOHelper
+        title={seoTitle}
+        description={seoDesc}
+        canonicalUrl={seoCanonical}
+        type="website"
+        siteName={siteName}
+        category="Surat Pembaca"
+        keywords={['surat pembaca', 'opini orang tua', 'kanal parenting', siteName]}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }}
