@@ -3,6 +3,7 @@ import { Tag, Send, CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Phone,
 import { IklanBarisItem, SiteConfig } from '../types';
 import TurnstileWidget from '../components/TurnstileWidget';
 import NewspaperClassifiedGrid from '../components/NewspaperClassifiedGrid';
+import SEOHelper from '../components/SEOHelper';
 
 interface IklanBarisPageProps {
   siteConfig?: SiteConfig;
@@ -393,8 +394,26 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
     return age > 0 ? `${age} thn` : '';
   };
 
+  const origin = typeof window !== 'undefined' ? window.location.origin : (siteConfig?.site_url || 'https://parenting.my.id');
+  const seoTitle = selectedKategori !== 'Semua'
+    ? `Iklan Baris ${selectedKategori} | ${siteName}`
+    : `Iklan Baris Gratis | ${siteName}`;
+  const seoDesc = `Pasang dan temukan iklan baris kebutuhan anak, keluarga, les privat, babysitter, dan jasa parenting di ${siteName}. Gratis, dimoderasi redaksi.`;
+  const seoCanonical = currentPage > 1
+    ? `${origin}/iklan-baris?page=${currentPage}${selectedKategori !== 'Semua' ? `&kategori=${encodeURIComponent(selectedKategori)}` : ''}`
+    : (selectedKategori !== 'Semua' ? `${origin}/iklan-baris?kategori=${encodeURIComponent(selectedKategori)}` : `${origin}/iklan-baris`);
+
   return (
     <div className="min-h-screen bg-amber-50/40 dark:bg-slate-950 text-slate-900 dark:text-slate-100 py-10 font-sans">
+      <SEOHelper
+        title={seoTitle}
+        description={seoDesc}
+        canonicalUrl={seoCanonical}
+        type="website"
+        siteName={siteName}
+        category="Iklan Baris"
+        keywords={['iklan baris', 'jual beli parenting', 'les privat', 'babysitter', siteName]}
+      />
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         
         {/* SIMPLIFIED HEADER */}
