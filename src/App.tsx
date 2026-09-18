@@ -313,19 +313,19 @@ export default function App() {
     }
 
     // Client-side fallback (e.g. for static Cloudflare Pages / GitHub Pages offline dev)
-    if ((email === 'admin@domain.com' || email === 'admin@parenting.my.id') && pass === 'admin123') {
+    if ((email === 'admin@domain.com' || email === 'admin@example.com') && pass === 'admin123') {
       const adminUser = INITIAL_USERS[0];
       setCurrentUser(adminUser);
       localStorage.setItem('cms_user', JSON.stringify(adminUser));
       localStorage.setItem('cms_token', `session_1_admin_${Date.now()}`);
       return { success: true };
-    } else if ((email === 'editor@domain.com' || email === 'editor@parenting.my.id') && pass === 'editor123') {
+    } else if ((email === 'editor@domain.com' || email === 'editor@example.com') && pass === 'editor123') {
       const editorUser = INITIAL_USERS[1];
       setCurrentUser(editorUser);
       localStorage.setItem('cms_user', JSON.stringify(editorUser));
       localStorage.setItem('cms_token', `session_2_editor_${Date.now()}`);
       return { success: true };
-    } else if ((email === 'penulis@domain.com' || email === 'penulis@parenting.my.id') && pass === 'writer123') {
+    } else if ((email === 'penulis@domain.com' || email === 'penulis@example.com') && pass === 'writer123') {
       const writerUser = INITIAL_USERS[2];
       setCurrentUser(writerUser);
       localStorage.setItem('cms_user', JSON.stringify(writerUser));

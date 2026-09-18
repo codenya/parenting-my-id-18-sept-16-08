@@ -4962,7 +4962,7 @@ export default function RichPostEditor({
               tags={tags}
               onAutoOptimizeMeta={() => {
                 if (title) {
-                  setMetaTitle(`${title} | Parenting.my.id`);
+                  setMetaTitle(`${title} | ${siteConfig?.site_name || 'Blog'}`);
                 }
                 const plainText = (excerpt || markdown || '').replace(/<[^>]+>/g, '').replace(/[#*`_~]/g, ' ').trim();
                 const truncated = plainText.length > 155 ? plainText.substring(0, 155) + '...' : plainText;

@@ -82,7 +82,7 @@ export function generateWebBotAuthHeaders(options: SignRequestOptions): WebBotAu
     method,
     url,
     body,
-    siteUrl = (typeof window !== 'undefined' ? window.location.origin : 'https://parenting.my.id'),
+    siteUrl = (typeof window !== 'undefined' ? window.location.origin : 'https://domain.com'),
     keyId = BOT_KEY_ID,
     created = Math.floor(Date.now() / 1000)
   } = options;

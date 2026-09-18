@@ -2320,9 +2320,12 @@ app.post('/api/posts/:id/view', (req, res) => {
 // Helper to commit file directly to GitHub via REST API (with retry on 409 conflict)
 async function commitFileToGitHub(filePath: string, contentStr: string, commitMessage: string, maxRetries = 3) {
   const githubToken = process.env.GITHUB_TOKEN;
-  const owner = process.env.GITHUB_OWNER;
-  const repo = process.env.GITHUB_REPO;
-  const branch = process.env.GITHUB_BRANCH || 'main';
+  const isBadOwner = (v?: string) => !v || ['username', 'your-username', 'owner', 'OWNER', 'vswi'].includes(v.trim());
+  const isBadRepo = (v?: string) => !v || ['blog_cms', 'cms-repository', 'repo', 'your-repo', 'repository', 'blog-cms'].includes(v.trim());
+
+  const owner = isBadOwner(process.env.GITHUB_OWNER) ? 'roywikan' : (process.env.GITHUB_OWNER || '').trim();
+  const repo = isBadRepo(process.env.GITHUB_REPO) ? 'parenting-my-id' : (process.env.GITHUB_REPO || '').trim();
+  const branch = (process.env.GITHUB_BRANCH || '').trim() || 'main';
 
   if (!githubToken || !owner || !repo) {
     return { success: false, reason: 'No GitHub credentials in env' };
@@ -2390,7 +2393,7 @@ async function triggerStaticFilesGeneratorAndCommit(posts: any[]) {
   try {
     const { feedContent, llmsContent, sitemapContent } = generateStaticFiles(posts);
 
-    if (process.env.GITHUB_TOKEN && process.env.GITHUB_OWNER && process.env.GITHUB_REPO) {
+    if (process.env.GITHUB_TOKEN) {
       console.log('[Auto-Commit] Committing updated feed.xml, llms.txt, and sitemap.xml to GitHub...');
       await commitFileToGitHub('public/feed.xml', feedContent, 'auto-update: sync feed.xml via CMS');
       await commitFileToGitHub('public/llms.txt', llmsContent, 'auto-update: sync llms.txt via CMS');
@@ -3403,9 +3406,12 @@ app.post('/api/auth/update-credentials', requireAuth(['admin', 'editor', 'writer
 // Helper function for GitHub Upload Fallback
 const performGitHubUpload = async (filename: string, base64Content: string) => {
   const token = process.env.GITHUB_TOKEN;
-  const owner = process.env.GITHUB_OWNER || 'vswi';
-  const repo = process.env.GITHUB_REPO || 'blog-cms';
-  const branch = process.env.GITHUB_BRANCH || 'main';
+  const isBadOwner = (v?: string) => !v || ['username', 'your-username', 'owner', 'OWNER', 'vswi'].includes(v.trim());
+  const isBadRepo = (v?: string) => !v || ['blog_cms', 'cms-repository', 'repo', 'your-repo', 'repository', 'blog-cms'].includes(v.trim());
+
+  const owner = isBadOwner(process.env.GITHUB_OWNER) ? 'roywikan' : (process.env.GITHUB_OWNER || '').trim();
+  const repo = isBadRepo(process.env.GITHUB_REPO) ? 'parenting-my-id' : (process.env.GITHUB_REPO || '').trim();
+  const branch = (process.env.GITHUB_BRANCH || '').trim() || 'main';
 
   const cleanFilename = path.basename(filename).replace(/[^a-zA-Z0-9.-]/g, '_');
   const timestamp = Date.now();
@@ -4990,12 +4996,7 @@ app.get(['/kategori/:category', '/kategori/:category/'], (req, res, next) => {
 
 // Explicit Robots.txt with Content-Signal directives and Sitemap pointer
 app.get('/robots.txt', (req, res) => {
-  const protocol = req.get('x-forwarded-proto') || req.protocol || 'https';
-  const host = req.get('host') || 'parenting.my.id';
-  let baseUrl = `${protocol}://${host}`;
-  if (host.includes('example.com') || host.includes('domain.com')) {
-    baseUrl = 'https://parenting.my.id';
-  }
+  const baseUrl = getBaseUrl(req);
 
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
   res.setHeader('Cache-Control', 'public, max-age=86400');

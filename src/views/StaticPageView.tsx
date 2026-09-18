@@ -41,8 +41,8 @@ export default function StaticPageView({
     setActiveTab(initialPage);
   }, [initialPage]);
 
-  const siteName = siteConfig?.site_name || 'Parenting.my.id';
-  const domainName = siteConfig?.site_url || 'parenting.my.id';
+  const siteName = siteConfig?.site_name || 'Blog Engine';
+  const domainName = siteConfig?.site_url || (typeof window !== 'undefined' ? window.location.hostname : 'domain.com');
   const cleanDomain = domainName.replace(/^https?:\/\//, '').replace(/\/$/, '');
   const siteEmail = `redaksi@${cleanDomain}`;
 

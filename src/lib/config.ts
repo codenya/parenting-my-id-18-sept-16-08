@@ -2,9 +2,9 @@ import { SiteConfig } from '../types';
 import { getAuthHeaders } from './auth';
 
 export const DEFAULT_SITE_CONFIG: SiteConfig = {
-  site_name: 'Parenting.my.id',
-  site_tagline: 'Edukasi & Pengasuhan Anak Modern',
-  site_description: 'Portal informasi dan panduan pengasuhan anak modern, nutrisi balita, serta kesehatan keluarga Indonesia.',
+  site_name: 'Modern Edge Blog',
+  site_tagline: 'Informasi & Wawasan Modern Terpercaya',
+  site_description: 'Portal publikasi berita, artikel edukatif, dan analisis mendalam terkini.',
   site_logo_url: '',
   site_logo_icon: 'Heart',
   site_favicon_url: '/favicon.ico',
@@ -28,8 +28,8 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
   ],
   enable_search_bar: true,
   enable_theme_toggle: true,
-  seo_meta_title: 'Parenting.my.id - Edukasi & Pengasuhan Anak Modern',
-  seo_meta_description: 'Portal informasi dan panduan pengasuhan anak modern, nutrisi balita, serta kesehatan keluarga Indonesia.',
+  seo_meta_title: 'Modern Edge Blog - Informasi & Wawasan Terpercaya',
+  seo_meta_description: 'Portal informasi dan artikel edukasi modern terpercaya.',
   seo_default_og_image: 'https://images.unsplash.com/photo-1572044162444-ad60f128bdea?q=15&w=400&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   show_hero_section: true,
   hero_title: 'Panduan Pengasuhan Anak Terpercaya',
@@ -43,11 +43,11 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
   popular_posts_count: 5,
   categories_widget_limit: 8,
   sidebar_banner_code: '',
-  footer_about_text: 'Parenting.my.id menghadirkan bacaan berkualitas seputar dunia pengasuhan anak, kesehatan keluarga, dan pendidikan anak usia dini.',
-  footer_copyright_text: '© 2026 Parenting.my.id. Hak Cipta Dilindungi Undang-Undang.',
-  social_facebook: 'https://facebook.com/parentingmyid',
-  social_instagram: 'https://instagram.com/parentingmyid',
-  social_twitter: 'https://x.com/parentingmyid',
+  footer_about_text: 'Platform media dan publikasi modern menghadirkan bacaan berkualitas seputar edukasi, wawasan, dan informasi terkini.',
+  footer_copyright_text: '© 2026 Modern Edge Blog. Hak Cipta Dilindungi Undang-Undang.',
+  social_facebook: 'https://facebook.com',
+  social_instagram: 'https://instagram.com',
+  social_twitter: 'https://x.com',
   footer_menu_links: [
     { label: 'Kebijakan Privasi', url: '/privacy' },
     { label: 'Tentang Kami', url: '/about' },
@@ -64,7 +64,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
     { label: 'Balita', url: '/balita' }
   ],
   comment_engine_mode: 'both',
-  admin_login_title: 'Portal Admin Parenting.my.id',
+  admin_login_title: 'Portal Admin CMS',
   admin_login_subtitle: 'Sistem Otentikasi Cloudflare D1',
   admin_login_btn_text: 'Masuk Portal CMS',
   admin_url_suffix: '9999',
@@ -72,7 +72,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
   mobile_show_logged_username: false,
   active_theme_preset: 'corp-blue',
   font_override_mode: 'system',
-  site_domain: 'parenting.my.id',
+  site_domain: '',
   default_theme_mode: 'auto',
   font_density_scale: 'standard',
   font_size_scale: 'normal',
@@ -180,7 +180,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
   custom_snippet_body_enable: false,
   custom_snippet_body_code: `<!-- Sample Custom JS Snippet Sebelum Penutup Tag </body> -->
 <script>
-  console.log('✅ Custom Body Script Active - Parenting.my.id');
+  console.log('✅ Custom Body Script Active');
 </script>`,
 
   // Custom HTML Meta Tag Snippet
@@ -253,11 +253,11 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
   campaign_whatsapp: '6281234567890',
 
   // Model 4: Microsite / Bio Links
-  microsite_title: 'Parenting.my.id Official Hub',
-  microsite_bio: 'Pusat informasi, konsultasi dokter anak, panduan MPASI, dan komunitas orang tua cerdas di Indonesia.',
+  microsite_title: 'Official Hub',
+  microsite_bio: 'Pusat informasi, konsultasi, dan komunitas cerdas terpercaya.',
   microsite_wa_number: '6281234567890',
-  microsite_wa_label: 'Konsultasi Privat Parenting (WhatsApp)',
-  microsite_telegram_url: 'https://t.me/parentingmyid',
+  microsite_wa_label: 'Konsultasi (WhatsApp)',
+  microsite_telegram_url: 'https://t.me',
   microsite_ebook_url: '#',
   microsite_podcast_url: 'https://spotify.com',
   microsite_shop_url: '#',
@@ -293,7 +293,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
   corporate_stat2_val: '45%',
   corporate_stat2_lbl: 'Penurunan Absenteeism',
   corporate_whatsapp: '6281234567890',
-  corporate_email: 'b2b@parenting.my.id',
+  corporate_email: 'b2b@domain.com',
 
   // Model 8: Product Landing Page
   product_badge_text: 'Best Seller • Rekomendasi Dokter',

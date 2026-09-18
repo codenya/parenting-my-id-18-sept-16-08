@@ -290,7 +290,7 @@ export default function AdminIklanBarisManager() {
               <label className="block text-xs font-bold mb-1">URL Gambar Eksternal (Khusus Admin - Otomatis Grayscale &amp; Diperkecil)</label>
               <input
                 type="url"
-                placeholder="https://parenting.my.id/image.jpg"
+                placeholder="https://example.com/image.jpg"
                 value={editImageUrl}
                 onChange={(e) => setEditImageUrl(e.target.value)}
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs"

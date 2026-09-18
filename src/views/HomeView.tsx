@@ -62,13 +62,14 @@ export default function HomeView({
     ? selectedTag.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
     : '';
 
+  const defaultSiteName = siteConfig?.site_name || 'Blog Engine';
   const metaTitle = isTagPage
     ? (isAllTagsPage 
-        ? `Daftar Semua Tag & Topik Artikel - ${siteConfig?.site_name || 'Parenting.my.id'}`
-        : `Artikel Tag #${displayTagName} - ${siteConfig?.site_name || 'Parenting.my.id'}`)
+        ? `Daftar Semua Tag & Topik Artikel - ${defaultSiteName}`
+        : `Artikel Tag #${displayTagName} - ${defaultSiteName}`)
     : (isFilteredCategory
-        ? `Artikel Kategori ${activeCategory} - ${siteConfig?.site_name || 'Parenting.my.id'}`
-        : siteConfig?.seo_meta_title || 'Parenting.my.id - Edukasi Pola Asuh & Kesehatan Anak Indonesia');
+        ? `Artikel Kategori ${activeCategory} - ${defaultSiteName}`
+        : siteConfig?.seo_meta_title || defaultSiteName);
 
   const metaDesc = isTagPage
     ? (isAllTagsPage

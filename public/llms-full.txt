@@ -6,10 +6,10 @@ Dokumen ini memuat kumpulan artikel lengkap dalam format Markdown untuk Large La
 
 # Panduan Lengkap Pola Asuh Demokratis untuk Mendidik Anak Tangguh Masa Kini
 
-* **URL:** https://parenting.my.id/baca/panduan-lengkap-pola-asuh-demokratis-anak-masa-kini
+* **URL:** https://domain.com/baca/panduan-lengkap-pola-asuh-demokratis-anak-masa-kini
 * **Penulis:** Dr. Ratna Sari, M.Psi
 * **Kategori:** Pola Asuh
-* **Terakhir Diperbarui:** 2026-09-14T23:04:55.535Z
+* **Terakhir Diperbarui:** 2026-09-15T01:32:13.157Z
 * **Ringkasan:** Pola asuh demokratis menggabungkan kasih sayang, aturan yang konsisten, dan komunikasi terbuka. Simak strategi praktis penerapannya di rumah.
 
 ## Mengapa Pola Asuh Demokratis Sangat Penting?
@@ -55,10 +55,10 @@ Untuk kelompok usia **balita**, penerapan komunikasi terbuka sangat efektif jika
 
 # 5 Aktivitas Sensory Play Seru untuk Melatih Motorik Halus Balita di Rumah
 
-* **URL:** https://parenting.my.id/baca/5-aktivitas-sensory-play-seru-untuk-melatih-motorik-balita
+* **URL:** https://domain.com/baca/5-aktivitas-sensory-play-seru-untuk-melatih-motorik-balita
 * **Penulis:** Ahmad Zulkarnain, S.Ked
 * **Kategori:** Tumbuh Kembang
-* **Terakhir Diperbarui:** 2026-09-15T23:04:55.535Z
+* **Terakhir Diperbarui:** 2026-09-16T01:32:13.157Z
 * **Ringkasan:** Temukan 5 ide permainan sensory play mudah dan hemat bahan untuk mengasah indera serta ketangkasan motorik balita di rumah.
 
 ## Pentingnya Sensory Play untuk Perkembangan Balita
@@ -97,10 +97,10 @@ Jika anak sudah menunjukkan tanda-tanda kelelahan, istirahatlah dan pastikan keb
 
 # Mengenal Bahaya Stunting dan Cara Pencegahannya Sejak 1000 Hari Pertama Kehidupan
 
-* **URL:** https://parenting.my.id/baca/mengenal-bahaya-stunting-dan-cara-pencegahannya-sejak-1000-hpk
+* **URL:** https://domain.com/baca/mengenal-bahaya-stunting-dan-cara-pencegahannya-sejak-1000-hpk
 * **Penulis:** Dr. Ratna Sari, M.Psi
 * **Kategori:** Kesehatan & Gizi
-* **Terakhir Diperbarui:** 2026-09-16T23:04:55.535Z
+* **Terakhir Diperbarui:** 2026-09-17T01:32:13.157Z
 * **Ringkasan:** Stunting berpengaruh besar pada kecerdasan anak. Pelajari langkah pencegahan stunting melalui pemberian ASI eksklusif dan MPASI tinggi protein.
 
 ## Masalah Stunting di Indonesia: Apa yang Perlu Orang Tua Ketahui?

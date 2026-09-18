@@ -10,9 +10,9 @@ dotenv.config();
 const rootDir = typeof __dirname !== 'undefined' ? path.resolve(__dirname, '..') : (typeof import.meta !== 'undefined' && import.meta.url ? path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..') : process.cwd());
 
 export function getSiteConfig() {
-  let siteName = process.env.SITE_NAME || 'Parenting.my.id';
-  let siteDescription = process.env.SITE_DESCRIPTION || 'Portal informasi dan panduan pengasuhan anak modern, nutrisi balita, serta kesehatan keluarga Indonesia.';
-  let SITE_URL = process.env.SITE_URL || 'https://parenting.my.id';
+  let siteName = process.env.SITE_NAME || 'Modern Edge Blog';
+  let siteDescription = process.env.SITE_DESCRIPTION || 'Portal informasi dan artikel terpercaya.';
+  let SITE_URL = process.env.SITE_URL || '';
 
   try {
     const configPath = path.join(rootDir, 'public', 'site_config.json');
@@ -21,7 +21,7 @@ export function getSiteConfig() {
       const parsed = JSON.parse(fileData);
       siteName = parsed.site_name || siteName;
       siteDescription = parsed.site_description || siteDescription;
-      if (parsed.site_url && parsed.site_url !== 'https://example.com' && parsed.site_url !== 'https://domain.com') {
+      if (parsed.site_url) {
         SITE_URL = parsed.site_url;
       } else if (parsed.site_domain) {
         SITE_URL = `https://${parsed.site_domain}`;
@@ -31,8 +31,8 @@ export function getSiteConfig() {
     console.error('Error loading config in getSiteConfig:', err);
   }
 
-  if (!SITE_URL || SITE_URL === 'https://example.com' || SITE_URL === 'https://domain.com') {
-    SITE_URL = 'https://parenting.my.id';
+  if (!SITE_URL) {
+    SITE_URL = 'https://domain.com';
   }
 
   return {
@@ -114,7 +114,7 @@ export function escapeCdata(text) {
  */
 export function generateFeedXml(posts, overrideBaseUrl) {
   const { siteName, siteDescription, SITE_URL } = getSiteConfig();
-  const baseUrl = overrideBaseUrl || (SITE_URL && SITE_URL !== 'https://example.com' && SITE_URL !== 'https://domain.com' ? SITE_URL : 'https://parenting.my.id');
+  const baseUrl = overrideBaseUrl || SITE_URL;
   const publishedPosts = (posts || []).filter((p) => p.status === 'published');
 
   const items = publishedPosts
@@ -193,7 +193,7 @@ function sanitizeLlmsText(text) {
  */
 export function generateLlmsTxt(posts, feedXmlContent, overrideBaseUrl) {
   const { siteName, siteDescription, SITE_URL } = getSiteConfig();
-  const baseUrl = overrideBaseUrl || (SITE_URL && SITE_URL !== 'https://example.com' && SITE_URL !== 'https://domain.com' ? SITE_URL : 'https://parenting.my.id');
+  const baseUrl = overrideBaseUrl || SITE_URL;
   let items = [];
 
   if (feedXmlContent) {
@@ -248,7 +248,7 @@ ${articleLinks}
  */
 export function generateLlmsFullTxt(posts, customSiteUrl, customSiteName) {
   const { siteName, SITE_URL } = getSiteConfig();
-  const activeSiteUrl = customSiteUrl || (SITE_URL && SITE_URL !== 'https://example.com' && SITE_URL !== 'https://domain.com' ? SITE_URL : 'https://parenting.my.id');
+  const activeSiteUrl = customSiteUrl || SITE_URL;
   const activeSiteName = customSiteName || siteName;
   const publishedPosts = (posts || []).filter((p) => p.status === 'published');
 
@@ -285,7 +285,7 @@ ${fullArticles}
  */
 export function generateSitemapXml(posts, overrideBaseUrl) {
   const { SITE_URL } = getSiteConfig();
-  const baseUrl = overrideBaseUrl || (SITE_URL && SITE_URL !== 'https://example.com' && SITE_URL !== 'https://domain.com' ? SITE_URL : 'https://parenting.my.id');
+  const baseUrl = overrideBaseUrl || SITE_URL;
   const publishedPosts = (posts || []).filter((p) => p.status === 'published');
 
   const urls = publishedPosts
