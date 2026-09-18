@@ -5135,7 +5135,7 @@ export default function AdminPortal({
                           type="text"
                           value={cfgMicrositeTitle}
                           onChange={(e) => setCfgMicrositeTitle(e.target.value)}
-                          placeholder="Parenting.my.id Official Hub"
+                          placeholder="Official Hub"
                           className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-semibold focus:ring-2 focus:ring-rose-500"
                         />
                       </div>
@@ -7993,7 +7993,7 @@ export default function AdminPortal({
                     type="text"
                     value={cfgAdminLoginTitle}
                     onChange={(e) => setCfgAdminLoginTitle(e.target.value)}
-                    placeholder="Portal Admin Parenting.my.id"
+                    placeholder="Portal Admin CMS"
                     className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-semibold focus:ring-2 focus:ring-rose-500"
                   />
                 </div>
@@ -8036,7 +8036,7 @@ export default function AdminPortal({
                   </p>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold font-mono text-slate-500 dark:text-slate-400 px-3 py-2 bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800">
-                      https://parenting.my.id/admin-
+                      {typeof window !== 'undefined' ? window.location.origin : 'https://domain.com'}/admin-
                     </span>
                     <input
                       type="text"

@@ -366,7 +366,7 @@ export default function SEOHelper({
           'name': 'Beranda',
           'item': {
             '@type': 'Thing',
-            '@id': currentOrigin || 'https://parenting.my.id',
+            '@id': currentOrigin || '/',
           },
         },
         {

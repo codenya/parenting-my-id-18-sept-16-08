@@ -146,6 +146,28 @@ const extractTokenFromHeaderOrCookie = (
   return '';
 };
 
+// Helpers to sanitize and ignore locked placeholder values in Cloudflare Pages env
+const isBadGitHubOwner = (v: string) =>
+  !v || ['username', 'your-username', 'owner', 'OWNER', 'user', 'USER', 'vswi'].includes(v.trim());
+
+const isBadGitHubRepo = (v: string) =>
+  !v ||
+  ['blog_cms', 'cms-repository', 'repo', 'your-repo', 'repository', 'blog-cms', 'cms_repository'].includes(v.trim());
+
+const resolveGitHubOwner = (v?: string) => {
+  const trimmed = (v || '').trim();
+  return isBadGitHubOwner(trimmed) ? 'roywikan' : trimmed;
+};
+
+const resolveGitHubRepo = (v?: string) => {
+  const trimmed = (v || '').trim();
+  return isBadGitHubRepo(trimmed) ? 'parenting-my-id' : trimmed;
+};
+
+const resolveGitHubBranch = (v?: string) => {
+  return (v || '').trim() || 'main';
+};
+
 export const onRequest: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
   const url = new URL(request.url);
@@ -2185,9 +2207,9 @@ Sitemap: ${siteUrl}/sitemap.xml
       const token = env.GITHUB_TOKEN;
       if (token) {
         try {
-          const owner = env.GITHUB_OWNER || 'roywikan';
-          const repo = env.GITHUB_REPO || 'parenting-my-id';
-          const branch = env.GITHUB_BRANCH || 'main';
+          const owner = resolveGitHubOwner(env.GITHUB_OWNER);
+          const repo = resolveGitHubRepo(env.GITHUB_REPO);
+          const branch = resolveGitHubBranch(env.GITHUB_BRANCH);
           const filePath = 'public/site_config.json';
           const ghUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
 
@@ -2753,9 +2775,9 @@ Sitemap: ${siteUrl}/sitemap.xml
       // GitHub Storage Fallback
       try {
         const token = env.GITHUB_TOKEN;
-        const owner = env.GITHUB_OWNER || 'roywikan';
-        const repo = env.GITHUB_REPO || 'parenting-my-id';
-        const branch = env.GITHUB_BRANCH || 'main';
+        const owner = resolveGitHubOwner(env.GITHUB_OWNER);
+        const repo = resolveGitHubRepo(env.GITHUB_REPO);
+        const branch = resolveGitHubBranch(env.GITHUB_BRANCH);
 
         if (!token) {
           return jsonResponse({ error: 'Gagal upload: Token storage tidak dikonfigurasi.' }, 500);
@@ -2813,9 +2835,9 @@ Sitemap: ${siteUrl}/sitemap.xml
       }
 
       const token = env.GITHUB_TOKEN;
-      const owner = env.GITHUB_OWNER || 'roywikan';
-      const repo = env.GITHUB_REPO || 'parenting-my-id';
-      const branch = env.GITHUB_BRANCH || 'main';
+      const owner = resolveGitHubOwner(env.GITHUB_OWNER);
+      const repo = resolveGitHubRepo(env.GITHUB_REPO);
+      const branch = resolveGitHubBranch(env.GITHUB_BRANCH);
 
       if (!token) {
         return jsonResponse({ error: 'GITHUB_TOKEN belum diset di Cloudflare Pages Variables & Secrets.' }, 500);
@@ -3856,27 +3878,46 @@ Berdasarkan judul artikel: "${title}" dan isi: "${(content || '').slice(0, 500)}
       if (auth.errorResponse) return auth.errorResponse;
 
       try {
-        if (env.GITHUB_TOKEN && typeof syncStaticFilesToGitHub === 'function') {
-          await syncStaticFilesToGitHub(env, context.waitUntil);
+        if (!env.GITHUB_TOKEN) {
+          return jsonResponse({
+            success: false,
+            error: 'GITHUB_TOKEN belum diset di Cloudflare Pages → Settings → Environment variables. Tanpa token, file tidak bisa ditulis ke GitHub (disk).',
+          }, 500);
+        }
+        if (!env.DB) {
+          return jsonResponse({
+            success: false,
+            error: 'Database D1 belum terhubung.',
+          }, 500);
         }
 
+        // Tunggu selesai supaya error bisa dikembalikan ke UI
+        await syncStaticFilesToGitHub(env);
+
         let postCount = 0;
-        if (env.DB) {
-          try {
-            const countRes: any = await env.DB.prepare("SELECT count(*) as total FROM posts WHERE status = 'published'").first();
-            postCount = countRes ? Number(countRes.total) : 0;
-          } catch (cErr) {
-            console.warn('Could not count published posts:', cErr);
-          }
-        }
+        try {
+          const countRes: any = await env.DB.prepare(
+            "SELECT count(*) as total FROM posts WHERE status = 'published'"
+          ).first();
+          postCount = countRes ? Number(countRes.total) : 0;
+        } catch (_) {}
 
         return jsonResponse({
           success: true,
-          message: `Berhasil meregenerasi berkas sitemap.xml, feed.xml, robots.txt, dan llms.txt secara dinamis (${postCount} postingan terindeks)!`,
-          filesUpdated: ['/sitemap.xml', '/feed.xml', '/robots.txt', '/llms.txt', '/llms-full.txt'],
+          message: `Berhasil meregenerasi & commit berkas publik ke GitHub (${postCount} postingan). Cloudflare akan auto-deploy dalam 1–3 menit.`,
+          filesUpdated: [
+            '/sitemap.xml',
+            '/feed.xml',
+            '/robots.txt',
+            '/llms.txt',
+            '/llms-full.txt',
+          ],
         });
       } catch (err: any) {
-        return jsonResponse({ success: false, error: 'Gagal meregenerasi berkas statis: ' + err.message }, 500);
+        return jsonResponse({
+          success: false,
+          error: 'Gagal meregenerasi berkas: ' + (err?.message || String(err)),
+        }, 500);
       }
     }
 
@@ -4313,107 +4354,178 @@ BEGIN TRANSACTION;
 
 async function syncStaticFilesToGitHub(env: Env, waitUntil?: (promise: Promise<any>) => void) {
   const token = env.GITHUB_TOKEN;
-  if (!token || !env.DB) return;
+  if (!token || !env.DB) {
+    throw new Error('GITHUB_TOKEN atau DB belum dikonfigurasi di Cloudflare Pages.');
+  }
 
   const doSync = async () => {
-    try {
-      const owner = env.GITHUB_OWNER || 'roywikan';
-      const repo = env.GITHUB_REPO || 'cms-repository';
-      const branch = env.GITHUB_BRANCH || 'main';
-      
-      let siteUrl = env.SITE_URL || 'https://domain.com';
-      let siteName = 'Portal Informasi';
-      let siteDescription = 'Portal berita dan informasi terpercaya.';
+    const isBadOwner = (v: string) =>
+      !v || ['username', 'your-username', 'OWNER', 'owner', 'vswi'].includes(v);
 
-      try {
-        const results = await env.DB.prepare("SELECT key, value FROM configs WHERE key IN ('site_url', 'site_name', 'site_description', 'seo_meta_title', 'seo_meta_description')").all();
-        const configMap: Record<string, string> = {};
-        if (results && results.results) {
-          for (const row of results.results) {
-            try {
-              configMap[row.key] = JSON.parse(row.value);
-            } catch {
-              configMap[row.key] = row.value;
-            }
+    const isBadRepo = (v: string) =>
+      !v ||
+      ['blog_cms', 'cms-repository', 'repo', 'your-repo', 'repository', 'blog-cms'].includes(v);
+
+    const owner = isBadOwner((env.GITHUB_OWNER || '').trim())
+      ? 'roywikan'
+      : (env.GITHUB_OWNER || '').trim();
+
+    const repo = isBadRepo((env.GITHUB_REPO || '').trim())
+      ? 'parenting-my-id'
+      : (env.GITHUB_REPO || '').trim();
+
+    const branch = (env.GITHUB_BRANCH || '').trim() || 'main';
+
+    let siteUrl = 'https://parenting.my.id';
+    let siteName = 'Parenting.my.id';
+    let siteDescription =
+      'Portal informasi dan panduan pengasuhan anak modern, nutrisi balita, serta kesehatan keluarga Indonesia.';
+
+    try {
+      const results = await env.DB.prepare(
+        "SELECT key, value FROM configs WHERE key IN ('site_url', 'site_name', 'site_description', 'seo_meta_title', 'seo_meta_description')"
+      ).all();
+      const configMap: Record<string, string> = {};
+      if (results?.results) {
+        for (const row of results.results as any[]) {
+          try {
+            configMap[row.key] = JSON.parse(row.value);
+          } catch {
+            configMap[row.key] = row.value;
           }
         }
-        if (configMap.site_url && !configMap.site_url.includes('example.com') && !configMap.site_url.includes('domain.com')) {
-          siteUrl = configMap.site_url.replace(/\/$/, '');
-        } else if (env.SITE_URL && !env.SITE_URL.includes('example.com') && !env.SITE_URL.includes('domain.com')) {
-          siteUrl = env.SITE_URL.replace(/\/$/, '');
-        }
-        siteName = configMap.site_name || configMap.seo_meta_title || 'Portal Informasi';
-        siteDescription = configMap.site_description || configMap.seo_meta_description || 'Portal berita dan informasi terpercaya.';
-      } catch (dbErr) {
-        console.error('Error fetching config in syncStaticFilesToGitHub:', dbErr);
       }
 
-      const { results } = await env.DB.prepare(
-        `SELECT p.title, p.slug, p.excerpt, p.content_markdown as contentMarkdown, p.category, p.updated_at as updatedAt, p.created_at as createdAt, u.name as authorName 
-         FROM posts p 
-         LEFT JOIN users u ON p.author_id = u.id 
-         WHERE p.status = 'published' 
-         ORDER BY p.created_at DESC`
-      ).all();
+      const candidate =
+        configMap.site_url ||
+        env.SITE_URL ||
+        '';
+      if (
+        candidate &&
+        !candidate.includes('example.com') &&
+        !candidate.includes('domain.com')
+      ) {
+        siteUrl = candidate.replace(/\/$/, '');
+      }
 
-      const postsList = results || [];
+      siteName = configMap.site_name || configMap.seo_meta_title || siteName;
+      siteDescription =
+        configMap.site_description ||
+        configMap.seo_meta_description ||
+        siteDescription;
+    } catch (dbErr) {
+      console.error('Error fetching config in syncStaticFilesToGitHub:', dbErr);
+    }
 
-      // 1. generate feed.xml
-      const items = postsList.map(
-        (post: any) => `
-    <item>
-      <title><![CDATA[${post.title}]]></title>
+    const { results } = await env.DB.prepare(
+      `SELECT p.title, p.slug, p.excerpt, p.content_markdown as contentMarkdown,
+              p.category, p.updated_at as updatedAt, p.created_at as createdAt,
+              u.name as authorName
+       FROM posts p
+       LEFT JOIN users u ON p.author_id = u.id
+       WHERE p.status = 'published'
+       ORDER BY p.created_at DESC`
+    ).all();
+
+    const postsList = (results || []) as any[];
+
+    // 1. feed.xml
+    const items = postsList
+      .map((post: any) => {
+        const pubDate = post.createdAt
+          ? new Date(post.createdAt).toUTCString()
+          : new Date().toUTCString();
+        return `    <item>
+      <title><![CDATA[${post.title || ''}]]></title>
       <link>${siteUrl}/baca/${post.slug}</link>
       <guid>${siteUrl}/baca/${post.slug}</guid>
       <description><![CDATA[${post.excerpt || ''}]]></description>
-      <pubDate>${new Date(post.created_at || Date.now()).toUTCString()}</pubDate>
-    </item>`
-      ).join('');
+      <pubDate>${pubDate}</pubDate>
+    </item>`;
+      })
+      .join('\n');
 
-      const feedXml = `<?xml version="1.0" encoding="UTF-8" ?>
+    const feedXml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
-    <title><![CDATA[${siteName}]]></title>
+    <title>${siteName}</title>
     <link>${siteUrl}</link>
-    <description><![CDATA[${siteDescription}]]></description>
+    <description>${siteDescription}</description>
     <language>id-id</language>
-    ${items}
+${items}
   </channel>
 </rss>`.trim();
 
-      // 2. generate sitemap.xml
-      const urls = postsList.map(
-        (post: any) => `<url><loc>${siteUrl}/baca/${post.slug}</loc><lastmod>${new Date(post.updatedAt || post.createdAt || Date.now()).toISOString().split('T')[0]}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>`
-      ).join('');
-      const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${siteUrl}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>${urls}</urlset>`.trim();
+    // 2. sitemap.xml
+    const postUrls = postsList
+      .map((p: any) => {
+        const lastMod = p.updatedAt
+          ? String(p.updatedAt).split('T')[0]
+          : new Date().toISOString().split('T')[0];
+        return `<url><loc>${siteUrl}/baca/${p.slug}</loc><lastmod>${lastMod}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>`;
+      })
+      .join('');
 
-      // 3. generate llms.txt
-      const sanitizeLlmsText = (text: string) => {
-        return (text || '')
-          .replace(/[\r\n\t]+/g, ' ')
-          .replace(/\s+/g, ' ')
-          .trim();
-      };
-
-      let articleLinks = postsList
-        .map((p: any) => {
-          const cleanTitle = sanitizeLlmsText(p.title || '').replace(/[\[\]]/g, '').trim();
-          const cleanDesc = sanitizeLlmsText(p.excerpt || '');
-          return `- [${cleanTitle}](${siteUrl}/baca/${p.slug})${cleanDesc ? `: ${cleanDesc}` : ''}`;
-        })
-        .join('\n');
-
-      if (!articleLinks.trim()) {
-        articleLinks = `- [Beranda](${siteUrl}): ${siteDescription}`;
+    let productUrls = '';
+    try {
+      const prodRes = await env.DB.prepare(
+        "SELECT slug, updated_at as updatedAt FROM products WHERE status = 'available' ORDER BY id DESC"
+      ).all();
+      if (prodRes?.results?.length) {
+        productUrls = (prodRes.results as any[])
+          .map((p: any) => {
+            const lastMod = p.updatedAt
+              ? String(p.updatedAt).split('T')[0]
+              : new Date().toISOString().split('T')[0];
+            return `<url><loc>${siteUrl}/produk/${p.slug}</loc><lastmod>${lastMod}</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>`;
+          })
+          .join('');
       }
+    } catch (_) {}
 
-      const llmsTxt = `# ${siteName}
+    const staticUrls = [
+      ['privacy', '0.5'],
+      ['about', '0.6'],
+      ['contact', '0.6'],
+      ['disclaimer', '0.5'],
+      ['terms', '0.5'],
+    ]
+      .map(
+        ([path, priority]) =>
+          `<url><loc>${siteUrl}/${path}</loc><changefreq>monthly</changefreq><priority>${priority}</priority></url>`
+      )
+      .join('');
+
+    const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${siteUrl}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>${staticUrls}${postUrls}${productUrls}</urlset>`.trim();
+
+    // 3. robots.txt
+    const robotsTxt = `User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /redaksi-login
+Disallow: /portal-redaksi
+Disallow: /kelola-parenting
+Disallow: /dashboard-redaksi
+
+Sitemap: ${siteUrl}/sitemap.xml
+`.trim() + '\n';
+
+    // 4. llms.txt
+    const articleLinks = postsList
+      .map((p: any) => {
+        const title = String(p.title || '').replace(/[\[\]]/g, '').trim();
+        const desc = String(p.excerpt || '').replace(/[\r\n\t]+/g, ' ').trim();
+        return `- [${title}](${siteUrl}/baca/${p.slug})${desc ? `: ${desc}` : ''}`;
+      })
+      .join('\n');
+
+    const llmsTxt = `# ${siteName}
 
 > ${siteDescription}
 
 ## Artikel Terkait & Panduan Utama
 
-${articleLinks}
+${articleLinks || `- [Beranda](${siteUrl}): ${siteDescription}`}
 
 ## Optional
 
@@ -4422,11 +4534,12 @@ ${articleLinks}
 - [RSS Feed](${siteUrl}/feed.xml): Umpan sindikasi artikel terbaru.
 `.trim();
 
-      // 4. generate llms-full.txt
-      const fullArticles = postsList.map((p: any) => {
+    // 5. llms-full.txt
+    const fullArticles = postsList
+      .map((p: any) => {
         const url = `${siteUrl}/baca/${p.slug}`;
         const author = p.authorName || `Tim Redaksi ${siteName}`;
-        const category = p.category || 'Berita';
+        const category = p.category || 'Umum';
         const date = p.updatedAt || p.createdAt || new Date().toISOString();
         return `---
 
@@ -4440,62 +4553,67 @@ ${articleLinks}
 
 ${p.contentMarkdown || ''}
 `;
-      }).join('\n\n');
+      })
+      .join('\n\n');
 
-      const llmsFullTxt = `# Arsip Lengkap Artikel ${siteName} (LLMs Full Text)
+    const llmsFullTxt = `# Arsip Lengkap Artikel ${siteName} (LLMs Full Text)
 
-Dokumen ini memuat kumpulan artikel lengkap dalam format Markdown for Large Language Models (LLMs).
+Dokumen ini memuat kumpulan artikel lengkap dalam format Markdown untuk Large Language Models (LLMs).
 
 ${fullArticles}
 `.trim();
 
-      // Commit files to GitHub sequentially
-      const filesToCommit = [
-        { path: 'public/feed.xml', content: feedXml, msg: 'auto-update: sync feed.xml via CMS D1' },
-        { path: 'public/sitemap.xml', content: sitemapXml, msg: 'auto-update: sync sitemap.xml via CMS D1' },
-        { path: 'public/llms.txt', content: llmsTxt, msg: 'auto-update: sync llms.txt via CMS D1' },
-        { path: 'public/llms-full.txt', content: llmsFullTxt, msg: 'auto-update: sync llms-full.txt via CMS D1' },
-      ];
+    const filesToCommit = [
+      { path: 'public/feed.xml', content: feedXml, msg: 'auto-update: sync feed.xml via CMS D1' },
+      { path: 'public/sitemap.xml', content: sitemapXml, msg: 'auto-update: sync sitemap.xml via CMS D1' },
+      { path: 'public/robots.txt', content: robotsTxt, msg: 'auto-update: sync robots.txt via CMS D1' },
+      { path: 'public/llms.txt', content: llmsTxt, msg: 'auto-update: sync llms.txt via CMS D1' },
+      { path: 'public/llms-full.txt', content: llmsFullTxt, msg: 'auto-update: sync llms-full.txt via CMS D1' },
+    ];
 
-      for (const f of filesToCommit) {
-        try {
-          const ghUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${f.path}`;
-          let sha = '';
-          const getRes = await fetch(ghUrl, {
-            headers: {
-              'Authorization': `token ${token}`,
-              'Accept': 'application/vnd.github.v3+json',
-              'User-Agent': 'CloudflarePages-ParentingApp',
-            }
-          });
-          if (getRes.ok) {
-            const getData: any = await getRes.json();
-            sha = getData.sha;
-          }
+    const resultsLog: string[] = [];
 
-          const contentBase64 = btoa(unescape(encodeURIComponent(f.content)));
-          await fetch(ghUrl, {
-            method: 'PUT',
-            headers: {
-              'Authorization': `token ${token}`,
-              'Accept': 'application/vnd.github.v3+json',
-              'User-Agent': 'CloudflarePages-ParentingApp',
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              message: f.msg,
-              content: contentBase64,
-              branch,
-              ...(sha ? { sha } : {})
-            })
-          });
-        } catch (fErr) {
-          console.error(`Error committing ${f.path} to GitHub:`, fErr);
-        }
+    for (const f of filesToCommit) {
+      const ghUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${f.path}`;
+      let sha = '';
+
+      const getRes = await fetch(ghUrl + `?ref=${branch}`, {
+        headers: {
+          Authorization: `token ${token}`,
+          Accept: 'application/vnd.github.v3+json',
+          'User-Agent': 'CloudflarePages-ParentingApp',
+        },
+      });
+      if (getRes.ok) {
+        const getData: any = await getRes.json();
+        sha = getData.sha;
       }
-    } catch (err) {
-      console.error('Error in syncStaticFilesToGitHub:', err);
+
+      const contentBase64 = btoa(unescape(encodeURIComponent(f.content)));
+      const putRes = await fetch(ghUrl, {
+        method: 'PUT',
+        headers: {
+          Authorization: `token ${token}`,
+          Accept: 'application/vnd.github.v3+json',
+          'User-Agent': 'CloudflarePages-ParentingApp',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: f.msg,
+          content: contentBase64,
+          branch,
+          ...(sha ? { sha } : {}),
+        }),
+      });
+
+      if (!putRes.ok) {
+        const errData: any = await putRes.json().catch(() => ({}));
+        throw new Error(`Gagal commit ${f.path}: ${errData.message || putRes.status}`);
+      }
+      resultsLog.push(f.path);
     }
+
+    console.log('syncStaticFilesToGitHub OK:', resultsLog.join(', '));
   };
 
   if (waitUntil) {

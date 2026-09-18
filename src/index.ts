@@ -182,11 +182,13 @@ ${articleLinks}
           ).bind(configJson).run();
 
           // GitHub REST API Sync for public/site_config.json if token is provided
-          if (env.GITHUB_TOKEN && env.GITHUB_OWNER && env.GITHUB_REPO) {
+          if (env.GITHUB_TOKEN) {
             try {
-              const owner = env.GITHUB_OWNER;
-              const repo = env.GITHUB_REPO;
-              const branch = env.GITHUB_BRANCH || 'main';
+              const isBadOwner = (v?: string) => !v || ['username', 'your-username', 'owner', 'OWNER', 'vswi'].includes(v.trim());
+              const isBadRepo = (v?: string) => !v || ['blog_cms', 'cms-repository', 'repo', 'your-repo', 'repository', 'blog-cms'].includes(v.trim());
+              const owner = isBadOwner(env.GITHUB_OWNER) ? 'roywikan' : (env.GITHUB_OWNER || '').trim();
+              const repo = isBadRepo(env.GITHUB_REPO) ? 'parenting-my-id' : (env.GITHUB_REPO || '').trim();
+              const branch = (env.GITHUB_BRANCH || '').trim() || 'main';
               const filePath = 'public/site_config.json';
               const githubApiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
 
@@ -601,9 +603,11 @@ ${articleLinks}
         // GitHub Storage Fallback
         try {
           const token = env.GITHUB_TOKEN;
-          const owner = env.GITHUB_OWNER || 'vswi';
-          const repo = env.GITHUB_REPO || 'parenting-my-id';
-          const branch = env.GITHUB_BRANCH || 'main';
+          const isBadOwner = (v?: string) => !v || ['username', 'your-username', 'owner', 'OWNER', 'vswi'].includes(v.trim());
+          const isBadRepo = (v?: string) => !v || ['blog_cms', 'cms-repository', 'repo', 'your-repo', 'repository', 'blog-cms'].includes(v.trim());
+          const owner = isBadOwner(env.GITHUB_OWNER) ? 'roywikan' : (env.GITHUB_OWNER || '').trim();
+          const repo = isBadRepo(env.GITHUB_REPO) ? 'parenting-my-id' : (env.GITHUB_REPO || '').trim();
+          const branch = (env.GITHUB_BRANCH || '').trim() || 'main';
 
           if (!token) {
             return new Response(JSON.stringify({ error: 'Gagal upload: Token storage tidak dikonfigurasi.' }), {
@@ -662,11 +666,13 @@ ${articleLinks}
           const { filename, base64Content } = body;
 
           const token = env.GITHUB_TOKEN;
-          const owner = env.GITHUB_OWNER;
-          const repo = env.GITHUB_REPO;
-          const branch = env.GITHUB_BRANCH || 'main';
+          const isBadOwner = (v?: string) => !v || ['username', 'your-username', 'owner', 'OWNER', 'vswi'].includes(v.trim());
+          const isBadRepo = (v?: string) => !v || ['blog_cms', 'cms-repository', 'repo', 'your-repo', 'repository', 'blog-cms'].includes(v.trim());
+          const owner = isBadOwner(env.GITHUB_OWNER) ? 'roywikan' : (env.GITHUB_OWNER || '').trim();
+          const repo = isBadRepo(env.GITHUB_REPO) ? 'parenting-my-id' : (env.GITHUB_REPO || '').trim();
+          const branch = (env.GITHUB_BRANCH || '').trim() || 'main';
 
-          if (!token || !owner || !repo) {
+          if (!token) {
             // Fallback for mock upload when token isn't configured yet
             const mockUrl = `https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80`;
             return new Response(JSON.stringify({

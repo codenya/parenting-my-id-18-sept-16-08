@@ -1,8 +1,8 @@
 /**
- * AI Assistant for Parenting.my.id Editor
+ * AI Assistant for Site Editor
  * Proxies through server-side API route for secure Gemini integration
  */
-export async function generateParentingSEOMeta(title: string, content: string) {
+export async function generateSEOMeta(title: string, content: string, siteName?: string) {
   try {
     const res = await fetch('/api/ai/generate-meta', {
       method: 'POST',
@@ -18,12 +18,16 @@ export async function generateParentingSEOMeta(title: string, content: string) {
     console.error('Gemini API Error via /api/ai/generate-meta:', err);
   }
 
+  const sName = siteName || 'Blog';
   return {
-    metaTitle: `${title} | Parenting.my.id`,
+    metaTitle: `${title} | ${sName}`,
     metaDescription: content.slice(0, 150).replace(/[#*`_]/g, '') + '...',
-    tags: 'parenting, anak, keluarga, kesehatan anak, balita',
+    tags: 'artikel, edukasi, informasi, panduan, wawasan',
     excerpt: content.slice(0, 180).replace(/[#*`_]/g, '') + '...',
     aiGenerated: false,
   };
 }
+
+export const generateParentingSEOMeta = generateSEOMeta;
+
 

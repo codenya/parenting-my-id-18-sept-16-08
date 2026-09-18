@@ -12,7 +12,8 @@ interface BreadcrumbsProps {
   siteUrl?: string;
 }
 
-export default function Breadcrumbs({ items, siteUrl = 'https://parenting.my.id' }: BreadcrumbsProps) {
+export default function Breadcrumbs({ items, siteUrl }: BreadcrumbsProps) {
+  const effectiveSiteUrl = siteUrl || (typeof window !== 'undefined' ? window.location.origin : '');
   if (!items || items.length === 0) return null;
 
   return (
@@ -31,7 +32,7 @@ export default function Breadcrumbs({ items, siteUrl = 'https://parenting.my.id'
           itemType="https://schema.org/ListItem"
           className="flex items-center gap-1.5"
         >
-          <link itemProp="item" href={siteUrl} />
+          <link itemProp="item" href={effectiveSiteUrl} />
           <button
             onClick={items[0]?.onClick}
             className="flex items-center gap-1 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
@@ -45,8 +46,8 @@ export default function Breadcrumbs({ items, siteUrl = 'https://parenting.my.id'
         {items.map((item, idx) => {
           const position = idx + 2;
           const itemUrl = item.active
-            ? (typeof window !== 'undefined' ? window.location.href : `${siteUrl}/baca`)
-            : `${siteUrl}/?kategori=${encodeURIComponent(item.label)}`;
+            ? (typeof window !== 'undefined' ? window.location.href : `${effectiveSiteUrl}/baca`)
+            : `${effectiveSiteUrl}/?kategori=${encodeURIComponent(item.label)}`;
 
           return (
             <li
