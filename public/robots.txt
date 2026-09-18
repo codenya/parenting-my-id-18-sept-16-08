@@ -1,5 +1,9 @@
 User-agent: *
 Allow: /
-Content-Signal: ai-train=no, search=yes, ai-input=no
+Disallow: /admin
+Disallow: /redaksi-login
+Disallow: /portal-redaksi
+Disallow: /kelola-parenting
+Disallow: /dashboard-redaksi
 
-Sitemap: /sitemap.xml
+Sitemap: https://parenting.my.id/sitemap.xml
