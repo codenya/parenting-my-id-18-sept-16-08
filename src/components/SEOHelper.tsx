@@ -18,6 +18,7 @@ interface SEOProps {
   siteName?: string;
   siteLogo?: string;
   articleData?: any;
+  eventData?: any;
   comments?: Array<{ user_name?: string; content?: string; created_at?: string }>;
   posts?: any[];
 }
@@ -39,6 +40,7 @@ export default function SEOHelper({
   siteName = 'Blog Engine',
   siteLogo = '/favicon-32x32.png',
   articleData,
+  eventData,
   comments,
   posts,
 }: SEOProps) {
@@ -354,6 +356,82 @@ export default function SEOHelper({
     }
 
     injectJsonLd('jsonld-article-schema', articleSchema);
+
+    // A3. Schema.org Event for Event & Webinar Listings (Official Google Search Event Rich Result)
+    const effectiveEvent = eventData || articleData?.interactiveEventListing;
+    if (effectiveEvent) {
+      let attendanceMode = 'https://schema.org/OnlineEventAttendanceMode';
+      if (effectiveEvent.eventFormat === 'offline') {
+        attendanceMode = 'https://schema.org/OfflineEventAttendanceMode';
+      } else if (effectiveEvent.eventFormat === 'hybrid') {
+        attendanceMode = 'https://schema.org/MixedEventAttendanceMode';
+      }
+
+      let locationObj: any = {
+        '@type': 'VirtualLocation',
+        'url': effectiveEvent.onlineJoinUrl || effectiveCanonicalUrl
+      };
+
+      if (effectiveEvent.eventFormat === 'offline' || effectiveEvent.eventFormat === 'hybrid') {
+        locationObj = {
+          '@type': 'Place',
+          'name': effectiveEvent.locationName || 'Lokasi Acara',
+          'address': {
+            '@type': 'PostalAddress',
+            'streetAddress': effectiveEvent.locationAddress || effectiveEvent.locationName || 'Indonesia',
+            'addressCountry': 'ID'
+          }
+        };
+      }
+
+      let availability = 'https://schema.org/InStock';
+      if (effectiveEvent.quotaStatus === 'sold_out' || effectiveEvent.quotaStatus === 'closed') {
+        availability = 'https://schema.org/SoldOut';
+      }
+
+      let numericPrice = '0';
+      const cleanPrice = String(effectiveEvent.price || '').replace(/[^0-9]/g, '');
+      if (cleanPrice && cleanPrice.length > 0) {
+        numericPrice = cleanPrice;
+      }
+
+      const eventSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'Event',
+        '@id': `${effectiveCanonicalUrl}#event`,
+        'name': effectiveEvent.eventTitle || title,
+        'description': description,
+        'startDate': effectiveEvent.startDate ? new Date(effectiveEvent.startDate).toISOString() : (datePublished || new Date().toISOString()),
+        'endDate': effectiveEvent.endDate ? new Date(effectiveEvent.endDate).toISOString() : (effectiveEvent.startDate ? new Date(effectiveEvent.startDate).toISOString() : new Date().toISOString()),
+        'eventAttendanceMode': attendanceMode,
+        'eventStatus': 'https://schema.org/EventScheduled',
+        'location': locationObj,
+        'image': [finalImage],
+        'offers': {
+          '@type': 'Offer',
+          'url': effectiveEvent.registrationUrl || effectiveCanonicalUrl,
+          'price': numericPrice,
+          'priceCurrency': 'IDR',
+          'availability': availability,
+          'validFrom': datePublished ? new Date(datePublished).toISOString().substring(0, 10) : '2026-01-01'
+        },
+        'performer': (effectiveEvent.speakers || []).map((s: any) => ({
+          '@type': 'Person',
+          'name': s.name,
+          'jobTitle': s.role
+        })),
+        'organizer': {
+          '@type': 'Organization',
+          'name': siteName,
+          'url': currentOrigin || effectiveCanonicalUrl
+        }
+      };
+
+      injectJsonLd('jsonld-event-schema', eventSchema);
+    } else {
+      const eventScript = document.getElementById('jsonld-event-schema');
+      if (eventScript) eventScript.remove();
+    }
 
     // B. BreadcrumbList Schema
     const breadcrumbSchema = {

@@ -3980,6 +3980,78 @@ app.get('/baca/:slug', (req, res, next) => {
       'keywords': post.tags,
     };
 
+    let schemaEvent = null;
+    const eventListing = post.interactiveEventListing || (typeof post.interactive_event_listing === 'string' ? JSON.parse(post.interactive_event_listing) : post.interactive_event_listing);
+    if (post.postType === 'interactive_event_listing' || eventListing) {
+      const ev = eventListing || {};
+      let attendanceMode = 'https://schema.org/OnlineEventAttendanceMode';
+      if (ev.eventFormat === 'offline') {
+        attendanceMode = 'https://schema.org/OfflineEventAttendanceMode';
+      } else if (ev.eventFormat === 'hybrid') {
+        attendanceMode = 'https://schema.org/MixedEventAttendanceMode';
+      }
+
+      let locationObj: any = {
+        '@type': 'VirtualLocation',
+        'url': ev.onlineJoinUrl || canonicalUrl
+      };
+
+      if (ev.eventFormat === 'offline' || ev.eventFormat === 'hybrid') {
+        locationObj = {
+          '@type': 'Place',
+          'name': ev.locationName || 'Lokasi Acara',
+          'address': {
+            '@type': 'PostalAddress',
+            'streetAddress': ev.locationAddress || ev.locationName || 'Indonesia',
+            'addressCountry': 'ID'
+          }
+        };
+      }
+
+      let availability = 'https://schema.org/InStock';
+      if (ev.quotaStatus === 'sold_out' || ev.quotaStatus === 'closed') {
+        availability = 'https://schema.org/SoldOut';
+      }
+
+      let numericPrice = '0';
+      const cleanPrice = String(ev.price || '').replace(/[^0-9]/g, '');
+      if (cleanPrice) {
+        numericPrice = cleanPrice;
+      }
+
+      schemaEvent = {
+        '@context': 'https://schema.org',
+        '@type': 'Event',
+        '@id': `${canonicalUrl}#event`,
+        'name': ev.eventTitle || post.title,
+        'description': pageDesc,
+        'startDate': ev.startDate ? new Date(ev.startDate).toISOString() : datePub,
+        'endDate': ev.endDate ? new Date(ev.endDate).toISOString() : (ev.startDate ? new Date(ev.startDate).toISOString() : datePub),
+        'eventAttendanceMode': attendanceMode,
+        'eventStatus': 'https://schema.org/EventScheduled',
+        'location': locationObj,
+        'image': [heroImageSrc],
+        'offers': {
+          '@type': 'Offer',
+          'url': ev.registrationUrl || canonicalUrl,
+          'price': numericPrice,
+          'priceCurrency': 'IDR',
+          'availability': availability,
+          'validFrom': datePub ? datePub.substring(0, 10) : '2026-01-01'
+        },
+        'performer': (ev.speakers || []).map((s: any) => ({
+          '@type': 'Person',
+          'name': s.name,
+          'jobTitle': s.role
+        })),
+        'organizer': {
+          '@type': 'Organization',
+          'name': siteName,
+          'url': siteUrl
+        }
+      };
+    }
+
     const seoTags = `
       <title>${pageTitle}</title>
       <meta name="description" content="${pageDesc}" />
@@ -3992,6 +4064,7 @@ app.get('/baca/:slug', (req, res, next) => {
       <meta property="og:type" content="article" />
       <meta name="twitter:card" content="summary_large_image" />
       <script type="application/ld+json">${JSON.stringify(schemaArticle)}</script>
+      ${schemaEvent ? `<script type="application/ld+json">${JSON.stringify(schemaEvent)}</script>` : ''}
     `;
 
     let htmlFilePath = path.join(process.cwd(), 'dist', 'index.html');
