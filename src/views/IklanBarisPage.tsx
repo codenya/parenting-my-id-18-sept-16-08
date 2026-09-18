@@ -394,11 +394,11 @@ export default function IklanBarisPage({ siteConfig, onNavigate }: IklanBarisPag
     return age > 0 ? `${age} thn` : '';
   };
 
-  const origin = typeof window !== 'undefined' ? window.location.origin : (siteConfig?.site_url || 'https://parenting.my.id');
+  const origin = typeof window !== 'undefined' ? window.location.origin : (siteConfig?.site_url || '');
   const seoTitle = selectedKategori !== 'Semua'
     ? `Iklan Baris ${selectedKategori} | ${siteName}`
     : `Iklan Baris Gratis | ${siteName}`;
-  const seoDesc = `Pasang dan temukan iklan baris kebutuhan anak, keluarga, les privat, babysitter, dan jasa parenting di ${siteName}. Gratis, dimoderasi redaksi.`;
+  const seoDesc = `Pasang dan temukan iklan baris, pengumuman, dan warta produk/jasa di ${siteName}. Gratis, dimoderasi redaksi.`;
   const seoCanonical = currentPage > 1
     ? `${origin}/iklan-baris?page=${currentPage}${selectedKategori !== 'Semua' ? `&kategori=${encodeURIComponent(selectedKategori)}` : ''}`
     : (selectedKategori !== 'Semua' ? `${origin}/iklan-baris?kategori=${encodeURIComponent(selectedKategori)}` : `${origin}/iklan-baris`);

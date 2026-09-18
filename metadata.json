@@ -1,6 +1,6 @@
 {
-  "name": "Parenting.my.id - Edukasi & Pengasuhan Anak",
-  "description": "Portal informasi dan panduan pengasuhan anak modern, nutrisi balita, serta kesehatan keluarga Indonesia.",
+  "name": "Portal Informasi & Blog Engine",
+  "description": "Platform publikasi berita, artikel, dan konten interaktif modern.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

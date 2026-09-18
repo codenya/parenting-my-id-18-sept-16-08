@@ -598,6 +598,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           p.featured_image as featuredImage, p.category, p.read_time_minutes as readTimeMinutes, 
           p.author_id as authorId, p.status, p.meta_title as metaTitle, 
           p.meta_description as metaDescription, p.tags, p.views, p.created_at as createdAt, p.updated_at as updatedAt,
+          p.post_type as postType, p.interactive_configurator as interactiveConfigurator, p.interactive_showcase as interactiveShowcase, p.interactive_radar as interactiveRadar, p.interactive_quiz as interactiveQuiz,
+          p.interactive_timeline_slider as interactiveTimelineSlider, p.interactive_battle_card as interactiveBattleCard, p.interactive_quiz_router as interactiveQuizRouter, p.interactive_habit_simulator as interactiveHabitSimulator, p.interactive_qa_column as interactiveQaColumn, p.interactive_event_listing as interactiveEventListing,
+          p.disclaimer_type as disclaimerType, p.custom_disclaimer_text as customDisclaimerText,
           u.name as authorName, u.avatar as authorAvatar, u.role as authorRole
         FROM posts p
         LEFT JOIN users u ON p.author_id = u.id
@@ -607,6 +610,13 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
       if (results && results.length > 0) {
         const r: any = results[0];
+        const safeParseJSON = (v: any) => {
+          if (typeof v === 'string') {
+            try { return JSON.parse(v); } catch { return null; }
+          }
+          return v || null;
+        };
+
         post = {
           id: r.id,
           title: r.title,
@@ -625,6 +635,19 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           metaDescription: r.metaDescription,
           tags: r.tags || 'parenting, anak',
           views: r.views || 0,
+          postType: r.postType || 'article',
+          interactiveConfigurator: safeParseJSON(r.interactiveConfigurator),
+          interactiveShowcase: safeParseJSON(r.interactiveShowcase),
+          interactiveRadar: safeParseJSON(r.interactiveRadar),
+          interactiveQuiz: safeParseJSON(r.interactiveQuiz),
+          interactiveTimelineSlider: safeParseJSON(r.interactiveTimelineSlider),
+          interactiveBattleCard: safeParseJSON(r.interactiveBattleCard),
+          interactiveQuizRouter: safeParseJSON(r.interactiveQuizRouter),
+          interactiveHabitSimulator: safeParseJSON(r.interactiveHabitSimulator),
+          interactiveQaColumn: safeParseJSON(r.interactiveQaColumn),
+          interactiveEventListing: safeParseJSON(r.interactiveEventListing),
+          disclaimerType: r.disclaimerType || 'none',
+          customDisclaimerText: r.customDisclaimerText || '',
           createdAt: r.createdAt || new Date().toISOString(),
           updatedAt: r.updatedAt || new Date().toISOString(),
         };

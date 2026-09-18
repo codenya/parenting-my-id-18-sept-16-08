@@ -146,7 +146,7 @@ export default function SuratPembacaPage({ siteConfig, onNavigate }: SuratPembac
     }
   };
 
-  const origin = typeof window !== 'undefined' ? window.location.origin : (siteConfig?.site_url || 'https://parenting.my.id');
+  const origin = typeof window !== 'undefined' ? window.location.origin : (siteConfig?.site_url || '');
   const seoTitle = siteConfig?.surat_pembaca_title
     ? `${siteConfig.surat_pembaca_title} | ${siteName}`
     : `Kanal Surat Pembaca | ${siteName}`;

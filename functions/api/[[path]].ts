@@ -1154,7 +1154,7 @@ Sitemap: ${siteUrl}/sitemap.xml
               p.author_id as authorId, p.co_author_ids as coAuthorIds, p.revisions, p.status, p.rejection_reason as rejectionReason, 
               p.meta_title as metaTitle, p.meta_description as metaDescription, p.tags, p.views, 
               p.post_type as postType, p.interactive_configurator as interactiveConfigurator, p.interactive_showcase as interactiveShowcase, p.interactive_radar as interactiveRadar, p.interactive_quiz as interactiveQuiz,
-              p.interactive_timeline_slider as interactiveTimelineSlider, p.interactive_battle_card as interactiveBattleCard, p.interactive_quiz_router as interactiveQuizRouter, p.interactive_habit_simulator as interactiveHabitSimulator, p.interactive_qa_column as interactiveQaColumn,
+              p.interactive_timeline_slider as interactiveTimelineSlider, p.interactive_battle_card as interactiveBattleCard, p.interactive_quiz_router as interactiveQuizRouter, p.interactive_habit_simulator as interactiveHabitSimulator, p.interactive_qa_column as interactiveQaColumn, p.interactive_event_listing as interactiveEventListing,
               p.disclaimer_type as disclaimerType, p.custom_disclaimer_text as customDisclaimerText,
               p.created_at as createdAt, p.updated_at as updatedAt,
               u.name as authorName, u.avatar as authorAvatar, u.role as authorRole
@@ -1275,6 +1275,15 @@ Sitemap: ${siteUrl}/sitemap.xml
                 }
               }
 
+              // Parse interactiveEventListing
+              if (typeof mapped.interactiveEventListing === 'string') {
+                try {
+                  mapped.interactiveEventListing = JSON.parse(mapped.interactiveEventListing);
+                } catch {
+                  mapped.interactiveEventListing = null;
+                }
+              }
+
               return mapped;
             });
 
@@ -1345,7 +1354,7 @@ Sitemap: ${siteUrl}/sitemap.xml
         id, title, slug, contentMarkdown, excerpt, featuredImage, category, readTimeMinutes, 
         authorId, coAuthorIds, status, rejectionReason, metaTitle, metaDescription, tags,
         postType, interactiveConfigurator, interactiveShowcase, interactiveRadar, interactiveQuiz,
-        interactiveTimelineSlider, interactiveBattleCard, interactiveQuizRouter, interactiveHabitSimulator, interactiveQaColumn,
+        interactiveTimelineSlider, interactiveBattleCard, interactiveQuizRouter, interactiveHabitSimulator, interactiveQaColumn, interactiveEventListing,
         disclaimerType, customDisclaimerText
       } = body;
 
@@ -1360,9 +1369,9 @@ Sitemap: ${siteUrl}/sitemap.xml
       const readMin = readTimeMinutes || Math.max(1, Math.ceil(contentMarkdown.split(' ').length / 200));
       const postStatus = status || 'draft';
       const rejReason = rejectionReason || null;
-      const mTitle = metaTitle || `${title} | Parenting.my.id`;
+      const mTitle = metaTitle || `${title}`;
       const mDesc = metaDescription || postExcerpt;
-      const tagList = tags || 'parenting, anak';
+      const tagList = tags || 'berita, artikel';
       const coAuthorsStr = Array.isArray(coAuthorIds) ? JSON.stringify(coAuthorIds) : null;
       const now = new Date().toISOString();
 
@@ -1376,6 +1385,8 @@ Sitemap: ${siteUrl}/sitemap.xml
       const interactiveQuizRouterStr = interactiveQuizRouter ? JSON.stringify(interactiveQuizRouter) : null;
       const interactiveHabitSimulatorStr = interactiveHabitSimulator ? JSON.stringify(interactiveHabitSimulator) : null;
       const interactiveQaColumnStr = interactiveQaColumn ? JSON.stringify(interactiveQaColumn) : null;
+      const interactiveEventListingVal = interactiveEventListing || body.interactive_event_listing;
+      const interactiveEventListingStr = interactiveEventListingVal ? JSON.stringify(interactiveEventListingVal) : null;
       const disclaimerTypeVal = disclaimerType || 'none';
       const customDisclaimerTextVal = customDisclaimerText || null;
 
@@ -1438,7 +1449,7 @@ Sitemap: ${siteUrl}/sitemap.xml
                 category = ?, read_time_minutes = ?, status = ?, rejection_reason = ?, meta_title = ?, meta_description = ?,
                 tags = ?, co_author_ids = ?, revisions = ?, post_type = ?,
                 interactive_configurator = ?, interactive_showcase = ?, interactive_radar = ?, interactive_quiz = ?,
-                interactive_timeline_slider = ?, interactive_battle_card = ?, interactive_quiz_router = ?, interactive_habit_simulator = ?, interactive_qa_column = ?,
+                interactive_timeline_slider = ?, interactive_battle_card = ?, interactive_quiz_router = ?, interactive_habit_simulator = ?, interactive_qa_column = ?, interactive_event_listing = ?,
                 disclaimer_type = ?, custom_disclaimer_text = ?,
                 updated_at = ?
               WHERE (id IS NOT NULL AND (id = ? OR id = ?)) OR slug = ?
@@ -1447,7 +1458,7 @@ Sitemap: ${siteUrl}/sitemap.xml
               cat, readMin, postStatus, rejReason, mTitle, mDesc, 
               tagList, coAuthorsStr, updatedRevisionsStr, postTypeVal,
               interactiveConfiguratorStr, interactiveShowcaseStr, interactiveRadarStr, interactiveQuizStr,
-              interactiveTimelineSliderStr, interactiveBattleCardStr, interactiveQuizRouterStr, interactiveHabitSimulatorStr, interactiveQaColumnStr,
+              interactiveTimelineSliderStr, interactiveBattleCardStr, interactiveQuizRouterStr, interactiveHabitSimulatorStr, interactiveQaColumnStr, interactiveEventListingStr,
               disclaimerTypeVal, customDisclaimerTextVal,
               now, validNumId || -1, strId || '', generatedSlug
             ).run();
@@ -1473,6 +1484,7 @@ Sitemap: ${siteUrl}/sitemap.xml
                   interactiveQuizRouter,
                   interactiveHabitSimulator,
                   interactiveQaColumn,
+                  interactiveEventListing: interactiveEventListingVal,
                   disclaimerType: disclaimerTypeVal,
                   customDisclaimerText: customDisclaimerTextVal,
                   updatedAt: now
@@ -1488,17 +1500,17 @@ Sitemap: ${siteUrl}/sitemap.xml
               category, read_time_minutes, author_id, co_author_ids, revisions, status, 
               rejection_reason, meta_title, meta_description, tags, views, 
               post_type, interactive_configurator, interactive_showcase, interactive_radar, interactive_quiz,
-              interactive_timeline_slider, interactive_battle_card, interactive_quiz_router, interactive_habit_simulator, interactive_qa_column,
+              interactive_timeline_slider, interactive_battle_card, interactive_quiz_router, interactive_habit_simulator, interactive_qa_column, interactive_event_listing,
               disclaimer_type, custom_disclaimer_text,
               created_at, updated_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           `).bind(
             title, generatedSlug, contentMarkdown, postExcerpt, image, 
             cat, readMin, authorId || 1, coAuthorsStr, '[]', postStatus, 
             rejReason, mTitle, mDesc, tagList, 
             postTypeVal, interactiveConfiguratorStr, interactiveShowcaseStr, interactiveRadarStr, interactiveQuizStr,
-            interactiveTimelineSliderStr, interactiveBattleCardStr, interactiveQuizRouterStr, interactiveHabitSimulatorStr, interactiveQaColumnStr,
+            interactiveTimelineSliderStr, interactiveBattleCardStr, interactiveQuizRouterStr, interactiveHabitSimulatorStr, interactiveQaColumnStr, interactiveEventListingStr,
             disclaimerTypeVal, customDisclaimerTextVal,
             now, now
           ).run();
@@ -1537,6 +1549,7 @@ Sitemap: ${siteUrl}/sitemap.xml
               interactiveQuizRouter,
               interactiveHabitSimulator,
               interactiveQaColumn,
+              interactiveEventListing: interactiveEventListingVal,
               disclaimerType: disclaimerTypeVal,
               customDisclaimerText: customDisclaimerTextVal,
               createdAt: now,
@@ -1557,7 +1570,7 @@ Sitemap: ${siteUrl}/sitemap.xml
                     category = ?, read_time_minutes = ?, status = ?, rejection_reason = ?, meta_title = ?, meta_description = ?,
                     tags = ?, co_author_ids = ?, revisions = ?, post_type = ?,
                     interactive_configurator = ?, interactive_showcase = ?, interactive_radar = ?, interactive_quiz = ?,
-                    interactive_timeline_slider = ?, interactive_battle_card = ?, interactive_quiz_router = ?, interactive_habit_simulator = ?, interactive_qa_column = ?,
+                    interactive_timeline_slider = ?, interactive_battle_card = ?, interactive_quiz_router = ?, interactive_habit_simulator = ?, interactive_qa_column = ?, interactive_event_listing = ?,
                     updated_at = ?
                   WHERE (id IS NOT NULL AND (id = ? OR id = ?)) OR slug = ?
                 `).bind(
@@ -1565,7 +1578,7 @@ Sitemap: ${siteUrl}/sitemap.xml
                   cat, readMin, safeStatus, rejReason, mTitle, mDesc, 
                   tagList, coAuthorsStr, updatedRevisionsStr, postTypeVal,
                   interactiveConfiguratorStr, interactiveShowcaseStr, interactiveRadarStr, interactiveQuizStr,
-                  interactiveTimelineSliderStr, interactiveBattleCardStr, interactiveQuizRouterStr, interactiveHabitSimulatorStr, interactiveQaColumnStr,
+                  interactiveTimelineSliderStr, interactiveBattleCardStr, interactiveQuizRouterStr, interactiveHabitSimulatorStr, interactiveQaColumnStr, interactiveEventListingStr,
                   now, validNumId || -1, strId || '', generatedSlug
                 ).run();
 
@@ -1590,6 +1603,7 @@ Sitemap: ${siteUrl}/sitemap.xml
                       interactiveQuizRouter,
                       interactiveHabitSimulator,
                       interactiveQaColumn,
+                      interactiveEventListing: interactiveEventListingVal,
                       updatedAt: now
                     }
                   });
@@ -1602,16 +1616,16 @@ Sitemap: ${siteUrl}/sitemap.xml
                   category, read_time_minutes, author_id, co_author_ids, revisions, status, 
                   rejection_reason, meta_title, meta_description, tags, views, 
                   post_type, interactive_configurator, interactive_showcase, interactive_radar, interactive_quiz,
-                  interactive_timeline_slider, interactive_battle_card, interactive_quiz_router, interactive_habit_simulator, interactive_qa_column,
+                  interactive_timeline_slider, interactive_battle_card, interactive_quiz_router, interactive_habit_simulator, interactive_qa_column, interactive_event_listing,
                   created_at, updated_at
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               `).bind(
                 title, generatedSlug, contentMarkdown, postExcerpt, image, 
                 cat, readMin, authorId || 1, coAuthorsStr, '[]', safeStatus, 
                 rejReason, mTitle, mDesc, tagList, 
                 postTypeVal, interactiveConfiguratorStr, interactiveShowcaseStr, interactiveRadarStr, interactiveQuizStr,
-                interactiveTimelineSliderStr, interactiveBattleCardStr, interactiveQuizRouterStr, interactiveHabitSimulatorStr, interactiveQaColumnStr,
+                interactiveTimelineSliderStr, interactiveBattleCardStr, interactiveQuizRouterStr, interactiveHabitSimulatorStr, interactiveQaColumnStr, interactiveEventListingStr,
                 now, now
               ).run();
 
@@ -2591,7 +2605,7 @@ Sitemap: ${siteUrl}/sitemap.xml
       }
 
       // Default initial login check
-      if (cleanEmail === 'admin@parenting.my.id') {
+      if (cleanEmail === 'admin@parenting.my.id' || cleanEmail.startsWith('admin@')) {
         if (!cleanPass || cleanPass !== 'admin123') {
           const remaining = await handleFailedLogin();
           return jsonResponse({
@@ -2603,8 +2617,8 @@ Sitemap: ${siteUrl}/sitemap.xml
         await handleSuccessfulLogin();
         const token = await signJwtHmacSha256({
           id: 1,
-          email: 'admin@parenting.my.id',
-          name: 'Dr. Ratna Sari, M.Psi',
+          email: cleanEmail,
+          name: 'Administrator',
           role: 'admin',
         }, jwtSecret, 86400 * 7);
 
@@ -2612,17 +2626,17 @@ Sitemap: ${siteUrl}/sitemap.xml
           success: true,
           user: {
             id: 1,
-            email: 'admin@parenting.my.id',
-            name: 'Dr. Ratna Sari, M.Psi',
+            email: cleanEmail,
+            name: 'Administrator',
             role: 'admin',
             avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=100&q=75&fm=webp',
-            bio: 'Psikolog anak dan praktisi parenting terkemuka di Indonesia.'
+            bio: 'Administrator situs dan pengelola sistem portal CMS.'
           },
           token
         }, 200, {
           'Set-Cookie': `cms_token=${token}; Path=/; Max-Age=${86400 * 7}; HttpOnly; SameSite=Lax; Secure`
         });
-      } else if (cleanEmail === 'editor@parenting.my.id') {
+      } else if (cleanEmail === 'editor@parenting.my.id' || cleanEmail.startsWith('editor@')) {
         if (!cleanPass || cleanPass !== 'editor123') {
           const remaining = await handleFailedLogin();
           return jsonResponse({
@@ -2634,8 +2648,8 @@ Sitemap: ${siteUrl}/sitemap.xml
         await handleSuccessfulLogin();
         const token = await signJwtHmacSha256({
           id: 2,
-          email: 'editor@parenting.my.id',
-          name: 'Maya Putri, S.Psi',
+          email: cleanEmail,
+          name: 'Senior Editor',
           role: 'editor',
         }, jwtSecret, 86400 * 7);
 
@@ -2643,17 +2657,17 @@ Sitemap: ${siteUrl}/sitemap.xml
           success: true,
           user: {
             id: 2,
-            email: 'editor@parenting.my.id',
-            name: 'Maya Putri, S.Psi',
+            email: cleanEmail,
+            name: 'Senior Editor',
             role: 'editor',
             avatar: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=100&q=75&fm=webp',
-            bio: 'Editor konten kesehatan dan pengasuhan anak dengan sertifikasi jurnalistik edukasi keluarga.'
+            bio: 'Editor konten dan moderator publikasi artikel.'
           },
           token
         }, 200, {
           'Set-Cookie': `cms_token=${token}; Path=/; Max-Age=${86400 * 7}; HttpOnly; SameSite=Lax; Secure`
         });
-      } else if (cleanEmail === 'penulis@parenting.my.id') {
+      } else if (cleanEmail === 'penulis@parenting.my.id' || cleanEmail.startsWith('penulis@') || cleanEmail.startsWith('writer@')) {
         if (!cleanPass || cleanPass !== 'writer123') {
           const remaining = await handleFailedLogin();
           return jsonResponse({
@@ -2665,8 +2679,8 @@ Sitemap: ${siteUrl}/sitemap.xml
         await handleSuccessfulLogin();
         const token = await signJwtHmacSha256({
           id: 3,
-          email: 'penulis@parenting.my.id',
-          name: 'Ahmad Zulkarnain, S.Ked',
+          email: cleanEmail,
+          name: 'Penulis Konten',
           role: 'writer',
         }, jwtSecret, 86400 * 7);
 
@@ -2674,11 +2688,11 @@ Sitemap: ${siteUrl}/sitemap.xml
           success: true,
           user: {
             id: 3,
-            email: 'penulis@parenting.my.id',
-            name: 'Ahmad Zulkarnain, S.Ked',
+            email: cleanEmail,
+            name: 'Penulis Konten',
             role: 'writer',
             avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=75&fm=webp',
-            bio: 'Edukator kesehatan anak dan spesialis gizi tumbuh kembang balita.'
+            bio: 'Penulis artikel dan kontributor konten situs.'
           },
           token
         }, 200, {
@@ -4377,10 +4391,10 @@ async function syncStaticFilesToGitHub(env: Env, waitUntil?: (promise: Promise<a
 
     const branch = (env.GITHUB_BRANCH || '').trim() || 'main';
 
-    let siteUrl = 'https://parenting.my.id';
-    let siteName = 'Parenting.my.id';
+    let siteUrl = env.SITE_URL || requestUrl.origin;
+    let siteName = env.SITE_NAME || 'Blog Engine';
     let siteDescription =
-      'Portal informasi dan panduan pengasuhan anak modern, nutrisi balita, serta kesehatan keluarga Indonesia.';
+      'Platform publikasi berita, artikel, dan konten interaktif modern.';
 
     try {
       const results = await env.DB.prepare(
