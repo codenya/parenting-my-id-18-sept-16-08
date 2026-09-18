@@ -61,5 +61,87 @@
     "views": 310,
     "createdAt": "2026-09-03T04:39:21.210Z",
     "updatedAt": "2026-09-03T04:39:21.210Z"
+  },
+  {
+    "id": 5,
+    "title": "Baby-Led Weaning (BLW) vs Spoon-Feeding Puree: Komparasi Lengkap Metode MPASI Pertama",
+    "slug": "blw-vs-puree-komparasi-lengkap-mpasi-bayi",
+    "contentMarkdown": "## Memilih Metode MPASI Pertama: Dilema Terbesar Orang Tua\n\nMemasuki usia 6 bulan, si kecil resmi memulai perjalanan Makanan Pendamping ASI (MPASI). Bagi orang tua baru, pertanyaan yang paling sering muncul adalah: ***\"Sebaiknya mulai dengan metode suap sendok puree tradisional atau langsung mencoba Baby-Led Weaning (BLW)?\"***\n\nKedua metode ini memiliki filosofi, manfaat, dan tantangan yang sangat berbeda. Untuk membantu para orang tua mengambil keputusan yang paling tepat sesuai kesiapan bayi dan kondisi keluarga, redaksi menyajikan analisis komparatif objektif dan berbasis bukti medis di bawah ini.\n\n---\n\n## Tanda Kesiapan Bayi Memulai MPASI (Menurut IDAI & WHO)\n\nSebelum memutuskan metode apa pun, pastikan si kecil telah menunjukkan tanda kesiapan fisik berikut:\n\n1. **Leher dan Kepala Tegak Stabil:** Bayi mampu menahan kepalanya tegak tanpa goyah saat didudukkan.\n2. **Duduk dengan Bantuan Minimal:** Bayi dapat duduk di kursi makan (*high chair*) dengan postur stabil.\n3. **Refleks Menjulurkan Lidah (*Extrusion Reflex*) Berkurang:** Bayi tidak lagi otomatis mendorong keluar benda padat yang masuk ke mulutnya.\n4. **Ketertarikan Tinggi pada Makanan:** Bayi tampak antusias melihat orang lain makan dan mencoba meraih makanan di sekitarnya.\n5. **Koordinasi Mata, Tangan, dan Mulut:** Mampu mengarahkan tangan ke arah target makanan.\n\n---\n\n## Memahami Perbedaan Refleks Muntah (*Gagging*) vs Tersedak (*Choking*)\n\nSalah satu kekhawatiran terbesar orang tua dalam metode BLW adalah risiko tersedak. Penting untuk membedakan dua kondisi ini:\n\n| Aspek | Refleks Muntah (*Gagging*) | Tersedak (*Choking*) |\n| :--- | :--- | :--- |\n| **Sifat** | Refleks fisiologis normal untuk mencegah benda asing masuk | Kegawatdaruratan medis karena saluran napas tersumbat total |\n| **Suara** | Bersuara batuk, terbatuk-batuk, wajah memerah | Hening (*silent*), tidak bersuara, tidak bisa batuk |\n| **Warna Kulit** | Kemerahan sementara lalu normal kembali | Membiru atau pucat di sekitar bibir dan kuku |\n| **Tindakan** | Tetap tenang, biarkan bayi membatukkan makanannya sendiri | Lakukan pertolongan pertama tersedak (*back blows & chest thrusts*) segera |\n\n---\n\n## Kunci Sukses: Pendekatan Responsif (*Responsive Feeding*)\n\nApapun metode yang Anda pilih, prinsip utama pemberian makan anak adalah **Responsive Feeding**:\n\n- **Orang tua menentukan:** Jadwal makan teratur, tempat makan yang nyaman tanpa distraksi gawai, serta menu padat gizi (kaya zat besi & protein hewani).\n- **Anak menentukan:** Berapa banyak makanan yang ingin dihabiskan sesuai sinyal rasa lapar dan kenyangnya.\n\nJangan memaksakan suapan saat anak memalingkan kepala atau menutup rapat mulutnya, dan berikan apresiasi positif terhadap setiap eksplorasi makan si kecil.",
+    "excerpt": "Bingung memilih antara Baby-Led Weaning (BLW) atau sendok puree konvensional untuk MPASI si kecil? Simak komparasi objektif berdasarkan kelebihan, kekurangan, kriteria tumbuh kembang, dan putusan medis IDAI.",
+    "featuredImage": "https://images.unsplash.com/photo-1544126592-807ade215a0b?auto=format&fit=crop&w=800&q=75&fm=webp",
+    "category": "Kesehatan & Gizi",
+    "readTimeMinutes": 6,
+    "authorId": 1,
+    "authorName": "Dr. Ratna Sari, M.Psi",
+    "authorAvatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=80&q=50&fm=webp",
+    "authorRole": "admin",
+    "authorTitle": "Senior Psychologist & Education Consultant",
+    "authorBio": "Psikolog & konsultan edukasi terkemuka di Indonesia dengan pengalaman klinis 12+ tahun.",
+    "authorSocials": {
+      "instagram": "https://instagram.com/ratnasari.mpsi",
+      "linkedin": "https://linkedin.com/in/ratnasari-mpsi",
+      "website": "https://domain.com"
+    },
+    "status": "published",
+    "metaTitle": "BLW vs Puree: Komparasi Lengkap Metode MPASI Bayi",
+    "metaDescription": "Analisis perbandingan komparatif metode Baby-Led Weaning (BLW) dan Spoon-Feeding Puree untuk MPASI pertama bayi 6 bulan.",
+    "tags": "MPASI, BLW, baby led weaning, puree, gizi anak, nutrisi bayi, tumbuh kembang",
+    "views": 412,
+    "createdAt": "2026-09-10T08:00:00.000Z",
+    "updatedAt": "2026-09-10T08:00:00.000Z",
+    "postType": "interactive_battle_card",
+    "disclaimerType": "medical_psychology",
+    "customDisclaimerText": "",
+    "interactiveBattleCard": {
+      "widgetTitle": "Komparasi Metode MPASI: Baby-Led Weaning (BLW) vs Puree Konvensional",
+      "widgetDescription": "Analisis komparatif berbasis bukti medis mengenai kelebihan, tantangan, dan kesesuaian tumbuh kembang bayi usia 6 bulan ke atas.",
+      "comparisonCriteria": [
+        "Stimulasi Motorik & Mengunyah",
+        "Kepastian Asupan Zat Besi & Kalori",
+        "Kemudahan & Kebersihan Orang Tua",
+        "Risiko Refleks Muntah (Gagging)",
+        "Kemampuan Regulasi Mandiri"
+      ],
+      "optionA": {
+        "name": "Baby-Led Weaning (BLW)",
+        "badge": "Eksplorasi Mandiri",
+        "image": "https://images.unsplash.com/photo-1544126592-807ade215a0b?auto=format&fit=crop&w=600&q=70&fm=webp",
+        "summary": "Metode MPASI di mana bayi sejak usia 6 bulan memegang dan mengunyah makanan padat bertekstur lunak (finger food) sendiri tanpa disuapi sendok puree.",
+        "strengths": [
+          "Mengasah koordinasi motorik halus (tangan-mata-mulut) dan ketangkasan mengunyah sejak dini",
+          "Mendorong kemampuan regulasi diri (bayi berhenti makan saat merasa kenyang alami)",
+          "Mengenalkan tekstur, bentuk, dan aroma asli bahan makanan secara nyata",
+          "Bayi dapat langsung ikut makan di meja bersama anggota keluarga lainnya"
+        ],
+        "weaknesses": [
+          "Area makan cenderung sangat berantakan dan membutuhkan waktu ekstra untuk membersihkan",
+          "Risiko refleks muntah (gagging) lebih sering terjadi sehingga kerap memicu kecemasan orang tua",
+          "Sulit menakar secara presisi berapa gram kalori dan zat besi yang benar-benar tertelan pada bulan-bulan awal"
+        ],
+        "bestFor": "Bayi usia 6 bulan ke atas yang sudah dapat duduk tegak stabil tanpa bersandar, memiliki refleks meraih yang baik, dan orang tua yang siap menghadapi proses makan berantakan.",
+        "rating": 4.6
+      },
+      "optionB": {
+        "name": "Spoon-Feeding (Puree Konvensional)",
+        "badge": "Terukur & Terjamin",
+        "image": "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?auto=format&fit=crop&w=600&q=70&fm=webp",
+        "summary": "Metode tradisional bertahap yang diawali dengan makanan bertekstur sangat halus (puree/bubur saring), lalu dinaikkan teksturnya secara bertahap seiring bertambahnya usia.",
+        "strengths": [
+          "Kuantitas asupan gizi, kalori harian, dan zat besi (Fe) dapat dihitung dan dipastikan masuk ke tubuh bayi",
+          "Minim risiko refleks muntah karena tekstur lembut dan sangat mudah ditelan",
+          "Proses makan jauh lebih bersih, higienis, dan efisien bagi orang tua dengan waktu terbatas",
+          "Sangat mudah memadukan bahan pangan hewani padat gizi (seperti hati ayam, telur, dan kaldu) dalam satu mangkuk"
+        ],
+        "weaknesses": [
+          "Anak dapat terlambat belajar mengunyah jika peningkatan tekstur terlambat dilakukan",
+          "Bayi cenderung pasif saat makan dan berisiko mengalami makan berlebih (overfeeding) bila dipaksa menghabiskan porsi",
+          "Memerlukan waktu persiapan khusus untuk menghaluskan dan menyaring bahan makanan setiap kali masak"
+        ],
+        "bestFor": "Bayi dengan riwayat kenaikan berat badan lambat (weight faltering), bayi prematur, atau orang tua yang membutuhkan kepastian target gizi harian.",
+        "rating": 4.7
+      },
+      "verdictTitle": "Putusan Rekomendasi Redaksi & Ahli Nutrisi Anak",
+      "verdictContent": "Tidak ada metode yang mutlak benar untuk setiap anak. Ikatan Dokter Anak Indonesia (IDAI) dan WHO merekomendasikan Responsive Feeding (Metode Kombinasi): berikan makanan bertekstur halus padat gizi menggunakan sendok untuk menjamin asupan zat besi dan kalori harian, sembari memberikan potongan finger food lunak agar bayi tetap dapat melatih motorik dan merasakan sensasi makan mandiri."
+    }
   }
 ]
