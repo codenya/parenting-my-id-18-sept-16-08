@@ -39,7 +39,7 @@ function isTemplateName(name?: string): boolean {
 function resolveSiteName(siteConfig: Record<string, any> | undefined, env: Env, hostname: string): string {
   if (!isTemplateName(siteConfig?.site_name)) return String(siteConfig.site_name);
   if (!isTemplateName(env.SITE_NAME)) return String(env.SITE_NAME);
-  return hostname.replace(/^www\./, '') || 'Parenting.my.id';
+  return hostname.replace(/^www\./, '') || 'Blog Engine';
 }
 
 function postMatchesSlug(postCategory: string, slug: string): boolean {

@@ -20,7 +20,7 @@ function resolveSiteUrl(env: Env, requestUrl: URL): string {
     raw.includes('example.com') ||
     raw.includes('domain.com')
   ) {
-    raw = (requestUrl.origin || 'https://parenting.my.id').replace(/\/$/, '');
+    raw = (requestUrl.origin || '').replace(/\/$/, '');
   }
   return raw;
 }
