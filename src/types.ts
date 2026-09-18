@@ -429,7 +429,7 @@ export interface Post {
   views: number;
   createdAt: string;
   updatedAt: string;
-  postType?: 'article' | 'interactive_configurator' | 'interactive_showcase' | 'interactive_radar' | 'interactive_quiz' | 'interactive_timeline_slider' | 'interactive_battle_card' | 'interactive_quiz_router' | 'interactive_habit_simulator' | 'interactive_qa_column';
+  postType?: 'article' | 'interactive_configurator' | 'interactive_showcase' | 'interactive_radar' | 'interactive_quiz' | 'interactive_timeline_slider' | 'interactive_battle_card' | 'interactive_quiz_router' | 'interactive_habit_simulator' | 'interactive_qa_column' | 'interactive_event_listing';
   interactiveConfigurator?: InteractiveConfiguratorData;
   interactiveShowcase?: InteractiveShowcaseData;
   interactiveRadar?: RadarWidgetConfig;
@@ -439,6 +439,7 @@ export interface Post {
   interactiveQuizRouter?: QuizRouterWidgetData;
   interactiveHabitSimulator?: HabitSimulatorWidgetData;
   interactiveQaColumn?: InteractiveQAColumnData;
+  interactiveEventListing?: InteractiveEventListingData;
   disclaimerType?: 'none' | 'medical_psychology' | 'financial' | 'legal' | 'academic' | 'custom';
   customDisclaimerText?: string;
 }
@@ -532,14 +533,32 @@ export interface InteractiveRecommendation {
   visual_hex_color: string;
 }
 
+export interface InteractiveConfiguratorCriterion {
+  id: string;
+  name: string;
+  placeholder?: string;
+  options: string[];
+}
+
+export interface InteractiveConfiguratorRecommendation {
+  title: string;
+  category?: string;
+  recommendation: string;
+  [key: string]: any;
+}
+
 export interface InteractiveConfiguratorData {
-  criterion1Name: string;
-  criterion1Options: string[];
-  criterion2Name: string;
-  criterion2Options: string[];
-  criterion3Name: string;
-  criterion3Options: string[];
-  recommendations: Record<string, InteractiveRecommendation>; // Key format: "option1_option2_option3"
+  title?: string;
+  description?: string;
+  criteria: InteractiveConfiguratorCriterion[];
+  recommendations: InteractiveConfiguratorRecommendation[] | any;
+  // Backwards compatibility legacy fields
+  criterion1Name?: string;
+  criterion1Options?: string[];
+  criterion2Name?: string;
+  criterion2Options?: string[];
+  criterion3Name?: string;
+  criterion3Options?: string[];
 }
 
 export interface CorePillar {
@@ -557,6 +576,8 @@ export interface CorePillar {
 }
 
 export interface InteractiveShowcaseData {
+  title?: string;
+  description?: string;
   pillars: CorePillar[];
 }
 
@@ -663,6 +684,49 @@ export interface InteractiveQAColumnData {
   buttonText: string;
   cases: QAColumnCase[];
   submissionPlaceholder?: string;
+}
+
+export type EventTimezone = 'WIB' | 'WITA' | 'WIT' | 'UTC';
+export type EventFormat = 'online' | 'offline' | 'hybrid';
+export type EventQuotaStatus = 'early_bird' | 'open' | 'limited' | 'sold_out' | 'closed';
+
+export interface EventSpeaker {
+  name: string;
+  role: string;
+  avatar?: string;
+  bio?: string;
+}
+
+export interface EventScheduleItem {
+  time: string;
+  topic: string;
+  speaker?: string;
+}
+
+export interface InteractiveEventListingData {
+  eventTitle: string;
+  eventType: 'webinar' | 'workshop' | 'seminar' | 'conference' | 'live_qa';
+  eventFormat: EventFormat;
+  startDate: string; // ISO date string or "YYYY-MM-DDTHH:mm"
+  endDate: string;   // ISO date string or "YYYY-MM-DDTHH:mm"
+  timezone: EventTimezone;
+  locationName: string; // e.g. "Zoom Webinar Room" or "Ballroom Hotel Indonesia"
+  locationAddress?: string; // Physical address
+  mapUrl?: string; // Google Maps URL
+  onlineJoinUrl?: string; // Direct Zoom / Google Meet URL
+  quotaStatus: EventQuotaStatus;
+  quotaCapacity?: number;
+  quotaRegistered?: number;
+  price: string; // e.g. "Gratis (Free)" or "Rp 150.000"
+  originalPrice?: string; // e.g. "Rp 250.000" (for strike-through in early bird)
+  registrationUrl?: string; // Google Forms / Website / WA Link
+  registrationCtaText?: string; // e.g. "Daftar Sekarang (Gratis)"
+  registrationDeadline?: string;
+  speakers: EventSpeaker[];
+  agenda?: EventScheduleItem[];
+  benefits?: string[];
+  contactPersonPhone?: string; // WhatsApp number
+  contactPersonName?: string;
 }
 
 export interface Product {

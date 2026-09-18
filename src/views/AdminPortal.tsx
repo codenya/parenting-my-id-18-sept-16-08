@@ -291,10 +291,10 @@ export default function AdminPortal({
   const [editorStatus, setEditorStatus] = useState<'draft' | 'published'>('draft');
   const [editorMetaTitle, setEditorMetaTitle] = useState('');
   const [editorMetaDesc, setEditorMetaDesc] = useState('');
-  const [editorTags, setEditorTags] = useState('parenting, anak, keluarga');
+  const [editorTags, setEditorTags] = useState('informasi, artikel, kegiatan');
   const [editorAuthorId, setEditorAuthorId] = useState<number>(currentUser?.id || 1);
   const [editorCoAuthorIds, setEditorCoAuthorIds] = useState<number[]>([]);
-  const [editorPostType, setEditorPostType] = useState<'article' | 'interactive_configurator' | 'interactive_showcase' | 'interactive_radar' | 'interactive_quiz' | 'interactive_timeline_slider' | 'interactive_battle_card' | 'interactive_quiz_router' | 'interactive_habit_simulator' | 'interactive_qa_column'>('article');
+  const [editorPostType, setEditorPostType] = useState<'article' | 'interactive_configurator' | 'interactive_showcase' | 'interactive_radar' | 'interactive_quiz' | 'interactive_timeline_slider' | 'interactive_battle_card' | 'interactive_quiz_router' | 'interactive_habit_simulator' | 'interactive_qa_column' | 'interactive_event_listing'>('article');
   const [editorInteractiveConfigurator, setEditorInteractiveConfigurator] = useState<any>(null);
   const [editorInteractiveShowcase, setEditorInteractiveShowcase] = useState<any>(null);
   const [editorInteractiveRadar, setEditorInteractiveRadar] = useState<any>(null);
@@ -304,6 +304,7 @@ export default function AdminPortal({
   const [editorInteractiveQuizRouter, setEditorInteractiveQuizRouter] = useState<any>(null);
   const [editorInteractiveHabitSimulator, setEditorInteractiveHabitSimulator] = useState<any>(null);
   const [editorInteractiveQaColumn, setEditorInteractiveQaColumn] = useState<any>(null);
+  const [editorInteractiveEventListing, setEditorInteractiveEventListing] = useState<any>(null);
   const [editorDisclaimerType, setEditorDisclaimerType] = useState<'none' | 'medical_psychology' | 'financial' | 'legal' | 'academic' | 'custom'>('none');
   const [editorCustomDisclaimerText, setEditorCustomDisclaimerText] = useState('');
 
@@ -1659,6 +1660,7 @@ export default function AdminPortal({
     setEditorInteractiveQuizRouter(post.interactiveQuizRouter || null);
     setEditorInteractiveHabitSimulator(post.interactiveHabitSimulator || null);
     setEditorInteractiveQaColumn(post.interactiveQaColumn || null);
+    setEditorInteractiveEventListing(post.interactiveEventListing || null);
     setEditorDisclaimerType(post.disclaimerType || 'none');
     setEditorCustomDisclaimerText(post.customDisclaimerText || '');
     setActiveTab('editor');
@@ -1690,6 +1692,7 @@ export default function AdminPortal({
     setEditorInteractiveQuizRouter(null);
     setEditorInteractiveHabitSimulator(null);
     setEditorInteractiveQaColumn(null);
+    setEditorInteractiveEventListing(null);
     setEditorDisclaimerType('none');
     setEditorCustomDisclaimerText('');
     setActiveTab('editor');
@@ -1743,6 +1746,7 @@ export default function AdminPortal({
           interactiveQuizRouter: editorInteractiveQuizRouter,
           interactiveHabitSimulator: editorInteractiveHabitSimulator,
           interactiveQaColumn: editorInteractiveQaColumn,
+          interactiveEventListing: editorInteractiveEventListing,
           disclaimerType: editorDisclaimerType,
           customDisclaimerText: editorCustomDisclaimerText,
         });
@@ -1887,6 +1891,7 @@ export default function AdminPortal({
         interactiveQuizRouter: editorInteractiveQuizRouter,
         interactiveHabitSimulator: editorInteractiveHabitSimulator,
         interactiveQaColumn: editorInteractiveQaColumn,
+        interactiveEventListing: editorInteractiveEventListing,
         disclaimerType: editorDisclaimerType,
         customDisclaimerText: editorCustomDisclaimerText,
       });
@@ -3150,6 +3155,8 @@ export default function AdminPortal({
           setInteractiveHabitSimulator={setEditorInteractiveHabitSimulator}
           interactiveQaColumn={editorInteractiveQaColumn}
           setInteractiveQaColumn={setEditorInteractiveQaColumn}
+          interactiveEventListing={editorInteractiveEventListing}
+          setInteractiveEventListing={setEditorInteractiveEventListing}
           disclaimerType={editorDisclaimerType}
           setDisclaimerType={setEditorDisclaimerType}
           customDisclaimerText={editorCustomDisclaimerText}

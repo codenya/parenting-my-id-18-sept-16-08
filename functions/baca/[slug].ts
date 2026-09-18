@@ -926,6 +926,79 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     schemaArticle.comment = blogComments;
   }
 
+  // Schema.org Event for Event & Webinar Listings
+  let schemaEvent: Record<string, any> | null = null;
+  const eventListing = post.interactiveEventListing || (typeof post.interactive_event_listing === 'string' ? JSON.parse(post.interactive_event_listing) : post.interactive_event_listing);
+  if (post.postType === 'interactive_event_listing' || eventListing) {
+    const ev = eventListing || {};
+    let attendanceMode = 'https://schema.org/OnlineEventAttendanceMode';
+    if (ev.eventFormat === 'offline') {
+      attendanceMode = 'https://schema.org/OfflineEventAttendanceMode';
+    } else if (ev.eventFormat === 'hybrid') {
+      attendanceMode = 'https://schema.org/MixedEventAttendanceMode';
+    }
+
+    let locationObj: any = {
+      '@type': 'VirtualLocation',
+      'url': ev.onlineJoinUrl || canonicalUrl
+    };
+
+    if (ev.eventFormat === 'offline' || ev.eventFormat === 'hybrid') {
+      locationObj = {
+        '@type': 'Place',
+        'name': ev.locationName || 'Lokasi Acara',
+        'address': {
+          '@type': 'PostalAddress',
+          'streetAddress': ev.locationAddress || ev.locationName || 'Indonesia',
+          'addressCountry': 'ID'
+        }
+      };
+    }
+
+    let availability = 'https://schema.org/InStock';
+    if (ev.quotaStatus === 'sold_out' || ev.quotaStatus === 'closed') {
+      availability = 'https://schema.org/SoldOut';
+    }
+
+    let numericPrice = '0';
+    const cleanPrice = String(ev.price || '').replace(/[^0-9]/g, '');
+    if (cleanPrice) {
+      numericPrice = cleanPrice;
+    }
+
+    schemaEvent = {
+      '@context': 'https://schema.org',
+      '@type': 'Event',
+      '@id': `${canonicalUrl}#event`,
+      'name': ev.eventTitle || post.title,
+      'description': pageDesc,
+      'startDate': ev.startDate ? formatIsoWithTimezone(ev.startDate) : datePub,
+      'endDate': ev.endDate ? formatIsoWithTimezone(ev.endDate) : (ev.startDate ? formatIsoWithTimezone(ev.startDate) : datePub),
+      'eventAttendanceMode': attendanceMode,
+      'eventStatus': 'https://schema.org/EventScheduled',
+      'location': locationObj,
+      'image': [post.featuredImage],
+      'offers': {
+        '@type': 'Offer',
+        'url': ev.registrationUrl || canonicalUrl,
+        'price': numericPrice,
+        'priceCurrency': 'IDR',
+        'availability': availability,
+        'validFrom': post.createdAt ? post.createdAt.substring(0, 10) : '2026-01-01'
+      },
+      'performer': (ev.speakers || []).map((s: any) => ({
+        '@type': 'Person',
+        'name': s.name,
+        'jobTitle': s.role
+      })),
+      'organizer': {
+        '@type': 'Organization',
+        'name': siteName,
+        'url': siteUrl
+      }
+    };
+  }
+
   // 3. Dynamic Q&A & FAQPage Extraction from parsedHtml or contentMarkdown for Rich Search snippets
   const faqList: any[] = [];
   const faqRegex = /<(h[23]) id="([^"]+)">([^<]+\?)<\/h\1>[\s\S]*?<p>(.*?)<\/p>/gi;
@@ -1184,6 +1257,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     <script type="application/ld+json">${JSON.stringify(schemaArticle)}</script>
     <script type="application/ld+json">${JSON.stringify(schemaBreadcrumb)}</script>
     ${schemaFAQ ? `<script type="application/ld+json">${JSON.stringify(schemaFAQ)}</script>` : ''}
+    ${schemaEvent ? `<script type="application/ld+json">${JSON.stringify(schemaEvent)}</script>` : ''}
   `;
 
   // Strip any pre-existing static preloads and generic SEO description/OpenGraph tags to prevent duplicates or crawler fallback

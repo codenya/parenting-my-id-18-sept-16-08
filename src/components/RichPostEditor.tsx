@@ -51,8 +51,8 @@ interface RichPostEditorProps {
   currentStatus?: PostStatus;
   rejectionReason?: string;
   currentLoggedInUserId?: number;
-  postType?: 'article' | 'interactive_configurator' | 'interactive_showcase' | 'interactive_radar' | 'interactive_quiz' | 'interactive_timeline_slider' | 'interactive_battle_card' | 'interactive_quiz_router' | 'interactive_habit_simulator' | 'interactive_qa_column';
-  setPostType?: (val: 'article' | 'interactive_configurator' | 'interactive_showcase' | 'interactive_radar' | 'interactive_quiz' | 'interactive_timeline_slider' | 'interactive_battle_card' | 'interactive_quiz_router' | 'interactive_habit_simulator' | 'interactive_qa_column') => void;
+  postType?: 'article' | 'interactive_configurator' | 'interactive_showcase' | 'interactive_radar' | 'interactive_quiz' | 'interactive_timeline_slider' | 'interactive_battle_card' | 'interactive_quiz_router' | 'interactive_habit_simulator' | 'interactive_qa_column' | 'interactive_event_listing';
+  setPostType?: (val: 'article' | 'interactive_configurator' | 'interactive_showcase' | 'interactive_radar' | 'interactive_quiz' | 'interactive_timeline_slider' | 'interactive_battle_card' | 'interactive_quiz_router' | 'interactive_habit_simulator' | 'interactive_qa_column' | 'interactive_event_listing') => void;
   interactiveConfigurator?: any;
   setInteractiveConfigurator?: (val: any) => void;
   interactiveShowcase?: any;
@@ -71,6 +71,8 @@ interface RichPostEditorProps {
   setInteractiveHabitSimulator?: (val: any) => void;
   interactiveQaColumn?: any;
   setInteractiveQaColumn?: (val: any) => void;
+  interactiveEventListing?: any;
+  setInteractiveEventListing?: (val: any) => void;
   disclaimerType?: 'none' | 'medical_psychology' | 'financial' | 'legal' | 'academic' | 'custom';
   setDisclaimerType?: (val: 'none' | 'medical_psychology' | 'financial' | 'legal' | 'academic' | 'custom') => void;
   customDisclaimerText?: string;
@@ -137,6 +139,8 @@ export default function RichPostEditor({
   setInteractiveHabitSimulator,
   interactiveQaColumn,
   setInteractiveQaColumn,
+  interactiveEventListing,
+  setInteractiveEventListing,
   disclaimerType = 'none',
   setDisclaimerType,
   customDisclaimerText = '',
@@ -305,6 +309,15 @@ export default function RichPostEditor({
     if (setInteractiveQaColumn) {
       setInteractiveQaColumn({
         ...interactiveQaColumn,
+        ...updates
+      });
+    }
+  };
+
+  const handleUpdateEventListing = (updates: any) => {
+    if (setInteractiveEventListing) {
+      setInteractiveEventListing({
+        ...interactiveEventListing,
         ...updates
       });
     }
@@ -2252,6 +2265,82 @@ export default function RichPostEditor({
                       >
                         <div className="font-bold text-xs">💬 Kolom Tanya Jawab Ahli</div>
                         <div className="text-[10px] opacity-75 mt-0.5">Analisis klinis masalah & dilema pembaca oleh psikolog klinis berlisensi.</div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (setPostType) setPostType('interactive_event_listing');
+                          setShowAllFormats(false);
+                          if (!interactiveEventListing && setInteractiveEventListing) {
+                            setInteractiveEventListing({
+                              eventTitle: title || 'Webinar & Lokakarya Eksklusif: Tren & Inovasi 2026',
+                              eventType: 'webinar',
+                              eventFormat: 'online',
+                              startDate: '2026-10-25T09:00',
+                              endDate: '2026-10-25T12:00',
+                              timezone: 'WIB',
+                              locationName: 'Zoom Webinar & YouTube Live',
+                              locationAddress: '',
+                              mapUrl: '',
+                              onlineJoinUrl: 'https://zoom.us/j/1234567890',
+                              quotaStatus: 'early_bird',
+                              quotaCapacity: 100,
+                              quotaRegistered: 65,
+                              price: 'Gratis',
+                              originalPrice: 'Rp 150.000',
+                              registrationUrl: 'https://forms.gle/sample-event-registration',
+                              registrationCtaText: 'Daftar Sekarang (Early Bird)',
+                              registrationDeadline: '24 Oktober 2026, 23:59 WIB',
+                              speakers: [
+                                {
+                                  name: 'Dr. Hendra Wijaya, M.Kom',
+                                  role: 'Pakar Transformasi & Peneliti Senior',
+                                  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+                                  bio: 'Praktisi dan peneliti dengan pengalaman lebih dari 15 tahun di bidang transformasi digital dan inovasi.'
+                                }
+                              ],
+                              agenda: [
+                                {
+                                  time: '09:00 - 09:15',
+                                  topic: 'Pembukaan & Pengantar Resmi Panitia',
+                                  speaker: 'Tim Pelaksana'
+                                },
+                                {
+                                  time: '09:15 - 10:45',
+                                  topic: 'Sesi Materi Utama: Transformasi, Tren, dan Best Practices',
+                                  speaker: 'Dr. Hendra Wijaya, M.Kom'
+                                },
+                                {
+                                  time: '10:45 - 11:45',
+                                  topic: 'Diskusi Interaktif & Tanya Jawab Langsung Peserta',
+                                  speaker: 'Narasumber & Moderator'
+                                },
+                                {
+                                  time: '11:45 - 12:00',
+                                  topic: 'Penutupan, Sertifikat & Dokumentasi Bersama',
+                                  speaker: 'Panitia'
+                                }
+                              ],
+                              benefits: [
+                                'E-Sertifikat Resmi Kehadiran',
+                                'Slide Presentasi & Rangkuman Materi PDF',
+                                'Akses Rekaman Video Sesi Penuh',
+                                'Grup Diskusi & Komunitas Eksklusif'
+                              ],
+                              contactPersonPhone: '081234567890',
+                              contactPersonName: 'Panitia Pendaftaran'
+                            });
+                          }
+                        }}
+                        className={`p-3 rounded-xl border text-left transition-all ${
+                          postType === 'interactive_event_listing'
+                            ? 'border-rose-500 bg-rose-500/5 dark:bg-rose-500/10 text-rose-700 dark:text-rose-300 ring-1 ring-rose-500'
+                            : 'border-slate-200 dark:border-slate-800 bg-transparent text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'
+                        }`}
+                      >
+                        <div className="font-bold text-xs">📅 Acara & Agenda / Webinar</div>
+                        <div className="text-[10px] opacity-75 mt-0.5">Countdown, Google/iCal calendar, pembicara, kuota, rundown & Google Event Schema.</div>
                       </button>
                     </div>
                   </>
@@ -4253,6 +4342,484 @@ export default function RichPostEditor({
                             placeholder="Lakukan mediasi sebelum tidur malam..."
                             className="w-full p-2 border text-xs rounded font-mono bg-white dark:bg-zinc-950"
                           />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* INTERACTIVE FORM PANEL: EVENT LISTING */}
+            {postType === 'interactive_event_listing' && interactiveEventListing && (
+              <div className="p-5 rounded-2xl border border-indigo-100 dark:border-indigo-900/40 bg-indigo-500/[0.02] dark:bg-indigo-950/20 space-y-6">
+                <div className="flex items-center justify-between pb-3 border-b border-indigo-100 dark:border-indigo-900/40">
+                  <div className="flex items-center gap-2">
+                    <span className="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold text-sm">📅</span>
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">Konfigurasi Acara & Agenda / Webinar</h4>
+                      <p className="text-[11px] text-slate-500">Mendukung countdown live, Google & iCal calendar, tracking kuota, rundown, dan Schema.org/Event SEO.</p>
+                    </div>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">
+                    ✓ Schema.org Event Active
+                  </span>
+                </div>
+
+                {/* BASIC INFO */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="md:col-span-3">
+                    <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">Judul Acara / Webinar</label>
+                    <input
+                      type="text"
+                      value={interactiveEventListing.eventTitle || ''}
+                      onChange={(e) => handleUpdateEventListing({ eventTitle: e.target.value })}
+                      placeholder="e.g., Webinar Eksklusif: Tren & Inovasi 2026"
+                      className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">Tipe Acara</label>
+                    <select
+                      value={interactiveEventListing.eventType || 'webinar'}
+                      onChange={(e) => handleUpdateEventListing({ eventType: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-900"
+                    >
+                      <option value="webinar">Webinar Online</option>
+                      <option value="workshop">Workshop & Pelatihan</option>
+                      <option value="seminar">Seminar Umum</option>
+                      <option value="conference">Konferensi / Simposium</option>
+                      <option value="live_qa">Sesi Tanya Jawab Langsung</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">Format Acara</label>
+                    <select
+                      value={interactiveEventListing.eventFormat || 'online'}
+                      onChange={(e) => handleUpdateEventListing({ eventFormat: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-900"
+                    >
+                      <option value="online">Virtual / Online Penuh</option>
+                      <option value="offline">Tatap Muka / Tatap Muka Fisik</option>
+                      <option value="hybrid">Hybrid (Fisik & Daring)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">Zona Waktu</label>
+                    <select
+                      value={interactiveEventListing.timezone || 'WIB'}
+                      onChange={(e) => handleUpdateEventListing({ timezone: e.target.value })}
+                      className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-900"
+                    >
+                      <option value="WIB">WIB (Waktu Indonesia Barat - UTC+7)</option>
+                      <option value="WITA">WITA (Waktu Indonesia Tengah - UTC+8)</option>
+                      <option value="WIT">WIT (Waktu Indonesia Timur - UTC+9)</option>
+                      <option value="UTC">UTC (Universal Time)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* DATE & TIME */}
+                <div className="p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/50 space-y-3">
+                  <h5 className="text-xs font-bold text-slate-700 dark:text-slate-300">Jadwal & Durasi Waktu</h5>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-500 mb-1">Waktu Mulai (start_date)</label>
+                      <input
+                        type="datetime-local"
+                        value={interactiveEventListing.startDate || ''}
+                        onChange={(e) => handleUpdateEventListing({ startDate: e.target.value })}
+                        className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-900"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-500 mb-1">Waktu Selesai (end_date)</label>
+                      <input
+                        type="datetime-local"
+                        value={interactiveEventListing.endDate || ''}
+                        onChange={(e) => handleUpdateEventListing({ endDate: e.target.value })}
+                        className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-900"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* LOCATION & ACCESS */}
+                <div className="p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/50 space-y-3">
+                  <h5 className="text-xs font-bold text-slate-700 dark:text-slate-300">Lokasi & Tautan Akses</h5>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-500 mb-1">Nama Tempat / Ruang Virtual</label>
+                      <input
+                        type="text"
+                        value={interactiveEventListing.locationName || ''}
+                        onChange={(e) => handleUpdateEventListing({ locationName: e.target.value })}
+                        placeholder="e.g., Zoom Meeting & Gedung Graha Sabha"
+                        className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-500 mb-1">Tautan Virtual (Zoom / Google Meet)</label>
+                      <input
+                        type="url"
+                        value={interactiveEventListing.onlineJoinUrl || ''}
+                        onChange={(e) => handleUpdateEventListing({ onlineJoinUrl: e.target.value })}
+                        placeholder="https://zoom.us/j/1234567890"
+                        className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-500 mb-1">Alamat Fisik Lengkap (Jika Offline / Hybrid)</label>
+                      <input
+                        type="text"
+                        value={interactiveEventListing.locationAddress || ''}
+                        onChange={(e) => handleUpdateEventListing({ locationAddress: e.target.value })}
+                        placeholder="Jl. M.H. Thamrin No. 1, Jakarta Pusat"
+                        className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-500 mb-1">Tautan Peta (Google Maps)</label>
+                      <input
+                        type="url"
+                        value={interactiveEventListing.mapUrl || ''}
+                        onChange={(e) => handleUpdateEventListing({ mapUrl: e.target.value })}
+                        placeholder="https://maps.google.com/..."
+                        className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-900"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* QUOTA, PRICING & REGISTRATION */}
+                <div className="p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/50 space-y-3">
+                  <h5 className="text-xs font-bold text-slate-700 dark:text-slate-300">Kuota, Tiket & Pendaftaran</h5>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-500 mb-1">Status Kuota</label>
+                      <select
+                        value={interactiveEventListing.quotaStatus || 'open'}
+                        onChange={(e) => handleUpdateEventListing({ quotaStatus: e.target.value })}
+                        className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-900 font-medium"
+                      >
+                        <option value="early_bird">🌟 Early Bird</option>
+                        <option value="open">🟢 Pendaftaran Dibuka</option>
+                        <option value="limited">🟡 Kuota Terbatas</option>
+                        <option value="sold_out">🔴 Kuota Habis (Sold Out)</option>
+                        <option value="closed">⚪ Pendaftaran Ditutup</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-500 mb-1">Kapasitas Kuota Kursi</label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={interactiveEventListing.quotaCapacity ?? 100}
+                        onChange={(e) => handleUpdateEventListing({ quotaCapacity: parseInt(e.target.value) || 0 })}
+                        className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-500 mb-1">Jumlah Terdaftar</label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={interactiveEventListing.quotaRegistered ?? 0}
+                        onChange={(e) => handleUpdateEventListing({ quotaRegistered: parseInt(e.target.value) || 0 })}
+                        className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-500 mb-1">Batas Akhir Pendaftaran</label>
+                      <input
+                        type="text"
+                        value={interactiveEventListing.registrationDeadline || ''}
+                        onChange={(e) => handleUpdateEventListing({ registrationDeadline: e.target.value })}
+                        placeholder="24 Oktober 2026, 23:59 WIB"
+                        className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-900"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-2">
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-500 mb-1">Harga Tiket</label>
+                      <input
+                        type="text"
+                        value={interactiveEventListing.price || 'Gratis'}
+                        onChange={(e) => handleUpdateEventListing({ price: e.target.value })}
+                        placeholder="Gratis / Rp 99.000"
+                        className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-500 mb-1">Harga Asli (Coret)</label>
+                      <input
+                        type="text"
+                        value={interactiveEventListing.originalPrice || ''}
+                        onChange={(e) => handleUpdateEventListing({ originalPrice: e.target.value })}
+                        placeholder="Rp 250.000"
+                        className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-500 mb-1">URL Formulir Pendaftaran</label>
+                      <input
+                        type="url"
+                        value={interactiveEventListing.registrationUrl || ''}
+                        onChange={(e) => handleUpdateEventListing({ registrationUrl: e.target.value })}
+                        placeholder="https://forms.gle/..."
+                        className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-500 mb-1">Teks Tombol Registrasi</label>
+                      <input
+                        type="text"
+                        value={interactiveEventListing.registrationCtaText || ''}
+                        onChange={(e) => handleUpdateEventListing({ registrationCtaText: e.target.value })}
+                        placeholder="Daftar Sekarang (Early Bird)"
+                        className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-900"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* CONTACT PERSON & BENEFITS */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/50 space-y-3">
+                    <h5 className="text-xs font-bold text-slate-700 dark:text-slate-300">Narahubung & Bantuan Panitia</h5>
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-500 mb-1">Nomor WhatsApp Panitia</label>
+                      <input
+                        type="text"
+                        value={interactiveEventListing.contactPersonPhone || ''}
+                        onChange={(e) => handleUpdateEventListing({ contactPersonPhone: e.target.value })}
+                        placeholder="081234567890"
+                        className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-900"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-500 mb-1">Nama Kontak Panitia</label>
+                      <input
+                        type="text"
+                        value={interactiveEventListing.contactPersonName || ''}
+                        onChange={(e) => handleUpdateEventListing({ contactPersonName: e.target.value })}
+                        placeholder="e.g., Tim Pelaksana Acara"
+                        className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-900"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/50 space-y-2">
+                    <h5 className="text-xs font-bold text-slate-700 dark:text-slate-300">Fasilitas & Keuntungan Peserta</h5>
+                    <label className="block text-[10px] text-slate-500">Tuliskan satu fasilitas per baris:</label>
+                    <textarea
+                      rows={4}
+                      value={Array.isArray(interactiveEventListing.benefits) ? interactiveEventListing.benefits.join('\n') : ''}
+                      onChange={(e) => {
+                        const list = e.target.value.split('\n').map(s => s.trim()).filter(Boolean);
+                        handleUpdateEventListing({ benefits: list });
+                      }}
+                      placeholder="E-Sertifikat Resmi Bernomor SKP&#10;Akses Rekaman Video Penuh Selamanya&#10;Slide Materi PDF Lengkap&#10;Grup Diskusi & Komunitas"
+                      className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-900 font-mono"
+                    />
+                  </div>
+                </div>
+
+                {/* SPEAKERS / NARASUMBER */}
+                <div className="p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/50 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h5 className="text-xs font-bold text-slate-700 dark:text-slate-300">Daftar Narasumber & Pembicara</h5>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newSpeakers = [
+                          ...(interactiveEventListing.speakers || []),
+                          {
+                            name: '',
+                            role: '',
+                            avatar: '',
+                            bio: ''
+                          }
+                        ];
+                        handleUpdateEventListing({ speakers: newSpeakers });
+                      }}
+                      className="px-3 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-bold text-xs hover:bg-indigo-100 transition-all"
+                    >
+                      + Tambah Narasumber
+                    </button>
+                  </div>
+
+                  <div className="space-y-3">
+                    {(interactiveEventListing.speakers || []).map((spk: any, sIdx: number) => (
+                      <div key={sIdx} className="p-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-2 relative">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newSpeakers = (interactiveEventListing.speakers || []).filter((_: any, i: number) => i !== sIdx);
+                            handleUpdateEventListing({ speakers: newSpeakers });
+                          }}
+                          className="absolute top-2 right-2 text-rose-500 hover:text-rose-700 text-xs font-bold"
+                          title="Hapus Narasumber"
+                        >
+                          ✕ Hapus
+                        </button>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pr-16">
+                          <div>
+                            <label className="block text-[9px] text-slate-400 font-bold">Nama Lengkap & Gelar</label>
+                            <input
+                              type="text"
+                              value={spk.name || ''}
+                              onChange={(e) => {
+                                const newSpeakers = [...interactiveEventListing.speakers];
+                                newSpeakers[sIdx] = { ...spk, name: e.target.value };
+                                handleUpdateEventListing({ speakers: newSpeakers });
+                              }}
+                              placeholder="Dr. Hendra Wijaya, M.Kom"
+                              className="w-full p-2 border text-xs rounded bg-white dark:bg-zinc-950"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[9px] text-slate-400 font-bold">Jabatan / Keahlian</label>
+                            <input
+                              type="text"
+                              value={spk.role || ''}
+                              onChange={(e) => {
+                                const newSpeakers = [...interactiveEventListing.speakers];
+                                newSpeakers[sIdx] = { ...spk, role: e.target.value };
+                                handleUpdateEventListing({ speakers: newSpeakers });
+                              }}
+                              placeholder="Pakar Transformasi & Peneliti Senior"
+                              className="w-full p-2 border text-xs rounded bg-white dark:bg-zinc-950"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[9px] text-slate-400 font-bold">URL Foto Avatar</label>
+                            <input
+                              type="url"
+                              value={spk.avatar || ''}
+                              onChange={(e) => {
+                                const newSpeakers = [...interactiveEventListing.speakers];
+                                newSpeakers[sIdx] = { ...spk, avatar: e.target.value };
+                                handleUpdateEventListing({ speakers: newSpeakers });
+                              }}
+                              placeholder="https://..."
+                              className="w-full p-2 border text-xs rounded bg-white dark:bg-zinc-950"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-[9px] text-slate-400 font-bold">Bio / Pengantar Singkat</label>
+                          <input
+                            type="text"
+                            value={spk.bio || ''}
+                            onChange={(e) => {
+                              const newSpeakers = [...interactiveEventListing.speakers];
+                              newSpeakers[sIdx] = { ...spk, bio: e.target.value };
+                              handleUpdateEventListing({ speakers: newSpeakers });
+                            }}
+                            placeholder="Pengalaman 15 tahun di bidang transformasi digital dan inovasi..."
+                            className="w-full p-2 border text-xs rounded bg-white dark:bg-zinc-950"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* AGENDA & RUNDOWN */}
+                <div className="p-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/50 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h5 className="text-xs font-bold text-slate-700 dark:text-slate-300">Susunan Acara (Rundown Agenda)</h5>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newAgenda = [
+                          ...(interactiveEventListing.agenda || []),
+                          {
+                            time: '',
+                            topic: '',
+                            speaker: ''
+                          }
+                        ];
+                        handleUpdateEventListing({ agenda: newAgenda });
+                      }}
+                      className="px-3 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-bold text-xs hover:bg-indigo-100 transition-all"
+                    >
+                      + Tambah Sesi Agenda
+                    </button>
+                  </div>
+
+                  <div className="space-y-3">
+                    {(interactiveEventListing.agenda || []).map((ag: any, aIdx: number) => (
+                      <div key={aIdx} className="p-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 grid grid-cols-1 sm:grid-cols-12 gap-2 items-center relative">
+                        <div className="sm:col-span-3">
+                          <label className="block text-[9px] text-slate-400 font-bold">Waktu</label>
+                          <input
+                            type="text"
+                            value={ag.time || ''}
+                            onChange={(e) => {
+                              const newAgenda = [...interactiveEventListing.agenda];
+                              newAgenda[aIdx] = { ...ag, time: e.target.value };
+                              handleUpdateEventListing({ agenda: newAgenda });
+                            }}
+                            placeholder="09:00 - 10:30"
+                            className="w-full p-2 border text-xs rounded bg-white dark:bg-zinc-950"
+                          />
+                        </div>
+                        <div className="sm:col-span-5">
+                          <label className="block text-[9px] text-slate-400 font-bold">Topik / Aktivitas</label>
+                          <input
+                            type="text"
+                            value={ag.topic || ''}
+                            onChange={(e) => {
+                              const newAgenda = [...interactiveEventListing.agenda];
+                              newAgenda[aIdx] = { ...ag, topic: e.target.value };
+                              handleUpdateEventListing({ agenda: newAgenda });
+                            }}
+                            placeholder="Pemaparan Utama & Diskusi Sesi 1"
+                            className="w-full p-2 border text-xs rounded bg-white dark:bg-zinc-950"
+                          />
+                        </div>
+                        <div className="sm:col-span-3">
+                          <label className="block text-[9px] text-slate-400 font-bold">Pembicara / PIC</label>
+                          <input
+                            type="text"
+                            value={ag.speaker || ''}
+                            onChange={(e) => {
+                              const newAgenda = [...interactiveEventListing.agenda];
+                              newAgenda[aIdx] = { ...ag, speaker: e.target.value };
+                              handleUpdateEventListing({ agenda: newAgenda });
+                            }}
+                            placeholder="Dr. Hendra Wijaya, M.Kom"
+                            className="w-full p-2 border text-xs rounded bg-white dark:bg-zinc-950"
+                          />
+                        </div>
+                        <div className="sm:col-span-1 flex justify-end">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newAgenda = (interactiveEventListing.agenda || []).filter((_: any, i: number) => i !== aIdx);
+                              handleUpdateEventListing({ agenda: newAgenda });
+                            }}
+                            className="text-rose-500 hover:text-rose-700 text-xs font-bold pt-3"
+                            title="Hapus Sesi"
+                          >
+                            ✕
+                          </button>
                         </div>
                       </div>
                     ))}

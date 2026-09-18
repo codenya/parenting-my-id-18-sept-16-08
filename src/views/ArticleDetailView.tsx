@@ -20,6 +20,7 @@ import InteractiveBattleCard from '../components/InteractiveBattleCard';
 import InteractiveQuizRouter from '../components/InteractiveQuizRouter';
 import InteractiveHabitSimulator from '../components/InteractiveHabitSimulator';
 import InteractiveQAColumn from '../components/InteractiveQAColumn';
+import InteractiveEventListing from '../components/InteractiveEventListing';
 
 function DynamicPillarIcon({ name, className }: { name: string; className?: string }) {
   const IconComponent = (LucideIcons as any)[name] || LucideIcons.Heart;
@@ -575,6 +576,7 @@ export default function ArticleDetailView({
         contentMarkdown={post.contentMarkdown}
         siteName={siteConfig?.site_name || 'Website'}
         siteLogo={siteConfig?.site_logo_icon || ''}
+        eventData={post.interactiveEventListing}
       />
 
       {/* BREADCRUMB & BACK NAVIGATION */}
@@ -819,6 +821,13 @@ export default function ArticleDetailView({
 
       {post.postType === 'interactive_qa_column' && post.interactiveQaColumn && (
         <InteractiveQAColumn config={post.interactiveQaColumn} />
+      )}
+
+      {post.postType === 'interactive_event_listing' && post.interactiveEventListing && (
+        <InteractiveEventListing 
+          config={post.interactiveEventListing} 
+          eventDatePublished={post.createdAt} 
+        />
       )}
 
       {/* ARTICLE CONTENT BODY WITH AUTO-LINKING */}
