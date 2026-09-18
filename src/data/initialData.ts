@@ -1043,4 +1043,99 @@ Bagi Anda yang memenuhi kualifikasi di atas dan siap berkontribusi mengedukasi m
     disclaimerType: 'none',
     customDisclaimerText: ''
   },
+  {
+    id: 999,
+    title: 'Webinar Nasional Parenting & Gizi 2026: Strategi Pencegahan Stunting dan Stimulasi Otak Anak Sejak Dini',
+    slug: 'webinar-nasional-parenting-gizi-2026-strategi-pencegahan-stunting',
+    excerpt: 'Ikuti Webinar Nasional Parenting & Gizi 2026 bersama dokter spesialis anak dan psikolog klinis. Dapatkan e-sertifikat, materi eksklusif, dan rekaman lengkap.',
+    featuredImage: 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=1200&q=75&fm=webp',
+    category: 'Webinar & Agenda',
+    readTimeMinutes: 5,
+    authorId: 1,
+    authorName: 'Dr. Ratna Sari, M.Psi',
+    authorAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=80&q=50&fm=webp',
+    authorRole: 'admin',
+    authorTitle: 'Senior Psychologist & Education Consultant',
+    authorBio: 'Psikolog & konsultan edukasi terkemuka di Indonesia dengan pengalaman klinis 12+ tahun.',
+    authorSocials: {
+      instagram: 'https://instagram.com/ratnasari.mpsi',
+      linkedin: 'https://linkedin.com/in/ratnasari-mpsi',
+      website: 'https://domain.com'
+    },
+    status: 'published',
+    metaTitle: 'Webinar Nasional Parenting & Gizi 2026 | Pendaftaran & Jadwal Live',
+    metaDescription: 'Ikuti Webinar Nasional Parenting & Gizi 2026 bersama para dokter anak dan psikolog terkemuka. Dapatkan e-sertifikat, materi eksklusif, dan rekaman lengkap.',
+    tags: 'webinar parenting, gizi anak, cegah stunting, seminar online, psikologi anak, e-sertifikat',
+    views: 540,
+    createdAt: '2026-09-18T02:00:00.000Z',
+    updatedAt: '2026-09-18T02:00:00.000Z',
+    postType: 'interactive_event_listing',
+    disclaimerType: 'medical_psychology',
+    customDisclaimerText: '',
+    contentMarkdown: '## Selamat Datang di Portal Pendaftaran Webinar Nasional 2026\\n\\nPemenuhan gizi yang tepat pada 1000 Hari Pertama Kehidupan (HPK) serta pola asuh yang penuh kasih adalah fondasi utama dalam melahirkan generasi Indonesia yang cerdas, sehat, dan bebas stunting.\\n\\nMelalui **Webinar Nasional Parenting & Gizi 2026**, kami menghadirkan para pakar klinis terkemuka untuk membedah strategi praktis yang dapat langsung diterapkan oleh para orang tua, guru, dan tenaga kesehatan di rumah.\\n\\n----\\n\\n## 💡 Mengapa Anda Wajib Mengikuti Webinar Ini?\\n\\n- **Materi Berbasis Bukti Ilmiah (*Evidence-Based*):** Disampaikan langsung oleh dokter spesialis anak dan psikolog klinis berlisensi.\\n- **Sesi Tanya Jawab Langsung (Live Q&A):** Konsultasikan permasalahan tumbuh kembang anak Anda secara langsung dengan narasumber.\\n- **Fasilitas Lengkap:** Seluruh peserta terdaftar akan mendapatkan e-sertifikat resmi, slide materi lengkap, dan akses rekaman video selamanya.',
+    interactiveEventListing: {
+      eventTitle: 'Webinar Nasional: Strategi Pencegahan Stunting & Stimulasi Otak Anak',
+      eventType: 'webinar',
+      eventFormat: 'online',
+      startDate: '2026-10-25T09:00',
+      endDate: '2026-10-25T12:00',
+      timezone: 'WIB',
+      locationName: 'Zoom Meeting Room & YouTube Private Live Streaming',
+      locationAddress: 'Daring / Online dari Rumah Anda',
+      onlineJoinUrl: 'https://zoom.us/j/example-webinar-link',
+      quotaStatus: 'early_bird',
+      quotaCapacity: 500,
+      quotaRegistered: 342,
+      price: 'Rp 75.000 (Harga Early Bird)',
+      originalPrice: 'Rp 150.000',
+      registrationUrl: 'https://wa.me/6281234567890?text=Halo%20Admin,%20saya%20ingin%20mendaftar%20Webinar%20Nasional%20Parenting%202026.',
+      registrationCtaText: 'Daftar Webinar Sekarang (Promo Early Bird)',
+      registrationDeadline: '2026-10-24T23:59',
+      speakers: [
+        {
+          name: 'Dr. dr. Sp.A(K)',
+          role: 'Dokter Spesialis Anak & Konsultan Tumbuh Kembang',
+          avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=200&q=60&fm=webp',
+          bio: 'Praktisi senior kesehatan anak dengan pengalaman klinis 15+ tahun di RS Anak Nasional.'
+        },
+        {
+          name: 'Dr. Ratna Sari, M.Psi',
+          role: 'Psikolog Anak & Keluarga',
+          avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=60&fm=webp',
+          bio: 'Konsultan pendidikan keluarga dan penulis buku best-seller psikologi pengasuhan.'
+        }
+      ],
+      agenda: [
+        {
+          time: '09:00 - 09:15',
+          topic: 'Pembukaan, Menyanyikan Lagu Kebangsaan, & Pengantar Ketua Panitia',
+          speaker: 'Panitia Nasional'
+        },
+        {
+          time: '09:15 - 10:30',
+          topic: 'Sesi 1: Deteksi Dini & Pencegahan Stunting Melalui Gizi Seimbang 1000 HPK',
+          speaker: 'Dr. dr. Sp.A(K)'
+        },
+        {
+          time: '10:30 - 11:45',
+          topic: 'Sesi 2: Stimulasi Kognitif & Pengelolaan Emosi Anak di Era Digital',
+          speaker: 'Dr. Ratna Sari, M.Psi'
+        },
+        {
+          time: '11:45 - 12:00',
+          topic: 'Sesi Tanya Jawab Interaktif (Live Q&A) & Penutup',
+          speaker: 'Semua Narasumber'
+        }
+      ],
+      benefits: [
+        'E-Sertifikat Resmi Ber-SKP / Berstempel Panitia Nasional',
+        'Slide Materi Presentasi Lengkap (Format PDF)',
+        'Akses Rekaman Video (Replay) Selamanya',
+        'Grup Diskusi Eksklusif WhatsApp Bersama Para Pakar',
+        'Kesempatan Doorprise Buku Parenting & Suplemen Kesehatan Anak'
+      ],
+      contactPersonPhone: '+62 812-3456-7890',
+      contactPersonName: 'Ibu Maya (Panitia Pendaftaran)'
+    }
+  }
 ];
