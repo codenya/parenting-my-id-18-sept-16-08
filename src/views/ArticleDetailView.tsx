@@ -21,6 +21,8 @@ import InteractiveQuizRouter from '../components/InteractiveQuizRouter';
 import InteractiveHabitSimulator from '../components/InteractiveHabitSimulator';
 import InteractiveQAColumn from '../components/InteractiveQAColumn';
 import InteractiveEventListing from '../components/InteractiveEventListing';
+import { InteractiveGlossaryDictionary } from '../components/InteractiveGlossaryDictionary';
+import { fetchGlossaryTerms, autoLinkGlossaryTerms, GlossaryTermMatch } from '../lib/glossaryAutoLink';
 
 function DynamicPillarIcon({ name, className }: { name: string; className?: string }) {
   const IconComponent = (LucideIcons as any)[name] || LucideIcons.Heart;
@@ -144,6 +146,16 @@ export default function ArticleDetailView({
   const [fetchedPost, setFetchedPost] = useState<Post | null>(null);
   const [isFetchingSingle, setIsFetchingSingle] = useState<boolean>(false);
   const [attemptedFetch, setAttemptedFetch] = useState<boolean>(false);
+  const [glossaryTerms, setGlossaryTerms] = useState<GlossaryTermMatch[]>([]);
+
+  // Load site-wide glossary terms for auto-linking
+  useEffect(() => {
+    fetchGlossaryTerms().then(terms => {
+      if (terms && terms.length > 0) {
+        setGlossaryTerms(terms);
+      }
+    });
+  }, []);
 
   // Reset local fetch state when slug changes
   useEffect(() => {
@@ -396,9 +408,16 @@ export default function ArticleDetailView({
     // Supports optional URL/DOI at the end with automatic bibliography generation
     rawHtml = parseAndRenderReferences(rawHtml, siteConfig?.reference_heading_label);
 
-    const finalHtml = applyAutoLinks(rawHtml, autolinks);
+    let finalHtml = applyAutoLinks(rawHtml, autolinks);
+    if (glossaryTerms && glossaryTerms.length > 0) {
+      finalHtml = autoLinkGlossaryTerms(finalHtml, glossaryTerms, {
+        autoLinkMaxPerTerm: post?.interactiveGlossaryDictionary?.autoLinkMaxPerTerm || 3,
+        minTermLength: post?.interactiveGlossaryDictionary?.minTermLength || 3,
+        caseSensitive: post?.interactiveGlossaryDictionary?.caseSensitive || false,
+      });
+    }
     return { parsedHtml: finalHtml, tocItems: items };
-  }, [post, autolinks, siteConfig?.reference_heading_label, products]);
+  }, [post, autolinks, siteConfig?.reference_heading_label, products, glossaryTerms]);
 
   // Handle Autolink Clicks inside article body
   useEffect(() => {
@@ -828,6 +847,10 @@ export default function ArticleDetailView({
           config={post.interactiveEventListing} 
           eventDatePublished={post.createdAt} 
         />
+      )}
+
+      {post.postType === 'interactive_glossary_dictionary' && post.interactiveGlossaryDictionary && (
+        <InteractiveGlossaryDictionary config={post.interactiveGlossaryDictionary} />
       )}
 
       {/* ARTICLE CONTENT BODY WITH AUTO-LINKING */}

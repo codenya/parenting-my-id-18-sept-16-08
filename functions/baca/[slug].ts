@@ -377,7 +377,7 @@ Untuk kelompok usia **balita**, penerapan komunikasi terbuka sangat efektif jika
     authorAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=100&q=75&fm=webp',
     authorRole: 'admin',
     status: 'published',
-    metaTitle: 'Panduan Lengkap Pola Asuh Demokratis Anak | Parenting.my.id',
+    metaTitle: 'Panduan Lengkap Pola Asuh Demokratis Anak',
     metaDescription: 'Pelajari panduan penerapan pola asuh demokratis untuk membentuk karakter anak yang mandiri, percaya diri, dan berani di era digital.',
     tags: 'pola asuh, psikologi anak, komunikasi keluarga, karakter anak',
     views: 248,
@@ -427,7 +427,7 @@ Jika anak sudah menunjukkan tanda-tanda kelelahan, istirahatlah dan pastikan keb
     authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=75&fm=webp',
     authorRole: 'writer',
     status: 'published',
-    metaTitle: '5 Aktivitas Sensory Play Melatih Motorik Balita | Parenting.my.id',
+    metaTitle: '5 Aktivitas Sensory Play Melatih Motorik Balita',
     metaDescription: 'Panduan praktis 5 permainan sensori (sensory play) hemat untuk meningkatkan stimulasi indera dan kekuatan motorik balita di rumah.',
     tags: 'sensory play, balita, motorik halus, permainan edukasi',
     views: 182,
@@ -467,7 +467,7 @@ Ajak juga **balita** aktif bergerak lewat permainan ringan seperti **sensory pla
     authorAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=100&q=75&fm=webp',
     authorRole: 'admin',
     status: 'published',
-    metaTitle: 'Cara Mencegah Stunting pada 1000 HPK Anak | Parenting.my.id',
+    metaTitle: 'Cara Mencegah Stunting pada 1000 HPK Anak',
     metaDescription: 'Edukasi komprehensif pencegahan stunting, manfaat ASI eksklusif, serta pola gizi sehat untuk anak tumbuh optimal.',
     tags: 'stunting, asi eksklusif, gizi anak, MPASI, kesehatan balita',
     views: 310,
@@ -599,7 +599,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           p.author_id as authorId, p.status, p.meta_title as metaTitle, 
           p.meta_description as metaDescription, p.tags, p.views, p.created_at as createdAt, p.updated_at as updatedAt,
           p.post_type as postType, p.interactive_configurator as interactiveConfigurator, p.interactive_showcase as interactiveShowcase, p.interactive_radar as interactiveRadar, p.interactive_quiz as interactiveQuiz,
-          p.interactive_timeline_slider as interactiveTimelineSlider, p.interactive_battle_card as interactiveBattleCard, p.interactive_quiz_router as interactiveQuizRouter, p.interactive_habit_simulator as interactiveHabitSimulator, p.interactive_qa_column as interactiveQaColumn, p.interactive_event_listing as interactiveEventListing,
+          p.interactive_timeline_slider as interactiveTimelineSlider, p.interactive_battle_card as interactiveBattleCard, p.interactive_quiz_router as interactiveQuizRouter, p.interactive_habit_simulator as interactiveHabitSimulator, p.interactive_qa_column as interactiveQaColumn, p.interactive_event_listing as interactiveEventListing, p.interactive_glossary_dictionary as interactiveGlossaryDictionary,
           p.disclaimer_type as disclaimerType, p.custom_disclaimer_text as customDisclaimerText,
           u.name as authorName, u.avatar as authorAvatar, u.role as authorRole
         FROM posts p
@@ -646,6 +646,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           interactiveHabitSimulator: safeParseJSON(r.interactiveHabitSimulator),
           interactiveQaColumn: safeParseJSON(r.interactiveQaColumn),
           interactiveEventListing: safeParseJSON(r.interactiveEventListing),
+          interactiveGlossaryDictionary: safeParseJSON(r.interactiveGlossaryDictionary),
           disclaimerType: r.disclaimerType || 'none',
           customDisclaimerText: r.customDisclaimerText || '',
           createdAt: r.createdAt || new Date().toISOString(),
@@ -1022,6 +1023,32 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     };
   }
 
+  // Schema.org DefinedTermSet for Glossary & Dictionary
+  let schemaGlossary: Record<string, any> | null = null;
+  const glossaryDict = post.interactiveGlossaryDictionary || (typeof post.interactive_glossary_dictionary === 'string' ? JSON.parse(post.interactive_glossary_dictionary) : post.interactive_glossary_dictionary);
+  if (post.postType === 'interactive_glossary_dictionary' || glossaryDict) {
+    const gd = glossaryDict || {};
+    const termsList = Array.isArray(gd.terms) ? gd.terms.filter((t: any) => t.isPublished !== false) : [];
+    if (termsList.length > 0) {
+      schemaGlossary = {
+        '@context': 'https://schema.org',
+        '@type': 'DefinedTermSet',
+        '@id': `${canonicalUrl}#glossary`,
+        'name': gd.widgetTitle || post.title,
+        'description': gd.widgetDescription || pageDesc,
+        'hasDefinedTerm': termsList.map((t: any) => ({
+          '@type': 'DefinedTerm',
+          '@id': `${canonicalUrl}#term-${t.slug || t.id}`,
+          'name': t.term,
+          'description': t.shortDefinition || t.longDefinition || '',
+          'inDefinedTermSet': `${canonicalUrl}#glossary`,
+          'termCode': t.slug || t.id,
+          'alternateName': t.aliases || []
+        }))
+      };
+    }
+  }
+
   // 3. Dynamic Q&A & FAQPage Extraction from parsedHtml or contentMarkdown for Rich Search snippets
   const faqList: any[] = [];
   const faqRegex = /<(h[23]) id="([^"]+)">([^<]+\?)<\/h\1>[\s\S]*?<p>(.*?)<\/p>/gi;
@@ -1281,6 +1308,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     <script type="application/ld+json">${JSON.stringify(schemaBreadcrumb)}</script>
     ${schemaFAQ ? `<script type="application/ld+json">${JSON.stringify(schemaFAQ)}</script>` : ''}
     ${schemaEvent ? `<script type="application/ld+json">${JSON.stringify(schemaEvent)}</script>` : ''}
+    ${schemaGlossary ? `<script type="application/ld+json">${JSON.stringify(schemaGlossary)}</script>` : ''}
   `;
 
   // Strip any pre-existing static preloads and generic SEO description/OpenGraph tags to prevent duplicates or crawler fallback

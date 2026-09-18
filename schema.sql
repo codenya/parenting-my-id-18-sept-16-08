@@ -1,4 +1,4 @@
--- Schema Cloudflare D1 Database (SQLite) untuk parenting.my.id
+-- Schema Cloudflare D1 Database (SQLite) Niche-Agnostic CMS Blog Engine
 
 CREATE TABLE IF NOT EXISTS  _cf_KV (
   key TEXT PRIMARY KEY,
@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS  posts (
   interactive_habit_simulator TEXT,
   interactive_qa_column TEXT,
   interactive_event_listing TEXT,
+  interactive_glossary_dictionary TEXT,
   disclaimer_type TEXT DEFAULT 'none',
   custom_disclaimer_text TEXT
 );
