@@ -4,22 +4,9 @@ Dokumen ini memuat kumpulan artikel lengkap dalam format Markdown untuk Large La
 
 ---
 
-# Webinar Sample
-
-* **URL:** https://parenting.my.id/baca/webinar-sample
-* **Penulis:** Dr. Ratna Sari, M.Psi
-* **Kategori:** Edukasi & Panduan
-* **Terakhir Diperbarui:** 2026-09-18T09:59:45.482Z
-* **Ringkasan:** Contoh webinar...
-
-Contoh webinar saja
-
-
----
-
 # Menulis di Website Parenting
 
-* **URL:** https://parenting.my.id/baca/menulis-di-website-parenting
+* **URL:** https://example.com/baca/menulis-di-website-parenting
 * **Penulis:** Penulis Magang
 * **Kategori:** Tips
 * **Terakhir Diperbarui:** 2026-09-17T09:36:38.889Z
@@ -52,7 +39,7 @@ Menulis akhirnya bukan sekadar proses merangkai kata, melainkan
 
 # Bayi Sering Menangis dan Susah Tidur? Dampaknya pada Kesehatan Mental Remaja
 
-* **URL:** https://parenting.my.id/baca/bayi-sering-menangis-dan-susah-tidur-dampaknya-pada-kesehatan-mental-remaja
+* **URL:** https://example.com/baca/bayi-sering-menangis-dan-susah-tidur-dampaknya-pada-kesehatan-mental-remaja
 * **Penulis:** Dr. Ratna Sari, M.Psi
 * **Kategori:** Edukasi & Panduan
 * **Terakhir Diperbarui:** 2026-09-13T12:11:18.398Z
@@ -119,7 +106,7 @@ Melalui pemantauan yang cermat sejak dini, kita dapat mendampingi tumbuh kembang
 
 # Memeluk Tangisan Masa Lalu: Seni Mendampingi Emosi Anak dan Menyembuhkan Jiwa Orang Tua
 
-* **URL:** https://parenting.my.id/baca/memeluk-tangisan-masa-lalu-seni-mendampingi-emosi-anak-dan-menyembuhkan-jiwa-orang-tua
+* **URL:** https://example.com/baca/memeluk-tangisan-masa-lalu-seni-mendampingi-emosi-anak-dan-menyembuhkan-jiwa-orang-tua
 * **Penulis:** Dr. Ratna Sari, M.Psi
 * **Kategori:** Edukasi & Panduan
 * **Terakhir Diperbarui:** 2026-09-14T09:17:37.261Z
@@ -202,7 +189,7 @@ Saat menyaksikan anak saya tertawa lepas melihat kereta api melintas, ada seberk
 
 # Rahasia di Balik Pakaian Anak, Pengaruh ke Fokus dan Percaya Diri
 
-* **URL:** https://parenting.my.id/baca/pakaian-anak-percaya-diri-fokus-enclothed
+* **URL:** https://example.com/baca/pakaian-anak-percaya-diri-fokus-enclothed
 * **Penulis:** Dr. Ratna Sari, M.Psi
 * **Kategori:** Gaya Hidup
 * **Terakhir Diperbarui:** 2026-09-10T06:30:49.367Z
@@ -262,7 +249,7 @@ Tugas kita sebagai orang tua bukan untuk menjadikan mereka model yang selalu tam
 
 # Membangun Sistem Belajar Mandiri pada Anak SMP: Panduan Humanis bagi Orang Tua
 
-* **URL:** https://parenting.my.id/baca/membangun-sistem-belajar-mandiri-pada-anak-smp-panduan-humanis-bagi-orang-tua
+* **URL:** https://example.com/baca/membangun-sistem-belajar-mandiri-pada-anak-smp-panduan-humanis-bagi-orang-tua
 * **Penulis:** Dr. Ratna Sari, M.Psi
 * **Kategori:** Edukasi & Panduan
 * **Terakhir Diperbarui:** 2026-09-12T13:32:16.449Z
@@ -337,7 +324,7 @@ Mulailah dengan langkah kecil hari ini. Berhenti menyuruh mereka belajar, mulail
 
 # Latihan Motorik Balita , Masa Depan Anak
 
-* **URL:** https://parenting.my.id/baca/dampak-kurang-latihan-motorik-balita-bagi-masa-depan-anak
+* **URL:** https://example.com/baca/dampak-kurang-latihan-motorik-balita-bagi-masa-depan-anak
 * **Penulis:** Dr. Ratna Sari, M.Psi
 * **Kategori:** Edukasi & Panduan
 * **Terakhir Diperbarui:** 2026-09-10T03:28:52.406Z
@@ -457,7 +444,7 @@ Mari dampingi remaja kita. Ajak mereka berdiri, regangkan otot-otot yang kaku ak
 
 # Panduan Gizi Seimbang: Kunci Tumbuh Kembang Anak Optimal
 
-* **URL:** https://parenting.my.id/baca/tumbuh-kembang-anak-yang-optimal-sangat-bergantung-pada-asupan-gizi-yang-seimbang
+* **URL:** https://example.com/baca/tumbuh-kembang-anak-yang-optimal-sangat-bergantung-pada-asupan-gizi-yang-seimbang
 * **Penulis:** Ahmad Zulkarnain, S.Ked
 * **Kategori:** Edukasi & Panduan
 * **Terakhir Diperbarui:** 2026-09-09T04:33:15.512Z
@@ -501,7 +488,7 @@ Orang tua memiliki tanggung jawab besar dalam merancang pola makan yang sehat da
 
 # Memahami Masa Kritis Campak pada Anak
 
-* **URL:** https://parenting.my.id/baca/memahami-masa-kritis-campak-pada-anak
+* **URL:** https://example.com/baca/memahami-masa-kritis-campak-pada-anak
 * **Penulis:** Dr. Ratna Sari, M.Psi
 * **Kategori:** Kesehatan
 * **Terakhir Diperbarui:** 2026-09-03T13:37:54.924Z
@@ -556,7 +543,7 @@ Pada akhirnya, memiliki batasan kriteria kedaruratan yang jelas akan sangat mene
 
 # Anak CIBI : Karakteristik, Pola Asuh, dan Potensinya
 
-* **URL:** https://parenting.my.id/baca/mengenal-murid-cibi-karakteristik-pola-asuh-dan-strategi-menjaga-potensinya
+* **URL:** https://example.com/baca/mengenal-murid-cibi-karakteristik-pola-asuh-dan-strategi-menjaga-potensinya
 * **Penulis:** Dr. Ratna Sari, M.Psi
 * **Kategori:** Pola Asuh
 * **Terakhir Diperbarui:** 2026-08-28T17:09:53.398Z
@@ -737,7 +724,7 @@ Pencegahan harus dilakukan sejak dini melalui sinergi antara rumah dan sekolah:
 
 # Rahasia Memaksimalkan Otak Anak dan Orang Tua: POV dari Ahli Bedah Saraf
 
-* **URL:** https://parenting.my.id/baca/rahasia-memaksimalkan-otak-anak-dan-orang-tua-pov-dari-ahli-bedah-saraf
+* **URL:** https://example.com/baca/rahasia-memaksimalkan-otak-anak-dan-orang-tua-pov-dari-ahli-bedah-saraf
 * **Penulis:** Dr. Ratna Sari, M.Psi
 * **Kategori:** Kesehatan & Gizi
 * **Terakhir Diperbarui:** 2026-09-03T01:36:28.209Z
@@ -876,7 +863,7 @@ Sebagai orang tua, memahami pola kerja otak memberikan fondasi yang sangat berha
 
 # Menghadapi Krisis Emosi Remaja 14 Tahun: Antara Empati Kemanusiaan dan Tugas Sekolah
 
-* **URL:** https://parenting.my.id/baca/menghadapi-krisis-emosi-remaja-14-tahun-antara-empati-kemanusiaan-dan-tugas-sekolah
+* **URL:** https://example.com/baca/menghadapi-krisis-emosi-remaja-14-tahun-antara-empati-kemanusiaan-dan-tugas-sekolah
 * **Penulis:** Dr. Ratna Sari, M.Psi
 * **Kategori:** Pola Asuh
 * **Terakhir Diperbarui:** 2026-09-06T12:37:43.722Z
@@ -961,7 +948,7 @@ Saat cerita ini saya tulis, anak laki-laki saya sedang duduk tenang di meja bela
 
 # Panduan Perawatan Gigi Bayi: Kiat Penting dari Ahli untuk Kesehatan Mulut si Kecil
 
-* **URL:** https://parenting.my.id/baca/kiat-merawat-gigi-bayi
+* **URL:** https://example.com/baca/kiat-merawat-gigi-bayi
 * **Penulis:** Dr. Ratna Sari, M.Psi
 * **Kategori:** Pola Asuh
 * **Terakhir Diperbarui:** 2026-08-12T05:53:02.778Z
@@ -1041,7 +1028,7 @@ Temukan kiat merawat gigi bayi sejak dini. Pelajari cara menangani anak rewel sa
 
 # Panduan Lengkap Nutrisi Anak Kecil : Perlu Dicermati Orang Tua & Keluarga
 
-* **URL:** https://parenting.my.id/baca/hal-yang-perlu-dicermati-dalam-memberikan-nutrisi-untuk-anak-kecil
+* **URL:** https://example.com/baca/hal-yang-perlu-dicermati-dalam-memberikan-nutrisi-untuk-anak-kecil
 * **Penulis:** Dr. Ratna Sari, M.Psi
 * **Kategori:** Kesehatan & Gizi
 * **Terakhir Diperbarui:** 2026-08-12T05:29:14.602Z
@@ -1102,7 +1089,7 @@ Setiap anak memiliki fase *picky eater* (pilih-pilih makanan). Respons keluarga 
 
 # Panduan Lengkap Pola Asuh Demokratis untuk Mendidik Anak Tangguh Masa Kini
 
-* **URL:** https://parenting.my.id/baca/panduan-lengkap-pola-asuh-demokratis-anak-masa-kini
+* **URL:** https://example.com/baca/panduan-lengkap-pola-asuh-demokratis-anak-masa-kini
 * **Penulis:** Dr. Ratna Sari, M.Psi
 * **Kategori:** Pola Asuh
 * **Terakhir Diperbarui:** 2026-08-12T03:45:18.501Z
@@ -1155,7 +1142,7 @@ Berbagai riset psikologi perkembangan menunjukkan bahwa anak yang dibesarkan dal
 
 # 5 Aktivitas Sensory Play Seru untuk Melatih Motorik Halus Balita di Rumah
 
-* **URL:** https://parenting.my.id/baca/5-aktivitas-sensory-play-seru-untuk-melatih-motorik-balita
+* **URL:** https://example.com/baca/5-aktivitas-sensory-play-seru-untuk-melatih-motorik-balita
 * **Penulis:** Maya Putri, S.Psi
 * **Kategori:** Tumbuh Kembang
 * **Terakhir Diperbarui:** 2026-09-06T06:26:47.536Z
@@ -1204,7 +1191,7 @@ Aktivitas bermain sensori akan memberikan hasil optimal jika didukung oleh suasa
 
 # Mengenal Bahaya Stunting dan Cara Pencegahannya Sejak 1000 Hari Pertama Kehidupan
 
-* **URL:** https://parenting.my.id/baca/mengenal-bahaya-stunting-dan-cara-pencegahannya-sejak-1000-hpk
+* **URL:** https://example.com/baca/mengenal-bahaya-stunting-dan-cara-pencegahannya-sejak-1000-hpk
 * **Penulis:** Dr. Ratna Sari, M.Psi
 * **Kategori:** Kesehatan & Gizi
 * **Terakhir Diperbarui:** 2026-08-12T03:56:37.151Z
